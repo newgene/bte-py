@@ -58,3 +58,44 @@ class Endpoint:
             'smartapi': self.api_meta_data.smartapi,
             'x-translator': self.api_meta_data['x-translator']
         }
+
+    def construct_response_mapping(self, op):
+        if "response_mapping" in op:
+            op.response_mapping = op.response_mapping
+
+        return {
+            f"{op.predicate}": self.resolve_ref_if_provided(op.response_mapping)
+        }
+
+    def parse_individual_operation(self, op, method, path_params):
+        res = []
+        query_operation = self.construct_query_operation({'op': op, 'method': method, 'path_params': path_params})
+        response_mapping = self.construct_response_mapping(op)
+        for input in op.inputs:
+            for output in op.outputs:
+                update_info = {}
+                association = self.construct_association(input, output, op)
+                update_info = {
+                    'query_operation': query_operation,
+                    'association': association,
+                    'response_mapping': response_mapping,
+                    'tags': query_operation.tags
+                }
+                res.append(update_info)
+        return res
+
+    def construct_endpoint_info(self):
+        res = []
+        for method in ['get', 'post']:
+            if method in self.path_item_object:
+                path_params = self.fetch_path_params(self.path_item_object[method])
+                if "x-bte-kgs-operations" in self.path_item_object[method]:
+                    for rec in self.path_item_object[method]['x-bte-kgs-operations']:
+                        operation = self.resolve_ref_if_provided(rec)
+                        operation = operation if isinstance(operation, list) else [operation]
+                        for op in operation:
+                            res = [
+                                *res,
+                                *self.parse_individual_operation({'op': op, 'method': method, 'path_params': path_params})
+                            ]
+        return res
