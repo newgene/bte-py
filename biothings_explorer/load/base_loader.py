@@ -7,7 +7,7 @@ class BaseLoader(ABC):
         pass
 
     @abstractmethod
-    def parse(self):
+    def parse(self, _input):
         pass
 
     @abstractmethod

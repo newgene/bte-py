@@ -16,7 +16,7 @@ class BaseAsyncLoader(BaseLoader):
         except Exception as e:
             pass
 
-    def parse(self):
+    def parse(self, _input):
         return []
 
     def load(self):
