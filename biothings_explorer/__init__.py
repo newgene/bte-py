@@ -15,7 +15,7 @@ class MetaKG:
     def path(self):
         return self.path
 
-    @property.setter
+    @path.setter
     def path(self, file_path):
         if not file_path:
             self._file_path = abspath(file_path)

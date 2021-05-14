@@ -1,0 +1,25 @@
+import requests
+import json
+from .base_loader import BaseLoader
+
+
+class BaseAsyncLoader(BaseLoader):
+    _url = ''
+
+    def __init__(self, url):
+        super(BaseAsyncLoader, self).__init__()
+        self._url = url
+
+    def fetch(self):
+        try:
+            response = requests.get(self._url)
+            return response.json()
+        except Exception as e:
+            pass
+
+    def parse(self, _input):
+        return []
+
+    def load(self):
+        specs = self.fetch()
+        return self.parse(specs)
