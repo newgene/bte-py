@@ -24,14 +24,14 @@ class Endpoint:
 
     def construct_query_operation(self, data):
         op, method, path_params = itemgetter('op', 'method', 'path_params')(data)
-        server = self.api_meta_data.url
+        server = self.api_meta_data['url']
         query_operation = QueryOperationObject()
         query_operation.xBTEKGSOperation = op
         query_operation.method = method
         query_operation.path_params = path_params
         query_operation.server = server
         query_operation.path = self.path
-        query_operation.tags = self.api_meta_data.tags
+        query_operation.tags = self.api_meta_data['tags']
         return query_operation
 
     def remove_bio_link_prefix(self, input):
@@ -79,7 +79,7 @@ class Endpoint:
                     'query_operation': query_operation,
                     'association': association,
                     'response_mapping': response_mapping,
-                    'tags': query_operation.tags
+                    'tags': query_operation['tags']
                 }
                 res.append(update_info)
         return res
@@ -96,6 +96,6 @@ class Endpoint:
                         for op in operation:
                             res = [
                                 *res,
-                                *self.parse_individual_operation({'op': op, 'method': method, 'path_params': path_params})
+                                *self.parse_individual_operation(op, method, path_params)
                             ]
         return res

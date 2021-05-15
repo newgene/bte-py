@@ -25,14 +25,14 @@ class MetaKG:
     @path.setter
     def path(self, file_path):
         if not file_path:
-            self._file_path = abspath('./data/smartapi_specs.json')
+            self._file_path = abspath('./biothings_explorer/smartapi_kg/data/smartapi_specs.json')
         else:
             self._file_path = file_path
 
     @predicates_path.setter
     def predicates_path(self, file_path):
         if not file_path:
-            self._predicates_path = abspath('./data/predicates.json')
+            self._predicates_path = abspath('./biothings_explorer/smartapi_kg/data/predicates.json')
         else:
             self._predicates_path = file_path
 

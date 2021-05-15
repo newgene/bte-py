@@ -11,12 +11,12 @@ class BaseOperationsBuilder(ABC):
     def load_ops_from_specs(self, specs):
         all_ops = []
         for spec in specs:
-            try:
-                parser = API(spec)
-                ops = parser.metadata['operations']
-                all_ops = [*all_ops, *ops]
-            except Exception as e:
-                pass
+            #try:
+            parser = API(spec)
+            ops = parser.metadata['operations']
+            all_ops = [*all_ops, *ops]
+            #except Exception as e:
+            #    print(e)
         return all_ops
 
     @abstractmethod

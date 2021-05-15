@@ -11,11 +11,11 @@ class SyncOperationsBuilder(BaseOperationsBuilder):
 
     def build(self):
         specs = sync_loader_factory(
-            self._options.smart_API_id,
-            self._options.team_name,
-            self._options.tag,
-            self._options.component,
-            self._options.api_names,
+            self._options.get('smart_API_id'),
+            self._options.get('team_name'),
+            self._options.get('tag'),
+            self._options.get('component'),
+            self._options.get('api_names'),
             self._file_path,
         )
 

@@ -21,7 +21,7 @@ class AllSpecsSyncLoader(BaseLoader):
             return result
 
     def parse(self, _input):
-        return _input.hits
+        return _input['hits']
 
     def load(self):
         specs = self.fetch()

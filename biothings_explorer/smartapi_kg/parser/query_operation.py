@@ -20,10 +20,11 @@ class QueryOperationObject:
 
     @xBTEKGSOperation.setter
     def xBTEKGSOperation(self, new_op):
-        self._params = new_op.parameters
-        self._request_body = new_op.request_body
-        self._support_batch = new_op.support_batch
-        self._input_separator = new_op.input_separator
+        if not isinstance(new_op, str):
+            self._params = new_op.get('parameters')
+            self._request_body = new_op.get('request_body')
+            self._support_batch = new_op.get('supportBatch')
+            self._input_separator = new_op.get('inputSeparator')
 
     @property
     def params(self):
