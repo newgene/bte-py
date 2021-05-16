@@ -18,8 +18,8 @@ class Endpoint:
         if "parameters" not in operation_object:
             return params
         for param in operation_object['parameters']:
-            if param['in'] == 'path':
-                params.append(param['name'])
+            if param.get('in') == 'path':
+                params.append(param.get('name'))
         return params
 
     def construct_query_operation(self, data):
@@ -42,44 +42,44 @@ class Endpoint:
         return input
 
     def resolve_ref_if_provided(self, rec):
-        if "$ref" in rec:
-            return self.api_meta_data.components.fetch_component_by_ref(rec['$ref'])
+        if rec and "$ref" in rec:
+            return self.api_meta_data.get('components').fetch_component_by_ref(rec['$ref'])
         return rec
 
     def construct_association(self, input, output, op):
         return {
-            'input_id': self.remove_bio_link_prefix(input.id),
-            'input_type': self.remove_bio_link_prefix(input.semantic),
-            'output_id': self.remove_bio_link_prefix(output.id),
-            'output_type': self.remove_bio_link_prefix(output.semantic),
-            'predicate': self.remove_bio_link_prefix(op.predicate),
-            'source': op.source,
-            'api_name': self.api_meta_data.title,
-            'smartapi': self.api_meta_data.smartapi,
-            'x-translator': self.api_meta_data['x-translator']
+            'input_id': self.remove_bio_link_prefix(input['id']),
+            'input_type': self.remove_bio_link_prefix(input['semantic']),
+            'output_id': self.remove_bio_link_prefix(output['id']),
+            'output_type': self.remove_bio_link_prefix(output['semantic']),
+            'predicate': self.remove_bio_link_prefix(op['predicate']),
+            'source': op.get('source'),
+            'api_name': self.api_meta_data.get('title'),
+            'smartapi': self.api_meta_data.get('smartapi'),
+            'x-translator': self.api_meta_data.get('x-translator')
         }
 
     def construct_response_mapping(self, op):
-        if "response_mapping" in op:
-            op.response_mapping = op.response_mapping
+        if "responseMapping" in op:
+            op['response_mapping'] = op['responseMapping']
 
         return {
-            f"{op.predicate}": self.resolve_ref_if_provided(op.response_mapping)
+            f"{op['predicate']}": self.resolve_ref_if_provided(op.get('response_mapping'))
         }
 
     def parse_individual_operation(self, op, method, path_params):
         res = []
         query_operation = self.construct_query_operation({'op': op, 'method': method, 'path_params': path_params})
         response_mapping = self.construct_response_mapping(op)
-        for input in op.inputs:
-            for output in op.outputs:
+        for input in op['inputs']:
+            for output in op['outputs']:
                 update_info = {}
                 association = self.construct_association(input, output, op)
                 update_info = {
                     'query_operation': query_operation,
                     'association': association,
                     'response_mapping': response_mapping,
-                    'tags': query_operation['tags']
+                    'tags': query_operation.tags
                 }
                 res.append(update_info)
         return res
@@ -94,6 +94,8 @@ class Endpoint:
                         operation = self.resolve_ref_if_provided(rec)
                         operation = operation if isinstance(operation, list) else [operation]
                         for op in operation:
+                            if isinstance(op, str):
+                                continue
                             res = [
                                 *res,
                                 *self.parse_individual_operation(op, method, path_params)
