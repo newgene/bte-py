@@ -9,5 +9,5 @@ class ComponentSpecsSyncLoader(AllSpecsSyncLoader):
         self._component = component
 
     def parse(self, _input):
-        return [item for item in _input.hits if "x-translator" in item.info and
-                item.info["x-translator"].component == self._component]
+        return [item for item in _input['hits'] if "x-translator" in item['info'] and
+                item['info']["x-translator"]['component'] == self._component]

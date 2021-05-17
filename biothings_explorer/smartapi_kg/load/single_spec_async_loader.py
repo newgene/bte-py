@@ -13,5 +13,5 @@ class SingleSpecAsyncLoader(BaseAsyncLoader):
         return super(SingleSpecAsyncLoader, self).fetch()
 
     def parse(self, _input):
-        _input._id = self._smartapi_id
+        _input['_id'] = self._smartapi_id
         return [_input]

@@ -63,7 +63,7 @@ class API:
             },
             'smartapi': {
                 'id': self.smartapi_doc['_id'],
-                'meta': self.smartapi_doc['_meta'],
+                'meta': self.smartapi_doc.get('_meta'),
             },
             'components': self.fetch_components(),
             'paths': list(self.smartapi_doc['paths'].keys()) if isinstance(self.smartapi_doc['paths'], dict) else [],

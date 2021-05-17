@@ -21,34 +21,34 @@ class SyncOperationsBuilderWithReasoner(BaseOperationsBuilder):
 
     def parse_predicate_endpoint(self, metadata):
         ops = []
-        for sbj in metadata.predicates:
-            for obj in metadata.predicates[sbj]:
-                if isinstance(metadata.predicates[sbj][obj], list):
-                    for pred in metadata.predicates[sbj][obj]:
+        for sbj in metadata['predicates']:
+            for obj in metadata['predicates'][sbj]:
+                if isinstance(metadata['predicates'][sbj][obj], list):
+                    for pred in metadata['predicates'][sbj][obj]:
                         ops.append({
                             'association': {
                                 'input_type': self.remove_bio_link_prefix(sbj),
                                 'output_type': self.remove_bio_link_prefix(obj),
                                 'predicate': self.remove_bio_link_prefix(pred),
-                                'api_name': metadata.association.api_name,
-                                'smartapi': metadata.association.smartapi,
-                                'x-translator': metadata.association['x-translator'],
+                                'api_name': metadata['association']['api_name'],
+                                'smartapi': metadata['association']['smartapi'],
+                                'x-translator': metadata['association']['x-translator'],
                             },
-                            'tags': [*metadata.tags, "bte-trapi"],
+                            'tags': [*metadata['tags'], "bte-trapi"],
                             'query_operation': {
                                 'path': '/query',
                                 'method': 'post',
-                                'server': metadata.query_operation.server,
+                                'server': metadata['query_operation']['server'],
                                 'path_params': None,
                                 'params': None,
                                 'request_body': None,
                                 'support_batch': True,
                                 'input_separator': ",",
-                                'tags': [*metadata.tags, "bte-trapi"]
+                                'tags': [*metadata['tags'], "bte-trapi"]
                             }
                         })
-        if self._options.api_names:
-            return [op for op in ops if op.association.api_name in self._options.api_names]
+        if self._options.get('api_names'):
+            return [op for op in ops if op['association']['api_name'] in self._options.get('api_names', [])]
         return ops
 
     def fetch(self):
@@ -58,11 +58,11 @@ class SyncOperationsBuilderWithReasoner(BaseOperationsBuilder):
 
     def build(self):
         specs = sync_loader_factory(
-            self._options.smart_API_id,
-            self._options.team_name,
-            self._options.tag,
-            self._options.component,
-            self._options.api_names,
+            self._options.get('smart_API_id'),
+            self._options.get('team_name'),
+            self._options.get('tag'),
+            self._options.get('component'),
+            self._options.get('api_names'),
             self._file_path,
         )
         nonTRAPIOps = self.load_ops_from_specs(specs)

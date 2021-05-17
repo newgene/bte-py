@@ -10,4 +10,4 @@ class TagSpecsAsyncLoader(BaseAsyncLoader):
         return super(TagSpecsAsyncLoader, self).fetch()
 
     def parse(self, _input):
-        return _input.hits
+        return _input['hits']

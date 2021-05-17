@@ -9,4 +9,4 @@ class SingleSpecSyncLoader(AllSpecsSyncLoader):
         self._smartAPIID = smartAPIID
 
     def parse(self, _input):
-        return [item for item in input.hits if item._id == self._smartAPIID]
+        return [item for item in _input['hits'] if item['_id'] == self._smartAPIID]

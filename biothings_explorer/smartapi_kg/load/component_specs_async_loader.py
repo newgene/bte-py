@@ -10,4 +10,4 @@ class ComponentSpecsAsyncLoader(BaseAsyncLoader):
         return super(ComponentSpecsAsyncLoader, self).fetch()
 
     def parse(self, _input):
-        return _input.hits
+        return _input['hits']

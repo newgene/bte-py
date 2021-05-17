@@ -9,4 +9,4 @@ class APINamesSpecsSyncLoader(AllSpecsSyncLoader):
         self._api_names = api_names
 
     def parse(self, _input):
-        return [item for item in _input.hits if item.info.title in self._api_names]
+        return [item for item in _input['hits'] if item['info']['title'] in self._api_names]

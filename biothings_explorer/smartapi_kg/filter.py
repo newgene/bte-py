@@ -26,6 +26,6 @@ def ft(ops, criteria):
 
     res = copy.deepcopy(ops)
     for field in FILTER_FIELDS:
-        res = [rec for rec in res if rec['association'][field] in filters[field]]
+        res = [rec for rec in res if rec['association'].get(field) in filters.get(field)]
 
     return res

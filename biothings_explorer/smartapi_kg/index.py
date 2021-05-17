@@ -1,3 +1,4 @@
+import os
 from os.path import abspath
 from .operations_builder.async_builder_factory import async_builder_factory
 from .operations_builder.sync_builder_factory import sync_builder_factory
@@ -25,14 +26,18 @@ class MetaKG:
     @path.setter
     def path(self, file_path):
         if not file_path:
-            self._file_path = abspath('./biothings_explorer/smartapi_kg/data/smartapi_specs.json')
+            directory = os.path.dirname(__file__)
+            #os.path.dirname(os.path.abspath('biothings_explorer/smartapi_kg/data/smartapi_specs.json'))
+            self._file_path = os.path.join(directory, 'data', 'smartapi_specs.json')
         else:
             self._file_path = file_path
 
     @predicates_path.setter
     def predicates_path(self, file_path):
         if not file_path:
-            self._predicates_path = abspath('./biothings_explorer/smartapi_kg/data/predicates.json')
+            directory = os.path.dirname(__file__)
+            #self._predicates_path = abspath('./biothings_explorer/smartapi_kg/data/predicates.json')
+            self._predicates_path = os.path.join(directory, 'data', 'predicates.json')
         else:
             self._predicates_path = file_path
 

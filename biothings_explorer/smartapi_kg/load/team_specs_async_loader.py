@@ -10,4 +10,4 @@ class TeamSpecsAsyncLoader(BaseAsyncLoader):
         return super(TeamSpecsAsyncLoader, self).fetch()
 
     def parse(self, _input):
-        return _input.hits
+        return _input['hits']
