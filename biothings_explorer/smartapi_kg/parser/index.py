@@ -62,7 +62,7 @@ class API:
                 'team': self.fetch_XTranslator_team(),
             },
             'smartapi': {
-                'id': self.smartapi_doc['_id'],
+                'id': self.smartapi_doc.get('_id'),
                 'meta': self.smartapi_doc.get('_meta'),
             },
             'components': self.fetch_components(),
