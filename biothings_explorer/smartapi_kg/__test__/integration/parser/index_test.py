@@ -6,7 +6,7 @@ from biothings_explorer.smartapi_kg.parser.index import API
 
 class TestAPIParser(unittest.TestCase):
     def setUp(self):
-        with open(os.path.abspath('../../data/mygene.json'), encoding='utf-8') as f:
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'mygene.json')), encoding='utf-8') as f:
             mygene_doc = json.load(f)
             mygene = API(mygene_doc)
             self.metadata = mygene.metadata
@@ -33,7 +33,8 @@ class TestAPIParser(unittest.TestCase):
 
 class TestAPIParserWhichIsAlreadyDereferenced(unittest.TestCase):
     def setUp(self):
-        with open(os.path.abspath('../../data/opentarget.json'), encoding='utf-8') as f:
+
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'opentarget.json')), encoding='utf-8') as f:
             smartapi_spec = json.load(f)
             opentarget = API(smartapi_spec)
             self.metadata = opentarget.metadata
@@ -59,7 +60,8 @@ class TestAPIParserWhichIsAlreadyDereferenced(unittest.TestCase):
 
 class TestAPIParserUsingSpecsWithParameters(unittest.TestCase):
     def test_path_params(self):
-        with open(os.path.abspath('../../data/litvar.json'), encoding='utf-8') as f:
+
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'litvar.json')), encoding='utf-8') as f:
             smartapi_spec = json.load(f)
             litvar = API(smartapi_spec)
             path_params = litvar.metadata['operations'][0]['query_operation'].path_params

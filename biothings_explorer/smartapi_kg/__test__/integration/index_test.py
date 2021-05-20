@@ -1,4 +1,5 @@
 import unittest
+import os
 from os.path import abspath
 from biothings_explorer.smartapi_kg.index import MetaKG
 
@@ -80,14 +81,17 @@ class TestConstructMetaKG(unittest.TestCase):
 
 class TestConstructMetaKGFromLocal(unittest.TestCase):
     def test_construct_meta_kg_from_local_file_successful(self):
-        file_path = abspath('../data/smartapi_multiomics_kp_query.json')
+
+        file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'smartapi_multiomics_kp_query.json'))
         meta_kg = MetaKG(file_path)
         meta_kg.construct_MetaKG(False, {})
         self.assertIsInstance(meta_kg.ops, list)
         self.assertGreater(len(meta_kg.ops), 0)
 
     def test_construct_meta_kg_from_local_file_path_not_from_query(self):
-        file_path = abspath('../data/mygene.json')
+
+        file_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'mygene.json'))
         meta_kg = MetaKG(file_path)
         meta_kg.construct_MetaKG(False, {})
         self.assertIsInstance(meta_kg.ops, list)
