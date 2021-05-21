@@ -11,7 +11,7 @@ class AsyncOperationsBuilderWithReasoner(AsyncOperationsBuilder):
             try:
                 parser = API(spec)
                 metadata = parser.metadata
-                if "/predicates" in metadata.paths and "/query" in metadata.paths and metadata["x-translator"].team:
+                if "/predicates" in metadata.get('paths') and "/query" in metadata.get('paths') and metadata["x-translator"]['team']:
                     trapi.append(metadata)
             except Exception as e:
                 pass
@@ -40,39 +40,39 @@ class AsyncOperationsBuilderWithReasoner(AsyncOperationsBuilder):
                                 'input_type': self.remove_bio_link_prefix(sbj),
                                 'output_type': self.remove_bio_link_prefix(obj),
                                 'predicate': self.remove_bio_link_prefix(pred),
-                                'api_name': metadata.title,
-                                'smartapi': metadata.smartapi,
-                                'x-translator': metadata['x-translator'],
+                                'api_name': metadata.get('title'),
+                                'smartapi': metadata.get('smartapi'),
+                                'x-translator': metadata.get('x-translator'),
                             },
-                            'tags': [*metadata.tags, 'bte-trapi'],
+                            'tags': [*metadata.get('tags'), 'bte-trapi'],
                             'query_operation': {
                                 'path': '/query',
                                 'method': 'post',
-                                'server': metadata.url,
+                                'server': metadata.get('url'),
                                 'path_params': None,
                                 'params': None,
                                 'request_body': None,
                                 'support_batch': True,
                                 'input_separator': ',',
-                                'tags': [*metadata.tags, 'bte-trapi']
+                                'tags': [*metadata.get('tags'), 'bte-trapi']
                             }
                         })
         return ops
 
     def get_ops_from_predicates_endpoint(self, metadata):
-        response = requests.get(self.construct_query_url(metadata.url))
-        if response.status_code == 200:
-            data = response.json()
-            return self.parse_predicate_endpoint(data)
+        if metadata.get('url'):
+            response = requests.get(self.construct_query_url(metadata['url']))
+            if response.status_code == 200:
+                data = response.json()
+                return self.parse_predicate_endpoint(data, metadata)
         return []
 
     def get_ops_from_predicates_endpoints(self, specs):
         metadatas = self.get_TRAPI_with_predicates_endpoint(specs)
         res = []
         for metadata in metadatas:
-            response = self.get_ops_from_predicates_endpoint(metadata)
-            for ops in response.value:
-                res = [*res, *response.value]
+            for rec in self.get_ops_from_predicates_endpoint(metadata):
+                res = [*res, rec]
         return res
 
     def build(self):

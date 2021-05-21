@@ -52,10 +52,10 @@ class TestAPIParserWhichIsAlreadyDereferenced(unittest.TestCase):
     # AssertionError: 'biolink:related_to' != 'related_to'
     def test_fetch_all_operations(self):
         ops = self.metadata['operations']
-        self.assertEqual(ops[0]['association']['api_name'], 'OpenTarget API')
-        self.assertEqual(ops[0]['association']['predicate'], 'related_to')
-        self.assertEqual(ops[0]['association']['input_id'], 'ENSEMBL')
-        self.assertEqual(ops[0]['association']['path'], '/platform/public/evidence/filter')
+        self.assertEqual(ops[0]['association'].get('api_name'), 'OpenTarget API')
+        self.assertEqual(ops[0]['association'].get('predicate'), 'related_to')
+        self.assertEqual(ops[0]['association'].get('input_id'), 'ENSEMBL')
+        self.assertEqual(ops[0]['query_operation'].path, '/platform/public/evidence/filter')
 
 
 class TestAPIParserUsingSpecsWithParameters(unittest.TestCase):

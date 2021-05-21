@@ -34,12 +34,12 @@ class Endpoint:
         query_operation.tags = self.api_meta_data['tags']
         return query_operation
 
-    def remove_bio_link_prefix(self, input):
-        if not input:
-            return input
-        if input.startswith('biolink:'):
-            return re.sub(r'/biolink:/gi', "", input)
-        return input
+    def remove_bio_link_prefix(self, _input):
+        if not _input:
+            return _input
+        if _input.startswith('biolink:'):
+            return re.sub(r'biolink:', "", _input)
+        return _input
 
     def resolve_ref_if_provided(self, rec):
         if rec and "$ref" in rec:
@@ -73,7 +73,6 @@ class Endpoint:
         response_mapping = self.construct_response_mapping(op)
         for input in op['inputs']:
             for output in op['outputs']:
-                update_info = {}
                 association = self.construct_association(input, output, op)
                 update_info = {
                     'query_operation': query_operation,
@@ -94,7 +93,7 @@ class Endpoint:
                         operation = self.resolve_ref_if_provided(rec)
                         operation = operation if isinstance(operation, list) else [operation]
                         for op in operation:
-                            if isinstance(op, str):
+                            if not isinstance(op, dict):
                                 continue
                             res = [
                                 *res,

@@ -9,4 +9,4 @@ class TagSpecsSyncLoader(AllSpecsSyncLoader):
         self._tag = tag
 
     def parse(self, _input):
-        return [item for item in _input['hits'] for name in item['tags'] if self._tag == name]
+        return [item for item in _input['hits'] for tag in item['tags'] if self._tag == tag['name']]

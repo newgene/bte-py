@@ -60,7 +60,6 @@ class TestConstructMetaKG(unittest.TestCase):
         self.assertEqual(meta_kg.ops[0]['association']['x-translator']['component'], 'KP')
         self.assertEqual(meta_kg.ops[4]['association']['x-translator']['component'], 'KP')
 
-    # FAILS
     def test_construct_meta_kg_including_reasoner_tags(self):
         meta_kg = MetaKG()
         meta_kg.construct_MetaKG(True, {'smart_API_id': '912372f46127b79fb387cd2397203709'})
