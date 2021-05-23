@@ -5,4 +5,4 @@ def underscore(_input):
 
 
 def pascal_case(s):
-    ''.join(x for x in s.title() if not x.isspace())
+    return ''.join(x for x in s.title() if not x.isspace())

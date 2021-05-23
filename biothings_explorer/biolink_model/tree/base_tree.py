@@ -7,16 +7,10 @@ class BaseTree(ABC):
     _modify = None
 
     def __init__(self, objects=None):
-        if objects:
-            self._objects_in_yaml = objects
-            self._objects_in_tree = {}
-            self._modify = lambda _input: _input
-        else:
-            self._objects_in_tree = {}
-            for name in self._objects_in_yaml:
-                self.add_new_object_to_tree(name)
-                if 'is_a' in self._objects_in_yaml[name]:
-                    self._objects_in_tree[self._modify(self._objects_in_yaml[name]['is_a'])].add_child(name)
+        self._objects_in_yaml = objects
+        self._objects_in_tree = {}
+        self._modify = lambda _input: _input
+
 
     @property
     def objects(self):
@@ -34,6 +28,18 @@ class BaseTree(ABC):
 
     def add_new_object_to_tree(self, name):
         pass
+
+    def construct(self):
+        self._objects_in_tree = {}
+        for name in self._objects_in_yaml:
+            self.add_new_object_to_tree(name)
+            if 'is_a' in self._objects_in_yaml[name]:
+                try:
+                    self._objects_in_tree.get(self._modify(self._objects_in_yaml.get(name, {})['is_a'])).add_child(name)
+                # TODO Figure out why code lands here
+                except Exception as e:
+                    print(e)
+                    pass
 
     def get_descendants(self, name):
         self.check_if_node_in_tree(name)
