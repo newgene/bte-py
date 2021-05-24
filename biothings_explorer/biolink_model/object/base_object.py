@@ -14,7 +14,7 @@ class BaseObject(ABC):
         self._children = []
 
     @property
-    def get_parent(self):
+    def parent(self):
         return self._parent
 
     @property
@@ -24,6 +24,10 @@ class BaseObject(ABC):
     @property
     def name(self):
         return self._name
+
+    @property
+    def children(self):
+        return self._children
 
     def add_child(self, child):
         pass
