@@ -16,8 +16,8 @@ class Slot(BaseObject, ABC):
         super(Slot, self).__init__(name, info)
         self._parent = info.get('is_a') if not info.get('is_a') else underscore(info.get('is_a'))
         self._inverse = info.get('inverse') if not info.get('inverse') else underscore(info.get('inverse'))
-        self._domain = info.get('domain') if not info.get('domain') else underscore(info.get('domain'))
-        self._range = info.get('range') if not info.get('range') else underscore(info.get('range'))
+        self._domain = info.get('domain') if not info.get('domain') else pascal_case(info.get('domain'))
+        self._range = info.get('range') if not info.get('range') else pascal_case(info.get('range'))
         self._symmetric = False if not info.get('symmetric') else True
         self._exact_mapping = info.get('exact_mapping')
         self._close_mapping = info.get('close_mapping')

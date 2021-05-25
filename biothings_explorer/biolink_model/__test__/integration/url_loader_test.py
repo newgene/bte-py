@@ -9,4 +9,4 @@ class TestURLLoader(unittest.TestCase):
         self.assertIn('id', res)
         self.assertEqual(res['id'], 'https://w3id.org/biolink/biolink-model')
         self.assertIn('name', res)
-        self.assertEqual(res['id'], 'Biolink-Model')
+        self.assertEqual(res['name'], 'Biolink-Model')
