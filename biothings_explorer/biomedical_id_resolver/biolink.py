@@ -3,7 +3,7 @@ from biothings_explorer.biolink_model.index import BioLink
 
 class BioLinkHandler:
     instance = {}
-    _class_tree = BioLink.class_tree
+    _class_tree = None
 
     def __init__(self):
         if not BioLinkHandler.instance:

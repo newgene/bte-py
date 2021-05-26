@@ -48,7 +48,7 @@ class BioLinkBasedValidator(BaseValidator):
     def add_valid_input_to_resolvable(self, semantic_type, prefix, curies):
         if semantic_type not in self._resolvable:
             self._resolvable[semantic_type] = []
-        self._resolvable[semantic_type] = [*self._resolvable[semantic_type, *curies]]
+        self._resolvable[semantic_type] = [*self._resolvable[semantic_type], *curies]
 
     def add_valid_input_to_irresolvable(self, semantic_type, prefix, curies):
         if semantic_type not in self._irresolvable:

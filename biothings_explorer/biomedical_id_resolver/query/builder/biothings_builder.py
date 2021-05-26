@@ -22,11 +22,8 @@ class BioThingsQueryBuilder(QueryBuilder):
     query_template = 'q={inputs}&scopes={scopes}&fields={fields}&dotfield=true&species=human'
 
     def get_return_fields(self, field_mapping):
-        result = []
-        for value in field_mapping.values():
-            reduced = functools.reduce(lambda prev, current: prev + ','.join(current) + ',', value, '')
-            result.append(reduced)
-        return result
+        reduced = functools.reduce(lambda prev, current: prev + ','.join(current) + ',', field_mapping.values(), '')
+        return reduced
 
     def get_input_scopes(self, field_mapping, prefix):
         return ','.join(field_mapping[prefix])
@@ -35,7 +32,7 @@ class BioThingsQueryBuilder(QueryBuilder):
         grped = {}
         for curie in curies:
             prefix = curie.split(':')[0]
-            if grped not in prefix:
+            if prefix not in grped:
                 grped[prefix] = []
             grped[prefix].append(generate_db_id(curie))
         return generate_object_with_no_duplicate_elements_in_value(grped)
@@ -79,11 +76,11 @@ class BioThingsQueryBuilder(QueryBuilder):
         result = {}
         grped_response = self.group_result_by_query(response)
         for query in grped_response:
-            curie = self.group_result_by_query(response)
+            curie = generate_curie(prefix, query)
             if 'notfound' not in grped_response[query][0]:
                 result[curie] = ResolvableBioEntity(
                     semantic_type,
-                    self.get_db_ids(grped_response[query]),
+                    self.get_db_ids_helper(grped_response[query]),
                     self.get_attribute_helper(grped_response[query])
                 )
             else:
@@ -109,7 +106,7 @@ class BioThingsQueryBuilder(QueryBuilder):
                 'dotfield': True,
                 'species': 'human'
             },
-            data={
+            json={
                 'q': inputs,
                 'scopes': scopes
             },
@@ -119,7 +116,7 @@ class BioThingsQueryBuilder(QueryBuilder):
         )
 
         data = r.json()
-        self.get_db_ids(prefix, self.semantic_type, data)
+        return self.get_db_ids(prefix, self.semantic_type, data)
 
     def build_queries(self, metadata, prefix, inputs):
         return [self.build_one_query(metadata, prefix, batch) for batch in chunks(inputs, MAX_BIOTHINGS_INPUT_SIZE)]
@@ -127,10 +124,8 @@ class BioThingsQueryBuilder(QueryBuilder):
     def build(self):
         grped = self.group_curies_by_prefix(self.curies)
         result = []
-        for key in grped:
-            reduced = functools.reduce(lambda prev, current: [
-                *prev,
-                *self.build_queries(self.get_api_metadata(self.semantic_type), current, grped[current])
-            ], key, [])
-            result.append(reduced)
-        return result
+        reduced = functools.reduce(lambda prev, current: [
+            *prev,
+            *self.build_queries(self.get_api_metadata(self.semantic_type), current, grped[current])
+        ], grped.keys(), [])
+        return reduced

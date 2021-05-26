@@ -7,9 +7,8 @@ def query(resolvable):
     result = []
     for promises in scheduler.buckets.values():
         for item in promises:
-            #TODO CHECK THIS
-            if item['status'] == 'fulfilled':
-                result.append(item['value'])
+            if item:
+                result.append(item)
             else:
                 pass
     return result

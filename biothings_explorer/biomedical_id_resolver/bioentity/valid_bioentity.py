@@ -9,7 +9,7 @@ class ResolvableBioEntity(BioEntity):
     _attributes = {}
 
     def __init__(self, semantic_type, db_ids, attributes):
-        super(ResolvableBioEntity, self).__init__(self)
+        super(ResolvableBioEntity, self).__init__()
         self._leaf_semantic_type = semantic_type
         self._db_ids = db_ids
         self._attributes = attributes
