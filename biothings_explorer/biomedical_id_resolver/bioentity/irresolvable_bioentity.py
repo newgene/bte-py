@@ -8,7 +8,7 @@ class IrresolvableBioEntity(BioEntity):
     curie = ''
 
     def __init__(self, semantic_type, curie):
-        super(IrresolvableBioEntity, self).__init__(self)
+        super(IrresolvableBioEntity, self).__init__()
         self._lead_semantic_type = semantic_type
         self.curie = curie
 

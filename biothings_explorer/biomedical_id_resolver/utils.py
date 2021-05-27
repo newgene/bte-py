@@ -24,7 +24,7 @@ def append_array_or_non_array_object_to_array(lst, item):
         for val in item:
             if isinstance(val, str):
                 lst.append(val)
-            elif val.isnumeric():
+            elif isinstance(val, int) or val.isnumeric():
                 lst.append(str(val))
         return lst
     else:

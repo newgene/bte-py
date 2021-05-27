@@ -51,7 +51,7 @@ class BioThingsQueryBuilder(QueryBuilder):
 
     def get_attribute_helper(self, records):
         res = {}
-        mapping = APIMETA[self.semantic_type]['additional_attributes_mapping']
+        mapping = APIMETA[self.semantic_type].get('additional_attributes_mapping')
         if not mapping:
             return res
 

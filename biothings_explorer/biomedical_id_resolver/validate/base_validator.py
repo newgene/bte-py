@@ -34,7 +34,7 @@ class BaseValidator(ABC):
         user_input = user_input if user_input else self.user_input
         for vals in user_input.values():
             for item in vals:
-                if not isinstance(item, str) or not ':' in item:
+                if not isinstance(item, str) or ':' not in item:
                     raise Exception(
                         f"Your Input to ID Resolver is Irresolvable. Each item in the values of your input dictionary should be a curie. Spotted {item} is not a curie")
 
