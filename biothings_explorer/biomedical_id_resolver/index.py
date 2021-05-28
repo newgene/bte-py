@@ -7,7 +7,7 @@ from .fake import generate_invalid
 class Resolver:
     _resolver = {}
 
-    def __init__(self, _type):
+    def __init__(self, _type=None):
         self.set_resolver(_type)
 
     def set_resolver(self, _type):
@@ -23,6 +23,9 @@ class Resolver:
     @resolver.setter
     def resolver(self, _type):
         self.set_resolver(_type)
+
+    def resolve(self, user_input):
+        return self._resolver.resolve(user_input)
 
 
 METADATA = APIMETA

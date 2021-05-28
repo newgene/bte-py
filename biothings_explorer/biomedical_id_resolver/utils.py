@@ -14,9 +14,21 @@ def get_prefix_from_curie(curie):
 
 def generate_db_id(val):
     if val.split(':')[0] not in CURIE['ALWAYS_PREFIXED']:
-        return val[val.index(':') + 1:]
+        try:
+            index = val.index(':') + 1
+        except ValueError as e:
+            index = 0
+        return val[index:]
     else:
         return val
+
+
+def is_numeric(val):
+    try:
+        return isinstance(val, int) or isinstance(val, float) or val.isnumeric()
+    except Exception as e:
+        print(e)
+    return False
 
 
 def append_array_or_non_array_object_to_array(lst, item):
@@ -24,13 +36,13 @@ def append_array_or_non_array_object_to_array(lst, item):
         for val in item:
             if isinstance(val, str):
                 lst.append(val)
-            elif isinstance(val, int) or val.isnumeric():
+            elif is_numeric(val):
                 lst.append(str(val))
         return lst
     else:
         if isinstance(item, str):
             lst.append(item)
-        elif isinstance(item, int) or item.isnumeric():
+        elif is_numeric(item):
             lst.append(str(item))
         return lst
 

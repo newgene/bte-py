@@ -108,6 +108,7 @@ class TestIDResolver(unittest.TestCase):
         self.assertEqual(len(res.keys()), len(fake_drug_bank_inputs) + len(fake_ncbi_gene_inputs) + len(fake_omim_gene_inputs))
         self.assertIsInstance(res['OMIM:0'][0], IrresolvableBioEntity)
 
+    #TODO FAILS
     def test_inputs_with_undefined_semantic_type_should_be_correctly_resolved(self):
         resolver = DefaultResolver()
         res = resolver.resolve({'undefined': ['NCBIGene:1017']})
@@ -116,3 +117,91 @@ class TestIDResolver(unittest.TestCase):
         self.assertEqual(res['NCBIGene:1017'][0].primary_id, 'NCBIGene:1017')
         self.assertEqual(res['NCBIGene:1017'][0].label, 'CDK2')
         self.assertEqual(res['NCBIGene:1017'][0].semantic_type, 'Gene')
+
+    # TODO FAILS
+    def test_inputs_with_undefined_semantic_type_and_could_be_mapped_to_multiple_semantic_types_should_be_correctly_resolved(self):
+        resolver = DefaultResolver()
+        res = resolver.resolve({'undefined': ['UMLS:C0008780']})
+        self.assertIn('UMLS:C0008780', res)
+        valid = [rec for rec in res['UMLS:C0008780'] if isinstance(rec, ResolvableBioEntity)]
+        self.assertEqual(len(valid), 2)
+        self.assertEqual(valid[0].semantic_type, 'PhenotypicFeature')
+        self.assertEqual(valid[1].primary_id, 'MONDO:0016575')
+        self.assertEqual(valid[1].label, 'primary ciliary dyskinesia')
+        self.assertEqual(valid[1].semantic_type, 'Disease')
+
+    # TODO FAILS
+    def test_inputs_with_undefined_semantic_type_and_could_be_mapped_to_multiple_semantic_types_correctly_resolved(self):
+        resolver = DefaultResolver()
+        res = resolver.resolve({'undefined': ['OMIM:116953']})
+        self.assertIn('OMIM:116953', res)
+        self.assertIsInstance(res['OMIM:116953'][0], ResolvableBioEntity)
+        self.assertEqual(res['OMIM:116953'][0].primary_id, 'NCBIGene:1017')
+        self.assertEqual(res['OMIM:116953'][0].label, 'CDK2')
+        self.assertEqual(res['OMIM:116953'][0].semantic_type, 'Gene')
+
+    def test_inputs_with_undefined_semantic_type_and_could_not_be_mapped_to_any_semantic_type_return_irresolvable(self):
+        resolver = DefaultResolver()
+        res = resolver.resolve({'undefined': ['OMIM1:116953']})
+        self.assertIn('OMIM1:116953', res)
+        self.assertIsInstance(res['OMIM1:116953'][0], IrresolvableBioEntity)
+        self.assertEqual(res['OMIM1:116953'][0].semantic_type, 'undefined')
+
+    def test_irresolvable_inputs_should_not_overwrite_the_result_of_a_valid_input(self):
+        resolver = DefaultResolver()
+        res = resolver.resolve({"Gene": ["NCBIGene:1017"], "Disease": ["NCBIGene:1017"]})
+        self.assertIn('NCBIGene:1017', res)
+        self.assertEqual(len(res['NCBIGene:1017']), 2)
+        self.assertIsInstance(res['NCBIGene:1017'][0], ResolvableBioEntity)
+        self.assertEqual(res['NCBIGene:1017'][0].primary_id, 'NCBIGene:1017')
+        self.assertEqual(res['NCBIGene:1017'][0].label, 'CDK2')
+        self.assertIsInstance(res['NCBIGene:1017'][1], IrresolvableBioEntity)
+
+    def test_chemical_attributes_are_correctly_retrieved(self):
+        resolver = DefaultResolver()
+        res = resolver.resolve({'ChemicalSubstance': ['CHEMBL.COMPOUND:CHEMBL744']})
+        self.assertIn('Benzothiazoles', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['drugbank_taxonomy_class'])
+        self.assertIn('4', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['chembl_max_phase'])
+        self.assertIn('Small molecule', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['chembl_molecule_type'])
+        self.assertIn('Anticonvulsants', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['drugbank_drug_category'])
+        self.assertIn('approved', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['drugbank_groups'])
+        self.assertIn('Organic compounds', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['drugbank_kingdom'])
+        self.assertIn('Organoheterocyclic compounds', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['drugbank_superclass'])
+        self.assertIn('Drug-induced hepatitis', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['contraindications'])
+        self.assertIn('Amyotrophic lateral sclerosis', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['indications'])
+        self.assertIn('Anticonvulsants', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['mesh_pharmacology_class'])
+        self.assertIn('Benzothiazole', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['fda_epc_pharmacology_class'])
+
+    def test_variant_attributes_are_correctly_retrieved(self):
+        resolver = DefaultResolver()
+        res = resolver.resolve({'SequenceVariant': ['DBSNP:rs796065306']})
+        self.assertIn('NON_SYNONYMOUS', res['DBSNP:rs796065306'][0].attributes['cadd_consequence'])
+        self.assertIn('SNV', res['DBSNP:rs796065306'][0].attributes['cadd_variant_type'])
+        self.assertIn('snv', res['DBSNP:rs796065306'][0].attributes['dbsnp_variant_type'])
+        self.assertIn('Pathogenic', res['DBSNP:rs796065306'][0].attributes['clinvar_clinical_significance'])
+        self.assertIn('deleterious', res['DBSNP:rs796065306'][0].attributes['sift_category'])
+
+    def test_gene_attributes_are_correctly_retrieved(self):
+        resolver = DefaultResolver()
+        res = resolver.resolve({'Gene': ['NCBIGene:1017']})
+        self.assertIn('Protein kinase domain', res['NCBIGene:1017'][0].attributes['interpro'])
+        self.assertIn('protein-coding', res['NCBIGene:1017'][0].attributes['type_of_gene'])
+
+    def test_pathway_attributes_are_correctly_retrieved(self):
+        resolver = DefaultResolver()
+        res = resolver.resolve({'Pathway': ['WIKIPATHWAYS:WP151']})
+        self.assertIn('68', res['WIKIPATHWAYS:WP151'][0].attributes['num_of_participants'])
+
+    def test_chemical_ids_can_be_resolved_as_rhea_ids(self):
+        resolver = DefaultResolver()
+        res = resolver.resolve({'ChemicalSubstance': ['PUBCHEM.COMPOUND:5460389']})
+        self.assertIsInstance(res['PUBCHEM.COMPOUND:5460389'][0], ResolvableBioEntity)
+        self.assertIn('RHEA', res['PUBCHEM.COMPOUND:5460389'][0].db_ids)
+        self.assertIn('RHEA:37975', res['PUBCHEM.COMPOUND:5460389'][0].db_ids['RHEA'])
+
+    #TODO FAILS
+    def test_rhea_ids_can_be_correctly_resolved(self):
+        resolver = DefaultResolver()
+        res = resolver.resolve({'ChemicalSubstance': ['RHEA:37975']})
+        self.assertIsInstance(res['RHEA:37975'][0], ResolvableBioEntity)
+        self.assertEqual(res['RHEA:37975'][0].primary_id, 'CHEBI:16169')

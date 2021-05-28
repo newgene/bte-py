@@ -41,7 +41,7 @@ class IrresolvableBioEntity(BioEntity):
     @property
     def db_ids(self):
         return {
-            [get_prefix_from_curie(self.curie)]: [self.curie]
+            get_prefix_from_curie(self.curie): [self.curie]
         }
 
     @property
