@@ -112,3 +112,10 @@ class TestUtilsModule(unittest.TestCase):
         _input = 'WIKIPATHWAYS:pathway:1017'
         res = generate_db_id(_input)
         self.assertEqual(res, 'pathway:1017')
+
+    def test_generate_id_type_dict(self):
+        res = generate_id_type_dict()
+        self.assertIn('NCBIGene', res)
+        self.assertEqual(res['NCBIGene'], ['Gene'])
+        self.assertIn('OMIM', res)
+        self.assertEqual(res['OMIM'], ['Gene', 'Disease'])
