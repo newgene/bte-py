@@ -24,16 +24,14 @@ class TestValidatorClass(unittest.TestCase):
         self.assertIn('kkk:1323', vd.irresolvable['Gene'])
         self.assertIn('kkk:12345', vd.irresolvable['Gene'])
 
-    #TODO FAILS
     def test_id_appear_in_config_should_be_mapped_to_the_correct_semantic_type(self):
         test_data = {"undefined": ["NCBIGene:1017", "kkk:1323"]}
         vd = DefaultValidator(test_data)
         vd.validate()
         self.assertIn('NCBIGene:1017', vd.resolvable['Gene'])
-        self.assertIn('NCBIGene:1017', vd.irresolvable['undefined'])
+        self.assertNotIn('NCBIGene:1017', vd.irresolvable['undefined'])
         self.assertIn('kkk:1323', vd.irresolvable['undefined'])
 
-    # TODO FAILS
     def test_id_that_can_be_mapped_to_multiple_semantic_types_are_correctly_mapped(self):
         test_data = {"undefined": ["NCBIGene:1017", "OMIM:123"]}
         vd = DefaultValidator(test_data)

@@ -5,14 +5,14 @@ from biothings_explorer.biomedical_id_resolver.utils import get_prefix_from_curi
 
 class DefaultValidator(BaseValidator):
     def handle_undefined_ids(self, user_input):
-        if None not in user_input or 'undefined' not in user_input:
+        if 'undefined' not in user_input:
             return user_input
 
         id_type_dict = generate_id_type_dict()
         identified = []
         for curie in user_input['undefined']:
             prefix = get_prefix_from_curie(curie)
-            possible_semantic_types = id_type_dict[prefix]
+            possible_semantic_types = id_type_dict.get(prefix)
             if possible_semantic_types is None:
                 continue
             for semantic_type in possible_semantic_types:

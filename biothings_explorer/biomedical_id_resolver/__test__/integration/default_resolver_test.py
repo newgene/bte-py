@@ -108,7 +108,6 @@ class TestIDResolver(unittest.TestCase):
         self.assertEqual(len(res.keys()), len(fake_drug_bank_inputs) + len(fake_ncbi_gene_inputs) + len(fake_omim_gene_inputs))
         self.assertIsInstance(res['OMIM:0'][0], IrresolvableBioEntity)
 
-    #TODO FAILS
     def test_inputs_with_undefined_semantic_type_should_be_correctly_resolved(self):
         resolver = DefaultResolver()
         res = resolver.resolve({'undefined': ['NCBIGene:1017']})
@@ -130,7 +129,6 @@ class TestIDResolver(unittest.TestCase):
         self.assertEqual(valid[1].label, 'primary ciliary dyskinesia')
         self.assertEqual(valid[1].semantic_type, 'Disease')
 
-    # TODO FAILS
     def test_inputs_with_undefined_semantic_type_and_could_be_mapped_to_multiple_semantic_types_correctly_resolved(self):
         resolver = DefaultResolver()
         res = resolver.resolve({'undefined': ['OMIM:116953']})
