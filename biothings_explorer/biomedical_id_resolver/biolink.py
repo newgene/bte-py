@@ -1,4 +1,4 @@
-from biothings_explorer.biolink_model.index import BioLink
+from biothings_explorer.biolink_model.biolink import BioLink
 
 
 class BioLinkHandler:

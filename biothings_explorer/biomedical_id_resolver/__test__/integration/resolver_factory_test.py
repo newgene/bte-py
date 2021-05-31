@@ -1,5 +1,5 @@
 import unittest
-from biothings_explorer.biomedical_id_resolver.index import METADATA, Resolver
+from biothings_explorer.biomedical_id_resolver.resolver import METADATA, Resolver
 from biothings_explorer.biomedical_id_resolver.bioentity.irresolvable_bioentity import IrresolvableBioEntity
 
 

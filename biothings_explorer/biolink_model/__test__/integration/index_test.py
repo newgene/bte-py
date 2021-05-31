@@ -1,5 +1,5 @@
 import unittest
-from biothings_explorer.biolink_model.index import BioLink
+from biothings_explorer.biolink_model.biolink import BioLink
 from biothings_explorer.biolink_model.tree.class_tree import BioLinkClassTree as BioLinkClassTree
 from biothings_explorer.biolink_model.tree.slot_tree import BioLinkClassTree as BioLinkSlotTree
 
