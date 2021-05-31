@@ -117,7 +117,6 @@ class TestIDResolver(unittest.TestCase):
         self.assertEqual(res['NCBIGene:1017'][0].label, 'CDK2')
         self.assertEqual(res['NCBIGene:1017'][0].semantic_type, 'Gene')
 
-    # TODO FAILS
     def test_inputs_with_undefined_semantic_type_and_could_be_mapped_to_multiple_semantic_types_should_be_correctly_resolved(self):
         resolver = DefaultResolver()
         res = resolver.resolve({'undefined': ['UMLS:C0008780']})
@@ -197,7 +196,6 @@ class TestIDResolver(unittest.TestCase):
         self.assertIn('RHEA', res['PUBCHEM.COMPOUND:5460389'][0].db_ids)
         self.assertIn('RHEA:37975', res['PUBCHEM.COMPOUND:5460389'][0].db_ids['RHEA'])
 
-    #TODO FAILS
     def test_rhea_ids_can_be_correctly_resolved(self):
         resolver = DefaultResolver()
         res = resolver.resolve({'ChemicalSubstance': ['RHEA:37975']})

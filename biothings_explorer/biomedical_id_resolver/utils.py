@@ -49,7 +49,7 @@ def append_array_or_non_array_object_to_array(lst, item):
 
 def generate_object_with_no_duplicate_elements_in_value(_input):
     for key in _input:
-        _input[key] = [item for item in set(_input[key])]
+        _input[key] = list(dict.fromkeys(_input[key]))
     return _input
 
 
