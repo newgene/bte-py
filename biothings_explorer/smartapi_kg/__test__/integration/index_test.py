@@ -1,7 +1,7 @@
 import unittest
 import os
 from os.path import abspath
-from biothings_explorer.smartapi_kg.index import MetaKG
+from biothings_explorer.smartapi_kg.metakg import MetaKG
 
 
 class TestConstructMetaKG(unittest.TestCase):
