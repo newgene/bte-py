@@ -2,6 +2,7 @@ import unittest
 import os
 from os.path import abspath
 from biothings_explorer.smartapi_kg.metakg import MetaKG
+from biothings_explorer.smartapi_kg.exceptions.fail_to_load_spec import FailToLoadSpecError
 
 
 class TestConstructMetaKG(unittest.TestCase):
@@ -43,6 +44,11 @@ class TestConstructMetaKG(unittest.TestCase):
         meta_kg.construct_MetaKG(False, {'tag': 'asdasdflsfd,'})
         self.assertIsInstance(meta_kg.ops, list)
         self.assertEqual(len(meta_kg.ops), 0)
+
+    def test_construct_meta_kg_with_invalid_smartapi_id_should_throw_error(self):
+        meta_kg = MetaKG()
+        with self.assertRaises(FailToLoadSpecError):
+            meta_kg.construct_MetaKG(False, {'smart_API_id': 'invalid'})
 
     def test_construct_meta_kg_with_smartapi_id(self):
         meta_kg = MetaKG()

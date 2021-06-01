@@ -1,4 +1,5 @@
 from abc import ABC
+from ..exceptions.node_not_found import NodeNotFound
 
 
 class BaseTree(ABC):
@@ -24,7 +25,7 @@ class BaseTree(ABC):
 
     def check_if_node_in_tree(self, name):
         if self._modify(name) not in self._objects_in_tree:
-            raise Exception(f'The node you provide {self._modify(name)} is not in the tree.')
+            raise NodeNotFound(f'The node you provide {self._modify(name)} is not in the tree.')
 
     def add_new_object_to_tree(self, name):
         pass

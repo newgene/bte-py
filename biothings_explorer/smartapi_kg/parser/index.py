@@ -66,7 +66,7 @@ class API:
                 'meta': self.smartapi_doc.get('_meta'),
             },
             'components': self.fetch_components(),
-            'paths': list(self.smartapi_doc['paths'].keys()) if isinstance(self.smartapi_doc['paths'], dict) else [],
+            'paths': list(self.smartapi_doc['paths'].keys()) if isinstance(self.smartapi_doc.get('paths'), dict) else [],
             'operations': [],
         }
 

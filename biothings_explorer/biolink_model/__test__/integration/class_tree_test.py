@@ -4,6 +4,7 @@ import json
 import yaml
 from biothings_explorer.biolink_model.object.entity_object import Entity
 from biothings_explorer.biolink_model.tree.class_tree import BioLinkClassTree
+from biothings_explorer.biolink_model.exceptions.node_not_found import NodeNotFound
 
 
 class TestConstructorFunction(unittest.TestCase):
@@ -55,6 +56,13 @@ class TestGetDescendants(unittest.TestCase):
         self.assertEqual(len(self.tree.get_descendants('Gene')), 0)
         self.assertEqual(len(self.tree.get_descendants('ProteinIsoform')), 0)
 
+    def test_entity_not_in_the_tree_should_throw_an_error(self):
+        with self.assertRaises(NodeNotFound):
+            self.tree.get_descendants('Gene1')
+
+        with self.assertRaisesRegex(NodeNotFound, 'The node you provide Gene1 is not in the tree.'):
+            self.tree.get_descendants('Gene1')
+
 
 class TestGetAncestors(unittest.TestCase):
     tree = {}
@@ -77,6 +85,13 @@ class TestGetAncestors(unittest.TestCase):
     def test_entity_without_ancestors_should_return_empty_array(self):
         self.assertEqual(len(self.tree.get_ancestors('Entity')), 0)
         self.assertEqual(len(self.tree.get_ancestors('Annotation')), 0)
+
+    def test_entity_not_in_the_tree_should_throw_an_error(self):
+        with self.assertRaises(NodeNotFound):
+            self.tree.get_ancestors('Gene1')
+
+        with self.assertRaisesRegex(NodeNotFound, 'The node you provide Gene1 is not in the tree.'):
+            self.tree.get_ancestors('Gene1')
 
 
 class TestGetPath(unittest.TestCase):
@@ -106,3 +121,17 @@ class TestGetPath(unittest.TestCase):
     def test_return_empty_array_if_downstream_has_no_parent(self):
         res = [item.name for item in self.tree.get_path('Entity', 'GenomicEntity')]
         self.assertEqual(res, [])
+
+    def test_downstream_node_not_in_the_tree_should_throw_an_error(self):
+        with self.assertRaises(NodeNotFound):
+            self.tree.get_path('Gene1', 'Gene2')
+
+        with self.assertRaisesRegex(NodeNotFound, 'The node you provide Gene1 is not in the tree.'):
+            self.tree.get_path('Gene1', 'Gene2')
+
+    def test_upstream_node_not_in_the_tree_should_throw_an_error(self):
+        with self.assertRaises(NodeNotFound):
+            self.tree.get_path('Gene', 'Gene2')
+
+        with self.assertRaisesRegex(NodeNotFound, 'The node you provide Gene2 is not in the tree.'):
+            self.tree.get_path('Gene', 'Gene2')

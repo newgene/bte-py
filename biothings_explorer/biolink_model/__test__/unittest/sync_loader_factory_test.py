@@ -15,3 +15,9 @@ class TestLoaderEntryPoint(unittest.TestCase):
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink.yaml'))
         res = sync_loader(file_path)
         self.assertIsInstance(res, SyncFileLoader)
+
+    def test_when_input_is_invalid_path_raise_exception(self):
+        file_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink1.yaml'))
+        with self.assertRaises(Exception):
+            sync_loader(file_path)

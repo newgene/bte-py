@@ -1,6 +1,7 @@
 import requests
 import json
 from .base_loader import BaseLoader
+from ..exceptions.fail_to_load_spec import FailToLoadSpecError
 
 
 class BaseAsyncLoader(BaseLoader):
@@ -13,9 +14,12 @@ class BaseAsyncLoader(BaseLoader):
     def fetch(self):
         try:
             response = requests.get(self._url)
+            response.raise_for_status()
             return response.json()
+        except requests.exceptions.HTTPError:
+            raise FailToLoadSpecError(f"Query to ${self._url} failed with status code ${response.status_code}")
         except Exception as e:
-            pass
+            raise Exception(f"Query to ${self._url} failed with error ${str(e)}")
 
     def parse(self, _input):
         return []

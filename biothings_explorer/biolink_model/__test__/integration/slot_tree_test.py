@@ -2,6 +2,7 @@ import os
 import unittest
 from biothings_explorer.biolink_model.tree.slot_tree import BioLinkClassTree as BioLinkSlotTree
 from biothings_explorer.biolink_model.object.slot_object import Slot
+from biothings_explorer.biolink_model.exceptions.node_not_found import NodeNotFound
 import yaml
 
 
@@ -53,6 +54,13 @@ class TestGetDescendantsFunction(unittest.TestCase):
         self.assertEqual(len(self.tree.get_descendants('negatively_regulates')), 0)
         self.assertEqual(len(self.tree.get_descendants('superclass_of')), 0)
 
+    def test_entity_not_in_the_tree_should_throw_an_error(self):
+        with self.assertRaises(NodeNotFound):
+            self.tree.get_descendants('Gene1')
+
+        with self.assertRaisesRegex(NodeNotFound, 'The node you provide Gene1 is not in the tree.'):
+            self.tree.get_descendants('Gene1')
+
 
 class TestGetAncestorsFunction(unittest.TestCase):
     tree = {}
@@ -75,6 +83,13 @@ class TestGetAncestorsFunction(unittest.TestCase):
     def test_entity_without_ancestors_should_return_empty_array(self):
         self.assertEqual(len(self.tree.get_ancestors('related_to')), 0)
         self.assertEqual(len(self.tree.get_ancestors('regulates')), 0)
+
+    def test_entity_not_in_the_tree_should_throw_an_error(self):
+        with self.assertRaises(NodeNotFound):
+            self.tree.get_ancestors('regulates1')
+
+        with self.assertRaisesRegex(NodeNotFound, 'The node you provide regulates1 is not in the tree.'):
+            self.tree.get_ancestors('regulates1')
 
 
 class TestGetPathFunction(unittest.TestCase):
@@ -104,3 +119,17 @@ class TestGetPathFunction(unittest.TestCase):
     def test_return_empty_array_if_downstream_has_no_parent(self):
         res = [item.name for item in self.tree.get_path('related_to', 'affects')]
         self.assertEqual(res, [])
+
+    def test_downstream_node_not_in_the_tree_should_throw_an_error(self):
+        with self.assertRaises(NodeNotFound):
+            self.tree.get_path('affects1', 'affects2')
+
+        with self.assertRaisesRegex(NodeNotFound, 'The node you provide affects1 is not in the tree.'):
+            self.tree.get_path('affects1', 'affects2')
+
+    def test_upstream_node_not_in_the_tree_should_throw_an_error(self):
+        with self.assertRaises(NodeNotFound):
+            self.tree.get_path('affects', 'affects2')
+
+        with self.assertRaisesRegex(NodeNotFound, 'The node you provide affects2 is not in the tree.'):
+            self.tree.get_path('affects', 'affects2')

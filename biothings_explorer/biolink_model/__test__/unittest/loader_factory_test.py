@@ -23,3 +23,9 @@ class TestLoaderEntryPoint(unittest.TestCase):
 
         res = loader(file_path)
         self.assertIsInstance(res, FileLoader)
+
+    def test_when_input_is_invalid_path_raise_exception(self):
+        file_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink1.yaml'))
+        with self.assertRaises(Exception):
+            loader(file_path)

@@ -1,0 +1,2 @@
+class IrresolvableIDResolverInputError(Exception):
+    pass
