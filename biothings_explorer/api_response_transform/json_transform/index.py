@@ -1,4 +1,4 @@
-from utils import separate_simple_an_complex_paths, transform_simple_object, transform_complex_object
+from .utils import separate_simple_an_complex_paths, transform_simple_object, transform_complex_object
 
 
 def transform(json_doc, template):

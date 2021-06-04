@@ -117,4 +117,7 @@ def separate_simple_an_complex_paths(template):
             simple_path_template[key] = value
         else:
             complex_path_template[key] = value
-    return {simple_path_template, complex_path_template}
+    return {
+        'simple_path_template': simple_path_template,
+        'complex_path_template': complex_path_template
+    }

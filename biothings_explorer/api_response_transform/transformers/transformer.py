@@ -84,3 +84,20 @@ class BaseTransformer:
             return []
         res[output_id_type] = to_array(res[output_id_type])
         return [generate_curie(output_id_type, item) for item in res[output_id_type]]
+
+    def transform(self):
+        result = []
+        responses = self.pair_input_with_api_response()
+        for curie in responses:
+            if isinstance(responses[curie], list) and len(responses[curie]) > 0:
+                for item in responses[curie]:
+                    item = self.wrap(item)
+                    item = self.json_transform(item)
+                    for predicate in item:
+                        if isinstance(item[predicate], list) and len(item[predicate]) > 0:
+                            for rec in item[predicate]:
+                                rec = self.add_edge_info(curie, rec)
+                                result = [*result, *rec]
+                        else:
+                            result = [*result, *self.add_edge_info(curie, item[predicate])]
+        return result
