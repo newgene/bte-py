@@ -30,11 +30,11 @@ class BaseTransformer:
     def _update_publications(self, res):
         if 'pubmed' in res:
             res['pubmed'] = to_array(res['pubmed'])
-            res['publications'] = [item.upper() if isinstance(item, str) and item.upper().startswith('PMID:') else 'PMID:' + item for item in res['pubmed']]
-            res.pop('pumbed', None)
+            res['publications'] = [item.upper() if isinstance(item, str) and item.upper().startswith('PMID:') else 'PMID:' + str(item) for item in res['pubmed']]
+            res.pop('pubmed', None)
         if 'pmc' in res:
             res['pmc'] = to_array(res['pmc'])
-            res['publications'] = [item.upper() if isinstance(item, str) and item.upper().startswith('PMC:') else 'PMC:' + item
+            res['publications'] = [item.upper() if isinstance(item, str) and item.upper().startswith('PMC:') else 'PMC:' + str(item)
                                    for item in res['pmc']]
             res.pop('pmc', None)
         return res

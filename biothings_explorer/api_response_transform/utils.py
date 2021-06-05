@@ -3,7 +3,7 @@ def generate_curie(id_type, _id):
         _id = _id[0]
     if isinstance(_id, str) and ':' in _id:
         _id = _id.split(':')[-1]
-    return id_type + ':' + _id
+    return str(id_type) + ':' + str(_id)
 
 
 def to_array(item):

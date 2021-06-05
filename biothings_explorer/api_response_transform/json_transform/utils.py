@@ -1,4 +1,5 @@
 import os
+from jsonpath_ng import jsonpath, parse
 
 
 def commonprefix(l, sep=os.sep):
@@ -6,23 +7,23 @@ def commonprefix(l, sep=os.sep):
     # always returns path prefixes as it compares
     # path component wise
     cp = []
-    ls = [p.split('/') for p in l]
-    ml = min( len(p) for p in ls )
+    ls = [p.split(sep) for p in l]
+    ml = min(len(p) for p in ls)
 
     for i in range(ml):
 
-        s = set( p[i] for p in ls )
+        s = set(p[i] for p in ls)
         if len(s) != 1:
             break
 
         cp.append(s.pop())
 
-    return sep.join(cp)
+    return sep.join([*cp, ''])
 
 
 def extract_paths_from_template(template):
     paths = []
-    for value in template:
+    for value in template.values():
         if isinstance(value, str):
             paths.append(value)
         else:
@@ -44,15 +45,23 @@ def transform_simple_object(json_doc, template):
     if len(json_doc.keys()) == 0:
         return new_doc
 
-    for key, value in json_doc.items():
+    for key, value in template.items():
         if isinstance(value, str):
-            val = []
-            #TODO jsonata stuff
-            pass
+            value = ''.join('[*]{}'.format(x) if x == '.' else x for x in value)
+            jsonpath_expr = parse(value)
+            try:
+                val = [jsonpath_expr.find(json_doc)[0].value]
+            except IndexError:
+                val = []
         else:
             val = []
-            # TODO jsonata stuff
-            pass
+            for element in value:
+                jsonpath_expr = parse(element)
+                try:
+                    val.append(jsonpath_expr.find(json_doc)[0].value)
+                except IndexError:
+                    pass
+
         val = [item for item in val if item]
         if len(val) == 0:
             continue
@@ -75,7 +84,8 @@ def transform_complex_object(json_doc, template):
     if len(paths) == 1 and paths[0] == common_path:
         return transform_simple_object(json_doc, template)
     if common_path:
-        #TODO jsonata stuff here
+        jsonpath_expr = parse(common_path)
+        trimmed_json_doc = jsonpath_expr.find(json_doc)[0].value
         trimmed_template = remove_common_path_from_template(template, common_path)
     else:
         trimmed_json_doc = json_doc
@@ -83,14 +93,14 @@ def transform_complex_object(json_doc, template):
     if not trimmed_json_doc:
         return {}
     if isinstance(trimmed_json_doc, list):
-        new_doc = transform_simple_object(trimmed_json_doc, trimmed_template)
+        new_doc = transform_array_of_simple_object(trimmed_json_doc, trimmed_template)
     else:
         new_doc = transform_simple_object(trimmed_json_doc, trimmed_template)
     return new_doc
 
 
 def remove_common_path_from_template(template, common_path):
-    if isinstance(common_path, str):
+    if not isinstance(common_path, str):
         return template
     common_path = common_path + '.'
     new_template = {}
