@@ -1,4 +1,4 @@
-from biothings_transformer import BioThingsTransformer
+from .biothings_transformer import BioThingsTransformer
 
 
 class SemmedTransformer(BioThingsTransformer):
@@ -6,8 +6,8 @@ class SemmedTransformer(BioThingsTransformer):
         result = {}
         for predicate in res:
             tmp = []
-            if isinstance(res['predicate'], list) and len(res['predicate']) > 0:
-                for item in res['predicate']:
+            if isinstance(res.get(predicate), list) and len(res.get(predicate)) > 0:
+                for item in res.get(predicate):
                     if item['@type'] == self.edge['association']['output_type'] or \
                             (item['@type'] == 'DiseaseOrPhenotypicFeature' and self.edge['association']['output_type'] == 'Disease'):
                         item['UMLS'] = item['umls']

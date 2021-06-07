@@ -40,33 +40,37 @@ def find_longest_common_path(paths):
     return common_path[0:-1] if common_path.endswith('.') else None
 
 
+def get_parsed_json(template, json_doc):
+    value = ''.join('[*]{}'.format(x) if x == '.' else x for x in template)
+    jsonpath_expr = parse(value)
+    value = value + '[*]'
+    jsonpath_expr_list = parse(value)
+
+    json_data = jsonpath_expr.find(json_doc)
+    json_data_list = jsonpath_expr_list.find(json_doc)
+    if len(json_data) > 0 and len(json_data_list) > 1:
+        return [[match.value for match in jsonpath_expr_list.find(json_doc)]]
+    else:
+        return [jsonpath_expr.find(json_doc)[0].value]
+
+
 def transform_simple_object(json_doc, template):
     new_doc = {}
     if len(json_doc.keys()) == 0:
         return new_doc
 
     for key, value in template.items():
-        #publications[*].id[*]
         if isinstance(value, str):
-            value = ''.join('[*]{}'.format(x) if x == '.' else x for x in value)
-            value = value + '[*]'
-            jsonpath_expr = parse(value)
             try:
-                if len(jsonpath_expr.find(json_doc)) > 1:
-                    val = [[match.value for match in jsonpath_expr.find(json_doc)]]
-                else:
-                    val = [jsonpath_expr.find(json_doc)[0].value]
+                val = get_parsed_json(value, json_doc)
             except IndexError:
                 val = []
         else:
             val = []
             for element in value:
-                element = ''.join('[*]{}'.format(x) if x == '.' else x for x in element)
-                element = element + '[*]'
-                jsonpath_expr = parse(element)
                 try:
                     #jsonpath_expr.find(json_doc)[0].value
-                    val.append(match.value for match in jsonpath_expr.find(json_doc))
+                    val.append(get_parsed_json(element, json_doc))
                 except IndexError:
                     pass
 
@@ -94,10 +98,8 @@ def transform_complex_object(json_doc, template):
     if len(paths) == 1 and paths[0] == common_path:
         return transform_simple_object(json_doc, template)
     if common_path:
-        value = ''.join('[*]{}'.format(x) if x == '.' else x for x in common_path)
-        value = value + '[*]'
-        jsonpath_expr = parse(value)
-        trimmed_json_doc = [match.value for match in jsonpath_expr.find(json_doc)] #jsonpath_expr.find(json_doc)[0].value
+        trimmed_json_doc = get_parsed_json(common_path, json_doc)[0]
+        #trimmed_json_doc = [match.value for match in jsonpath_expr.find(json_doc)] #jsonpath_expr.find(json_doc)[0].value
         trimmed_template = remove_common_path_from_template(template, common_path)
     else:
         trimmed_json_doc = json_doc

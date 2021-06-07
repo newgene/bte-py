@@ -80,7 +80,6 @@ class TestBiolinkTransformer(unittest.TestCase):
         res = tf.json_transform(wrapped_response)
         self.assertIn('related_to', res)
         self.assertEqual(res['related_to'][0]['HGNC'], '10956')
-        #TODO FAILS
         self.assertEqual(res['related_to'][0]['pubmed'][0], '21685912')
         self.assertEqual(res['related_to'][0]['relation'], 'contributes to condition')
         self.assertEqual(res['related_to'][0]['source'][0], 'https://archive.monarchinitiative.org/#gwascatalog')

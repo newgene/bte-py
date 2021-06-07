@@ -42,20 +42,20 @@ class BaseTransformer:
     def _update_edge_metadata(self, res):
         res['$edge_metadata'] = {
             **self.edge['association'],
-            'trapi_qEdge_obj': self.edge['resoner_edge'],
-            'filter': self.edge['filter']
+            'trapi_qEdge_obj': self.edge.get('reasoner_edge'),
+            'filter': self.edge.get('filter')
         }
         return res
 
     def _update_input(self, res, _input):
         res['$input'] = {
-            'original': None if not self.edge['original_input'] else self.edge['original_input'][_input],
-            'obj': None if not (self.edge['input_resolved_identifiers'] and self.edge['original_input']) else self.edge['input_resolved_identifiers'][self.edge['original_input'][_input]]
+            'original': None if not self.edge.get('original_input') else self.edge['original_input'][_input],
+            'obj': None if not (self.edge.get('input_resolved_identifiers') and self.edge.get('original_input')) else self.edge['input_resolved_identifiers'][self.edge['original_input'][_input]]
         }
         return res
 
     def _remove_non_edge_data(self, res):
-        res.pop('@type')
+        res.pop('@type', None)
         res.pop(self.edge['association']['output_id'])
         return res
 

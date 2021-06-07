@@ -1,4 +1,4 @@
-from transformer import BaseTransformer
+from .transformer import BaseTransformer
 from ..utils import generate_curie
 
 
@@ -16,4 +16,4 @@ class BioThingsTransformer(BaseTransformer):
             return res
         else:
             _input = generate_curie(self.edge['association']['input_id'], self.edge['input'])
-            return {[_input]: [self.data['response']]}
+            return {_input: [self.data['response']]}

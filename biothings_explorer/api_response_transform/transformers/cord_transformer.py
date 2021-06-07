@@ -1,4 +1,4 @@
-from biothings_transformer import BioThingsTransformer
+from .biothings_transformer import BioThingsTransformer
 
 
 class CordTransformer(BioThingsTransformer):
@@ -12,7 +12,7 @@ class CordTransformer(BioThingsTransformer):
                     if item['@type'] == self.edge['association']['output_type'] or \
                             (item['@type'] == 'DiseaseOrPhenotypicFeature' and
                              self.edge['association']['output_type'] == 'Disease'):
-                        for key in item:
+                        for key in list(item):
                             if key in PREFIXES:
                                 item[key.upper()] = item[key]
                                 item.pop(key, None)
