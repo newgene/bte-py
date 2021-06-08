@@ -1,9 +1,61 @@
-import unittest
 import requests
-from biothings_explorer.api_response_transform.transformers.semmed_transformer import SemmedTransformer
+import unittest
+from biothings_explorer.api_response_transform.transformers.ctd_transformer import CTDTransformer
+from biothings_explorer.api_response_transform.transformers.opentarget_transformer import OpenTargetTransformer
+from biothings_explorer.api_response_transform.transformers.biothings_transformer import BioThingsTransformer
+from biothings_explorer.api_response_transform.transformers.transformer import BaseTransformer
 
 
-class TestSemmedTransformer(unittest.TestCase):
+class TestOpentargetTransformer(unittest.TestCase):
+    def setUp(self):
+        res = requests.get('https://platform-api.opentargets.io/v3/platform/public/evidence/filter?target=ENSG00000088832&size=100&fields=drug&datasource=chembl')
+        self.api_response = res.json()
+
+    def test_opentarget_wrapper(self):
+        _input = {
+            'response': self.api_response,
+            'edge': {
+                'input': '238',
+                'association': {
+                    'output_type': 'Gene'
+                },
+                'response_mapping': {
+                    'sookie': 'kevin'
+                }
+            }
+        }
+
+        tf = OpenTargetTransformer(_input)
+        res = tf.wrap(self.api_response)
+        self.assertEqual(res['data'][0]['drug']['id'], 'CHEMBL1200686')
+        self.assertIn('PIMECROLIMUS', res['data'][0]['drug']['molecule_name'])
+
+
+class TestCtdTransformer(unittest.TestCase):
+    def setUp(self):
+        res = requests.get('http://ctdbase.org/tools/batchQuery.go?inputType=chem&inputTerms=D003634|mercury&report=diseases_curated&format=json')
+        self.api_response = res.json()
+
+    def test_ctd_wrapper(self):
+        _input = {
+            'response': self.api_response,
+            'edge': {
+                'input': '238',
+                'association': {
+                    'output_type': 'Gene'
+                },
+                'response_mapping': {
+                    'sookie': 'kevin'
+                }
+            }
+        }
+        tf = CTDTransformer(_input)
+        res = tf.wrap(self.api_response)
+        self.assertEqual(res['data'][0]['DiseaseID'], 'D000022')
+        self.assertIn('16120699', res['data'][0]['PubMedIDs'])
+
+
+class TestBiothingsTransformer(unittest.TestCase):
     def setUp(self):
         response = requests.post(
             'https://biothings.ncats.io/semmedgene/query',
@@ -70,38 +122,14 @@ class TestSemmedTransformer(unittest.TestCase):
             }
         }
 
-    def test_semmed_pair_input_with_api_response(self):
-        tf = SemmedTransformer(self._input)
+    def test_biothings_pair_input_with_api_response(self):
+        tf = BioThingsTransformer(self._input)
         res = tf.pair_input_with_api_response()
         self.assertEqual(res["UMLS:C1332823"][0]['umls'], 'C1332823')
         self.assertIn('UMLS:C1332823', res)
-        self.assertIsNone(res.get('UMLS:123'))
+        self.assertIsNone(res.get('123'))
 
     def test_wrapper(self):
-        tf = SemmedTransformer(self._input)
+        tf = BioThingsTransformer(self._input)
         res = tf.wrap(self._input['response'][0])
-        self.assertIn('positively_regulates', res)
-
-    def test_json_transform(self):
-        tf = SemmedTransformer(self._input)
-        res = tf.json_transform(self._input['response'][0])
-        self.assertEqual(res, self._input['response'][0])
-
-    def test_add_edge_info(self):
-        tf = SemmedTransformer(self._input)
-        res = tf.pair_input_with_api_response()
-        rec = res["UMLS:C1332823"][0]
-        rec = tf.wrap(rec)
-        result = tf.add_edge_info("UMLS:C1332823", rec["positively_regulates"][0])
-        self.assertIn('$edge_metadata', result[0])
-        self.assertEquals(result[0]['$edge_metadata']['api_name'], 'SEMMED Gene API')
-
-    def test_main_function_transform(self):
-        tf = SemmedTransformer(self._input)
-        res = tf.transform()
-        self.assertNotIn('UMLS', res[0])
-        self.assertNotIn('@type', res[0])
-        self.assertIn('$edge_metadata', res[0])
-        self.assertIn('$input', res[0])
-        self.assertIn('$input', res[-1])
-        self.assertGreater(len(res), 30)
+        self.assertIn('query', res)

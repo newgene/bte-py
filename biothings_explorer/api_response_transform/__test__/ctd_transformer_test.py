@@ -22,9 +22,9 @@ class TestCtdTransformer(unittest.TestCase):
         tf = CTDTransformer(self._input)
         res = tf.wrap(self.response)
         self.assertIn('data', res)
-        self.assertEquals(len(res['data']), 2)
-        self.assertEquals(res['data'][0]['PubMedIDs'], ["21559390"])
-        self.assertEquals(res['data'][0]['DiseaseID'], "D008545")
+        self.assertEqual(len(res['data']), 2)
+        self.assertEqual(res['data'][0]['PubMedIDs'], ["21559390"])
+        self.assertEqual(res['data'][0]['DiseaseID'], "D008545")
 
     def test_ctd_wrapper_if_pubmed_id_field_is_not_string(self):
         tf = CTDTransformer(self._input)
@@ -47,5 +47,5 @@ class TestCtdTransformer(unittest.TestCase):
         ]
         res = tf.wrap(fake)
         self.assertIn('data', res)
-        self.assertEquals(len(res['data']), 1)
+        self.assertEqual(len(res['data']), 1)
         self.assertIsNone(res['data'][0].get('DiseaseIDs'))

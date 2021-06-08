@@ -22,7 +22,7 @@ class TestOpenTargetTransformer(unittest.TestCase):
         tf = OpenTargetTransformer(self._input)
         res = tf.wrap(self.response)
         self.assertIn('data', res)
-        self.assertEquals(res['data'][0]['drug']['id'], 'CHEMBL220492')
+        self.assertEqual(res['data'][0]['drug']['id'], 'CHEMBL220492')
 
     def test_opentarget_wrapper_if_id_is_not_chembl(self):
         tf = OpenTargetTransformer(self._input)
@@ -37,4 +37,4 @@ class TestOpenTargetTransformer(unittest.TestCase):
         }
         res = tf.wrap(fake)
         self.assertIn('data', res)
-        self.assertEquals(res['data'][0]['drug']['id'], "http://identifiers.org/drugbank/DB0001")
+        self.assertEqual(res['data'][0]['drug']['id'], "http://identifiers.org/drugbank/DB0001")
