@@ -1,11 +1,11 @@
-from transformers.biolink_transformer import BiolinkTransformer
-from transformers.biothings_transformer import BioThingsTransformer
-from transformers.cord_transformer import CordTransformer
-from transformers.ctd_transformer import CTDTransformer
-from transformers.semmed_transformer import SemmedTransformer
-from transformers.opentarget_transformer import OpenTargetTransformer
-from transformers.transformer import BaseTransformer
-from transformers.trapi_transformer import TRAPITransformer
+from .transformers.biolink_transformer import BiolinkTransformer
+from .transformers.biothings_transformer import BioThingsTransformer
+from .transformers.cord_transformer import CordTransformer
+from .transformers.ctd_transformer import CTDTransformer
+from .transformers.semmed_transformer import SemmedTransformer
+from .transformers.opentarget_transformer import OpenTargetTransformer
+from .transformers.transformer import BaseTransformer
+from .transformers.trapi_transformer import TRAPITransformer
 
 
 class Transformer:

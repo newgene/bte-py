@@ -2,7 +2,7 @@ import requests
 from .builder.builder_factory import builder_factory
 from .query_queue import APIQueryQueue
 from ..api_response_transform.index import Transformer
-from ..biomedical_id_resolver.biolink import BioLink
+from ..biomedical_id_resolver.resolver import generate_invalid_bioentities, Resolver
 from .log_entry import LogEntry
 
 
@@ -67,4 +67,24 @@ class APIQueryDispatcher:
             if res:
                 result = [*result, *res]
         self.logs.append(LogEntry("DEBUG", None, f"call-apis: Total number of results returned for this query is {len(result)}").get_log())
+        return result
+
+    def _group_output_ids_by_semantic_type(self, result):
+        output_ids = {}
+        for item in result:
+            output_type = item['$edge_metadata']['output_type']
+            if output_type not in output_ids:
+                output_ids[output_type] = []
+            output_ids[output_type].append(item['$output']['original'])
+        return output_ids
+
+    def _annotate(self, result, enable=True):
+        grped_ids = self._group_output_ids_by_semantic_type(result)
+        if not enable:
+            res = generate_invalid_bioentities(grped_ids)
+        else:
+            biomedical_resolver = Resolver('biolink')
+            res = biomedical_resolver.resolve(grped_ids)
+        for item in result:
+            item['$output']['obj'] = res[item['$output']['original']]
         return result

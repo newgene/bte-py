@@ -1,4 +1,4 @@
-from transformer import BaseTransformer
+from .transformer import BaseTransformer
 
 
 class TRAPITransformer(BaseTransformer):
