@@ -12,9 +12,9 @@ class QueryBuilder:
     def _get_url(self, edge, _input):
         server = edge['query_operation']['server']
         if server.endswith('/'):
-            server = server[0, len(server) - 1]
+            server = server[0: len(server) - 1]
         path = edge['query_operation']['path']
-        if isinstance(edge['query_operation']['path_params'], list):
+        if isinstance(edge['query_operation'].get('path_params'), list):
             for param in edge['query_operation']['path_params']:
                 val = edge['query_operation']['params'][param]
                 path = path.replace('{' + param + "}", val).replace("{inputs[0]}", _input)
@@ -23,14 +23,14 @@ class QueryBuilder:
     def _get_input(self, edge):
         if edge['query_operation']['supportBatch']:
             if isinstance(edge['input'], list):
-                return edge['query_operation']['inputSeparator'].join(edge['input'])
+                return edge['query_operation'].get("inputSeparator", ',').join(edge['input'])
         return edge['input']
 
     def _get_params(self, edge, _input):
         params = {}
         for param in edge['query_operation']['params']:
-            if isinstance(edge['query_operation']['path_params'], list) and param in edge['query_operation']['path_params']:
-                return
+            if isinstance(edge['query_operation'].get('path_params'), list) and param in edge['query_operation']['path_params']:
+                return {}
             if isinstance(edge['query_operation']['params'][param], str):
                 params[param] = edge['query_operation']['params'][param].replace("{inputs[0]}", _input)
             else:

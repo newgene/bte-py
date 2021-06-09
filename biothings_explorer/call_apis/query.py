@@ -64,18 +64,18 @@ class APIQueryDispatcher:
     def _merge(self, query_result):
         result = []
         for res in query_result:
-            if res:
-                result = [*result, *res]
+            if res['status'] == 'fulfilled' and res['value']:
+                result = [*result, *res['value']]
         self.logs.append(LogEntry("DEBUG", None, f"call-apis: Total number of results returned for this query is {len(result)}").get_log())
         return result
 
     def _group_output_ids_by_semantic_type(self, result):
         output_ids = {}
         for item in result:
-            output_type = item['$edge_metadata']['output_type']
+            output_type = item['$edge_metadata'].get('output_type')
             if output_type not in output_ids:
                 output_ids[output_type] = []
-            output_ids[output_type].append(item['$output']['original'])
+            output_ids[output_type].append(item['$output'].get('original'))
         return output_ids
 
     def _annotate(self, result, enable=True):
