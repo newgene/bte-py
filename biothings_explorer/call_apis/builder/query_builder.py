@@ -1,5 +1,6 @@
 import functools
 
+
 class QueryBuilder:
     def __init__(self, edge):
         self.start = 0
@@ -30,7 +31,7 @@ class QueryBuilder:
         params = {}
         for param in edge['query_operation']['params']:
             if isinstance(edge['query_operation'].get('path_params'), list) and param in edge['query_operation']['path_params']:
-                return {}
+                continue
             if isinstance(edge['query_operation']['params'][param], str):
                 params[param] = edge['query_operation']['params'][param].replace("{inputs[0]}", _input)
             else:
@@ -39,10 +40,17 @@ class QueryBuilder:
 
     # TODO CONVERT THIS TO DICT
     def _get_request_body(self, edge, _input):
-        if edge['query_operation'].get('request_body') and 'body' in edge['qurey_operation'].get('request_body'):
-            body = edge['query_operation']['request_body']['body']
-            reduced = functools.reduce(lambda accumulator, key: accumulator + key + '=' + str(body[key]).replace('{inputs[0]}', _input) + '&', body.keys(), '')
-            return reduced[:len(reduced) - 1]
+        if edge['query_operation'].get('request_body') and 'body' in edge['query_operation'].get('request_body'):
+            for key in edge['query_operation']['request_body']['body']:
+                try:
+                    edge['query_operation']['request_body']['body'][key] = edge['query_operation']['request_body']['body'][key].replace('{inputs[0]}', _input)
+                except AttributeError:
+                    pass
+
+            #body = edge['query_operation']['request_body']['body']
+            #reduced = functools.reduce(lambda accumulator, key: accumulator + key + '=' + str(body[key]).replace('{inputs[0]}', _input) + '&', body.keys(), '')
+            #return reduced[:len(reduced) - 1]
+            return edge['query_operation']['request_body']['body']
 
     def construct_request_config(self):
         _input = self._get_input(self.edge)

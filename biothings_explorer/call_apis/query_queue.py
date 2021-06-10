@@ -7,7 +7,11 @@ class APIQueryQueue:
         self.queries = queries
 
     def dequeue(self):
-        self.queue.pop(0)
+        try:
+            self.queue.pop(0)
+        except IndexError:
+            # queue is already empty here
+            pass
 
     def add_query(self, query):
         for bucket in self.queue:

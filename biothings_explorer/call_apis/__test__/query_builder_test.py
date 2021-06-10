@@ -124,3 +124,147 @@ class TestQueryBuilder(unittest.TestCase):
         res = builder._get_params(edge, '1017')
         self.assertNotIn('geneid', res)
         self.assertEqual(res['output'], 'json')
+
+    def test_if_query_params_value_is_not_string(self):
+        edge = {
+            "query_operation": {
+                "server": "https://google.com",
+                "path": "/{geneid}/query",
+                "path_params": ["geneid"],
+                "params": {
+                    "geneid": "hello",
+                    "output": 1
+                }
+            }
+        }
+        builder = QueryBuilder(edge)
+        res = builder._get_params(edge, '1017')
+        self.assertEqual(res['output'], 1)
+
+    def test_if_request_body_is_empty(self):
+        edge = {
+            "query_operation": {
+                "server": "https://google.com",
+                "path": "/{geneid}/query",
+                "path_params": ["geneid"],
+                "params": {
+                    "geneid": "hello",
+                    "output": 1
+                }
+            }
+        }
+        builder = QueryBuilder(edge)
+        res = builder._get_request_body(edge, '1017')
+        self.assertIsNone(res, None)
+
+    def test_if_request_body_is_not_empty(self):
+        edge = {
+            "query_operation": {
+                "server": "https://google.com",
+                "path": "/{geneid}/query",
+                "request_body": {
+                    "body": {
+                        "geneid": "hello",
+                        "output": 1
+                    }
+                }
+            }
+        }
+        builder = QueryBuilder(edge)
+        res = builder._get_request_body(edge, '1017')
+        self.assertEqual(res, {'geneid': 'hello', 'output': 1})
+
+    def test_if_request_body_is_not_empty_and_should_be_replaced_with_input(self):
+        edge = {
+            "query_operation": {
+                "server": "https://google.com",
+                "path": "/{geneid}/query",
+                "request_body": {
+                    "body": {
+                        "geneid": "hello",
+                        "output": "{inputs[0]}"
+                    }
+                }
+            }
+        }
+        builder = QueryBuilder(edge)
+        res = builder._get_request_body(edge, '1017')
+        self.assertEqual(res, {'geneid': 'hello', 'output': '1017'})
+
+    # TODO axios is not a thing in python, need to change this
+    def test_construct_axios_request_config_function(self):
+        edge = {
+            "input": "1017",
+            "query_operation": {
+                "server": "https://google.com",
+                "path": "/{geneid}/query",
+                "path_params": ["geneid"],
+                "params": {
+                    "geneid": "{inputs[0]}",
+                    "output": "json"
+                },
+                "method": "get"
+            }
+        }
+        builder = QueryBuilder(edge)
+        #res = builder.construct_request_config()
+
+    def test_non_biothings_tagged_api_should_return_false(self):
+        edge = {
+            "query_operation": {
+                "method": "get",
+            },
+            "tags": ["translator"]
+        }
+        response = {
+            'total': 1000,
+            'hits': [i for i in range(400)]
+        }
+        builder = QueryBuilder(edge)
+        res = builder.need_pagination(response)
+        self.assertFalse(res)
+
+    def test_biothings_tagged_api_with_post_method_should_return_false(self):
+        edge = {
+            "query_operation": {
+                "method": "post",
+            },
+            "tags": ["translator", "biothings"]
+        }
+        response = {
+            'total': 1000,
+            'hits': [i for i in range(400)]
+        }
+        builder = QueryBuilder(edge)
+        res = builder.need_pagination(response)
+        self.assertFalse(res)
+
+    def test_biothings_tagged_api_with_get_method_needs_pagination_should_return_true(self):
+        edge = {
+            "query_operation": {
+                "method": "get",
+            },
+            "tags": ["translator", "biothings"]
+        }
+        response = {
+            'total': 1000,
+            'hits': [i for i in range(400)]
+        }
+        builder = QueryBuilder(edge)
+        res = builder.need_pagination(response)
+        self.assertTrue(res)
+
+    def test_biothings_tagged_api_with_get_method_and_doesnt_need_pagination_should_return_false(self):
+        edge = {
+            "query_operation": {
+                "method": "get",
+            },
+            "tags": ["translator", "biothings"]
+        }
+        response = {
+            'total': 1000,
+            'hits': [i for i in range(1000)]
+        }
+        builder = QueryBuilder(edge)
+        res = builder.need_pagination(response)
+        self.assertFalse(res)

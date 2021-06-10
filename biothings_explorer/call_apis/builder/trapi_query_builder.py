@@ -12,7 +12,7 @@ class TRAPIQueryBuilder:
         if server.endswith('/'):
             server = server[:len(server) - 1]
         path = edge['query_operation']['path']
-        if isinstance(edge['query_operation']['path_params'], list):
+        if isinstance(edge['query_operation'].get('path_params'), list):
             for param in edge['query_operation']['path_params']:
                 val = edge['query_operation']['params'][param]
                 path = path.replace('{' + param + '}', val).replace('{inputs[0]}', _input)
@@ -51,7 +51,7 @@ class TRAPIQueryBuilder:
         config = {
             'url': self._get_url(self.edge, _input),
             'params': self._get_request_body(self.edge, _input),
-            'method': self.edge['query_operation']['method'],
+            'method': self.edge['query_operation'].get('method'),
             'headers': {
                 'Content-Type': 'application/json'
             }

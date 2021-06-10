@@ -20,12 +20,13 @@ class APIQueryDispatcher:
                 request_func = requests.get
             else:
                 request_func = requests.post
+            config.pop('method')
             response = request_func(**config)
             data = response.json()
-            edge = query['edge']
+            edge = query.edge
             if query.need_pagination(data):
                 self.logs.append(LogEntry("DEBUG", None, "call-apis: This query needs to be paginated").get_log())
-            self.logs.append(LogEntry("DEBUG", None, f"call-apis: Succesfully made the following query: {str(query['config'])}").get_log())
+            #self.logs.append(LogEntry("DEBUG", None, f"call-apis: Succesfully made the following query: {str(query.config)}").get_log())
             tf_obj = Transformer({'response': data, 'edge': edge})
             transformed = tf_obj.transform()
             self.logs.append(LogEntry("DEBUG", None, f"call-apis: After transformation, BTE is able to retrieve: {len(transformed)} hits!").get_log())
@@ -64,8 +65,11 @@ class APIQueryDispatcher:
     def _merge(self, query_result):
         result = []
         for res in query_result:
-            if res['status'] == 'fulfilled' and res['value']:
-                result = [*result, *res['value']]
+            try:
+                if res['status'] == 'fulfilled' and res['value']:
+                    result = [*result, *res['value']]
+            except Exception as e:
+                result = [*result, *res]
         self.logs.append(LogEntry("DEBUG", None, f"call-apis: Total number of results returned for this query is {len(result)}").get_log())
         return result
 

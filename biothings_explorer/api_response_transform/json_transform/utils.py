@@ -51,7 +51,13 @@ def get_parsed_json(template, json_doc):
     if len(json_data) > 0 and len(json_data_list) > 1:
         return [[match.value for match in jsonpath_expr_list.find(json_doc)]]
     else:
-        return [jsonpath_expr.find(json_doc)[0].value]
+        try:
+            return [jsonpath_expr.find(json_doc)[0].value]
+        except IndexError:
+            try:
+                return [jsonpath_expr.find(json_doc['data'][0])[0].value]
+            except Exception as e:
+                return []
 
 
 def transform_simple_object(json_doc, template):
