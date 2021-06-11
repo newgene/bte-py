@@ -191,7 +191,6 @@ class TestQueryBuilder(unittest.TestCase):
         res = builder._get_request_body(edge, '1017')
         self.assertEqual(res, {'geneid': 'hello', 'output': '1017'})
 
-    # TODO axios is not a thing in python, need to change this
     def test_construct_axios_request_config_function(self):
         edge = {
             "input": "1017",
@@ -207,7 +206,13 @@ class TestQueryBuilder(unittest.TestCase):
             }
         }
         builder = QueryBuilder(edge)
-        #res = builder.construct_request_config()
+        res = builder.construct_request_config()
+        self.assertEqual(res['url'], 'https://google.com/1017/query')
+        self.assertNotIn('geneid', res['data'])
+        self.assertEqual(res['data']['output'], 'json')
+        self.assertEqual(res['method'], 'get')
+        self.assertIsNone(res['params'])
+
 
     def test_non_biothings_tagged_api_should_return_false(self):
         edge = {

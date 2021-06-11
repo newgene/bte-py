@@ -14,19 +14,23 @@ class APIQueryDispatcher:
     def _query_bucket(self, queries):
         res = []
         for query in queries:
-            # TODO add try except
             config = query.get_config()
             if config['method'].lower() == 'get':
                 request_func = requests.get
             else:
                 request_func = requests.post
             config.pop('method')
-            response = request_func(**config)
-            data = response.json()
+            try:
+
+                response = request_func(**config)
+                data = response.json()
+            except requests.exceptions.HTTPError as e:
+                self.logs.append(LogEntry("ERROR", None, f"call-apis: Failed to make to following query: {str(config)}. The error is {str(e)}").get_log())
+                return None
             edge = query.edge
             if query.need_pagination(data):
                 self.logs.append(LogEntry("DEBUG", None, "call-apis: This query needs to be paginated").get_log())
-            #self.logs.append(LogEntry("DEBUG", None, f"call-apis: Succesfully made the following query: {str(query.config)}").get_log())
+            #self.logs.append(LogEntry("DEBUG", None, f"call-apis: Succesfully made the following query: {str(query['config'])}").get_log())
             tf_obj = Transformer({'response': data, 'edge': edge})
             transformed = tf_obj.transform()
             self.logs.append(LogEntry("DEBUG", None, f"call-apis: After transformation, BTE is able to retrieve: {len(transformed)} hits!").get_log())

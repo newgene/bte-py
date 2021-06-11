@@ -22,7 +22,7 @@ class QueryBuilder:
         return server + path
 
     def _get_input(self, edge):
-        if edge['query_operation']['supportBatch']:
+        if edge['query_operation'].get('supportBatch'):
             if isinstance(edge['input'], list):
                 return edge['query_operation'].get("inputSeparator", ',').join(edge['input'])
         return edge['input']
@@ -38,7 +38,6 @@ class QueryBuilder:
                 params[param] = edge['query_operation']['params'][param]
         return params
 
-    # TODO CONVERT THIS TO DICT
     def _get_request_body(self, edge, _input):
         if edge['query_operation'].get('request_body') and 'body' in edge['query_operation'].get('request_body'):
             for key in edge['query_operation']['request_body']['body']:
@@ -52,6 +51,7 @@ class QueryBuilder:
             #return reduced[:len(reduced) - 1]
             return edge['query_operation']['request_body']['body']
 
+    # axios has a different config from python requests so params and data are swapped
     def construct_request_config(self):
         _input = self._get_input(self.edge)
         config = {
