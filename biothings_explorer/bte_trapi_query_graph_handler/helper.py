@@ -1,7 +1,11 @@
+import hashlib
 from .biolink import BioLinkModelInstance
 
 
 class QueryGraphHelper:
+    def _generate_hash(self, string_to_be_hashed):
+        return hashlib.md5(string_to_be_hashed.encode('utf-8')).hexdigest()
+
     def _get_input_query_node_id(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
             return record['$edge_metadata']['trapi_qEdge_obj'].get_object().get_id()

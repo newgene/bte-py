@@ -40,3 +40,34 @@ class Graph:
                     'category': self.helper._get_input_category(record),
                     'node_attributes': self.helper._get_input_attributes(record)
                 })
+
+            self.nodes[output_id].add_source_node(input_id)
+            self.nodes[output_id].add_source_qg_node(input_qg_id)
+            self.nodes[input_id].add_target_node(output_id)
+            self.nodes[input_id].add_target_qg_node(output_qg_id)
+            if edge_id not in self.edges:
+                self.edges[edge_id] = KGEdge(edge_id, {
+                    'predicate': self.helper._get_predicate(record),
+                    'subject': input_primary_id,
+                    'object': output_primary_id
+                })
+
+            self.edges[edge_id].add_api(self.helper._get_api(record))
+            self.edges[edge_id].add_source(self.helper._get_source(record))
+            self.edges[edge_id].add_publication(self.helper._get_publication(record))
+            for key in record:
+                if not (key in bte_attributes or key.startswith('$')):
+                    self.edges[edge_id].add_additional_attributes(key, record[key])
+
+    def subscribe(self, subscriber):
+        self.subscribers.append(subscriber)
+
+    def unsubscribe(self, subscriber):
+        self.subscribers = [fn for fn in self.subscribers if fn != subscriber]
+
+    def notify(self):
+        for subscriber in self.subscribers:
+            subscriber.update({
+                'nodes': self.nodes,
+                'edges': self.edges,
+            })
