@@ -1,0 +1,2 @@
+class InvalidQueryGraphError(Exception):
+    pass

@@ -7,7 +7,7 @@ from biothings_explorer.api_response_transform.transformers.biothings_transforme
 class TestBiothingsTransformerForPostQuery(unittest.TestCase):
 
     def setUp(self):
-        post_query_response_path =  os.path.abspath(
+        post_query_response_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), 'data', 'biothings', 'mychem_post.json'))
         edge_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), 'data', 'biothings', 'mychem_example_edge.json'))
