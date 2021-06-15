@@ -1,6 +1,6 @@
 import functools
 from .helper import QueryGraphHelper
-from utils import to_array, get_unique, remove_biolink_prefix
+from .utils import to_array, get_unique, remove_biolink_prefix
 from .biolink import BioLinkModelInstance
 
 
@@ -34,6 +34,7 @@ class QEdge:
         predicates = [remove_biolink_prefix(item) for item in to_array(self.predicate)]
         expanded_predicates = self.expand_predicates(predicates)
         #TODO this might break
+        #it does break
         return [BioLinkModelInstance.reverse(predicate) if self.is_reversed() else predicates for predicate in expanded_predicates if predicate]
 
     def get_subject(self):

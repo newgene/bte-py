@@ -4,11 +4,9 @@ from biothings_explorer.biolink_model.biolink import BioLink
 
 class BioLinkModel:
     def __init__(self):
-        if not isinstance(BioLinkModel, type):
-            #BioLink-model class is initiated
-            biolink_file = os.path.abspath(os.path.join(os.path.dirname(__file__), 'biolink.json'))
-            self.biolink = BioLink()
-            self.biolink.load_sync(biolink_file)
+        biolink_file = os.path.abspath(os.path.join(os.path.dirname(__file__), 'biolink.json'))
+        self.biolink = BioLink()
+        self.biolink.load_sync(biolink_file)
 
     def reverse(self, predicate):
         if isinstance(predicate, str):

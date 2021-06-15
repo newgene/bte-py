@@ -26,24 +26,24 @@ class QueryGraphHelper:
 
     def _get_output_id(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['input']['obj'][0]['primary_id']
+            return record['$input']['obj'][0]['primaryID']
         else:
-            return record['$output']['obj'][0]['primary_id']
+            return record['$output']['obj'][0]['primaryID']
 
     def _get_input_id(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$output']['obj'][0]['primary_id']
+            return record['$output']['obj'][0]['primaryID']
         else:
-            return record['input']['obj'][0]['primary_id']
+            return record['$input']['obj'][0]['primaryID']
 
     def _get_api(self, record):
-        return record['$edge_metadata']['api_name'] or None
+        return record['$edge_metadata'].get('api_name') or None
 
     def _get_source(self, record):
-        return record['$edge_metadata']['source'] or None
+        return record['$edge_metadata'].get('source') or None
 
     def _get_publication(self, record):
-        return record['publications'] or None
+        return record.get('publications') or None
 
     def _get_kg_edge_id(self, record):
         return '-'.join([self._get_input_id(record), self._get_predicate(record), self._get_output_id(record)])
@@ -59,15 +59,15 @@ class QueryGraphHelper:
 
     def _get_input_category(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$output']['obj'][0]['semantic_type']
+            return record['$output']['obj'][0]['semanticType']
         else:
-            return record['$input']['obj'][0]['semantic_type']
+            return record['$input']['obj'][0]['semanticType']
 
     def _get_output_category(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$input']['obj'][0]['semantic_type']
+            return record['$input']['obj'][0]['semanticType']
         else:
-            return record['$output']['obj'][0]['semantic_type']
+            return record['$output']['obj'][0]['semanticType']
 
     def _get_output_label(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
@@ -86,7 +86,7 @@ class QueryGraphHelper:
             if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
                 return record['$output']['obj'][0]['curies']
             else:
-                return record['input']['obj'][0]['curies']
+                return record['$input']['obj'][0]['curies']
         except Exception as e:
             return None
 
