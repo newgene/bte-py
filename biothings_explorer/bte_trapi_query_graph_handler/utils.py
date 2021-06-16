@@ -5,7 +5,9 @@ def to_array(_input):
 
 
 def get_unique(_input):
-    return [item for item in set(_input)]
+    # set does not maintain order so we don't use it
+    # [item for item in set(_input)]
+    return list(dict.fromkeys(_input))
 
 
 def remove_biolink_prefix(_input):

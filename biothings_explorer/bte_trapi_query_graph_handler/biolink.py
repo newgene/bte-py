@@ -11,9 +11,11 @@ class BioLinkModel:
     def reverse(self, predicate):
         if isinstance(predicate, str):
             if predicate in self.biolink.slot_tree.objects:
-                if self.biolink.slot_tree.objects[predicate]['symmetric']:
+                if self.biolink.slot_tree.objects[predicate].symmetric:
                     return predicate
-            return self.biolink.slot_tree.objects[predicate]['inverse']
+
+            if self.biolink.slot_tree.objects.get(predicate):
+                return self.biolink.slot_tree.objects[predicate].inverse
         return None
 
     def get_descendant_classes(self, class_name):

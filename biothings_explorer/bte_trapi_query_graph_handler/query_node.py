@@ -6,8 +6,8 @@ from .biolink import BioLinkModelInstance
 class QNode:
     def __init__(self, _id, info):
         self.id = _id
-        self.category = info['categories'] or 'NamedThing'
-        self.curie = info['ids']
+        self.category = info.get('categories') or 'NamedThing'
+        self.curie = info.get('ids')
 
     def get_id(self):
         return self.id
@@ -31,7 +31,7 @@ class QNode:
         categories = []
         for entities in self.equivalent_ids.values():
             for entity in entities:
-                categories = [*categories, *entity.semantic_types]
+                categories = [*categories, *entity['semanticTypes']]
         return get_unique(categories)
 
     def get_entities(self):
@@ -40,13 +40,13 @@ class QNode:
         return reduced
 
     def get_primary_ids(self):
-        return [entity.primary_id for entity in self.get_entities()]
+        return [entity['primaryID'] for entity in self.get_entities()]
 
     def set_equivalent_ids(self, equivalent_ids):
         self.equivalent_ids = equivalent_ids
 
     def update_equivalent_ids(self, equivalent_ids):
-        if not self.equivalent_ids:
+        if not hasattr(self, 'equivalent_ids'):
             self.equivalent_ids = equivalent_ids
         else:
             self.equivalent_ids = {**self.equivalent_ids, **equivalent_ids}
@@ -55,4 +55,6 @@ class QNode:
         return self.curie
 
     def has_equivalent_ids(self):
-        return self.equivalent_ids
+        if hasattr(self, 'equivalent_ids'):
+            return self.equivalent_ids
+        return None

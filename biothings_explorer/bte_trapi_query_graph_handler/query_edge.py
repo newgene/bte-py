@@ -7,9 +7,9 @@ from .biolink import BioLinkModelInstance
 class QEdge:
     def __init__(self, _id, info):
         self.id = _id
-        self.predicate = info['predicates']
-        self.subject = info['subject']
-        self.object = info['object']
+        self.predicate = info.get('predicates')
+        self.subject = info.get('subject')
+        self.object = info.get('object')
         self.expanded_predicates = []
         self.init()
 
@@ -20,9 +20,9 @@ class QEdge:
         return self.id
 
     def get_hashed_edge_representation(self):
-        to_be_hased = self.subject.get_categories() + self.predicate + self.object.get_categories() + self.get_input_curie()
+        to_be_hashed = self.subject.get_categories() + self.predicate + self.object.get_categories() + self.get_input_curie()
         helper = QueryGraphHelper()
-        return helper._generate_hash(to_be_hased)
+        return helper._generate_hash(to_be_hashed)
 
     def expand_predicates(self, predicates):
         reduced = functools.reduce(lambda prev, current: [*prev, *BioLinkModelInstance.get_descendant_predicates(current)], predicates, [])
@@ -33,9 +33,7 @@ class QEdge:
             return None
         predicates = [remove_biolink_prefix(item) for item in to_array(self.predicate)]
         expanded_predicates = self.expand_predicates(predicates)
-        #TODO this might break
-        #it does break
-        return [BioLinkModelInstance.reverse(predicate) if self.is_reversed() else predicates for predicate in expanded_predicates if predicate]
+        return [BioLinkModelInstance.reverse(predicate) if self.is_reversed() else predicate for predicate in expanded_predicates if predicate]
 
     def get_subject(self):
         if self.is_reversed():
