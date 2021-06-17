@@ -14,9 +14,9 @@ class QueryGraphHelper:
 
     def _get_predicate(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return 'biolink' + BioLinkModelInstance.reverse(record['$edge_metadata']['predicate'])
+            return 'biolink:' + BioLinkModelInstance.reverse(record['$edge_metadata']['predicate'])
         else:
-            return 'biolink' + record['$edge_metadata']['predicate']
+            return 'biolink:' + str(record['$edge_metadata'].get('predicate'))
 
     def _get_output_query_node_id(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
@@ -59,27 +59,27 @@ class QueryGraphHelper:
 
     def _get_input_category(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$output']['obj'][0]['semanticType']
+            return record['$output']['obj'][0].get('semanticType')
         else:
-            return record['$input']['obj'][0]['semanticType']
+            return record['$input']['obj'][0].get('semanticType')
 
     def _get_output_category(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$input']['obj'][0]['semanticType']
+            return record['$input']['obj'][0].get('semanticType')
         else:
-            return record['$output']['obj'][0]['semanticType']
+            return record['$output']['obj'][0].get('semanticType')
 
     def _get_output_label(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$input']['obj'][0]['label']
+            return record['$input']['obj'][0].get('label')
         else:
-            return record['$output']['obj'][0]['label']
+            return record['$output']['obj'][0].get('label')
 
     def _get_input_label(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$output']['obj'][0]['label']
+            return record['$output']['obj'][0].get('label')
         else:
-            return record['$input']['obj'][0]['label']
+            return record['$input']['obj'][0].get('label')
 
     def _get_input_equivalent_ids(self, record):
         try:

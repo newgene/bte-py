@@ -1,0 +1,5 @@
+import unittest
+from biothings_explorer.bte_trapi_query_graph_handler.query_node import QNode
+from biothings_explorer.bte_trapi_query_graph_handler.query_edge import QEdge
+from biothings_explorer.bte_trapi_query_graph_handler.update_nodes import NodesUpdateHandler
+

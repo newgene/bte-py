@@ -13,7 +13,7 @@ class TRAPIQueryHandler:
         self.logs = []
         self.options = options
         self.include_reasoner = include_reasoner
-        self.resolve_output_ids = True if not self.options['enableIDResolution'] else self.options['enableIDResolution']
+        self.resolve_output_ids = True if not ('enableIDResolution' in self.options and self.options['enableIDResolution']) else self.options['enableIDResolution']
         self.path = smart_api_path or os.path.abspath(
             os.path.join(os.path.dirname(__file__), 'smartapi_specs.json'))
         self.predicate_path = predicates_path or os.path.abspath(os.path.join(os.path.dirname(__file__), 'predicates.json'))

@@ -99,3 +99,18 @@ class TestingQueryEdgeModule(unittest.TestCase):
         res = edge.expand_predicates(['contributes_to'])
         self.assertIn('contributes_to', res)
         self.assertIn('causes', res)
+
+    def test_expand_predicates_multiple_predicates_can_be_resolved(self):
+        edge = QEdge('e01', {'subject': self.type_node, 'object': self.disease1_node, 'predicates': 'biolink:contributes_to'})
+        res = edge.expand_predicates(["contributes_to", "ameliorates"])
+        self.assertIn('contributes_to', res)
+        self.assertIn('causes', res)
+        self.assertIn('ameliorates', res)
+        self.assertIn('treats', res)
+
+    def test_expand_predicates_predicates_not_in_biolink_model_should_return_itself(self):
+        edge = QEdge('e01', {'subject': self.type_node, 'object': self.disease1_node, 'predicates': 'biolink:contributes_to'})
+        res = edge.expand_predicates(["contributes_to", "amelio"])
+        self.assertIn('contributes_to', res)
+        self.assertIn('causes', res)
+        self.assertIn('amelio', res)

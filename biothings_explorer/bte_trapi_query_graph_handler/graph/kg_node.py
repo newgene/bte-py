@@ -1,11 +1,11 @@
 class KGNode:
     def __init__(self, _id, info):
         self.id = _id
-        self._primary_id = info['primaryID']
-        self._qg_id = info['qgID']
-        self._curies = info['equivalentIDs']
+        self._primary_id = info['primary_id']
+        self._qg_id = info['qg_id']
+        self._curies = info['equivalent_ids']
         self._semantic_type = info['category']
-        self._node_attributes = info['nodeAttributes']
+        self._node_attributes = info['node_attributes']
         self._label = info['label']
         self._source_nodes = set()
         self._target_nodes = set()
