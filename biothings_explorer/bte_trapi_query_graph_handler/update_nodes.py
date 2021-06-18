@@ -10,7 +10,7 @@ class NodesUpdateHandler:
         curies = {}
         for edge in q_edges:
             if edge.has_input_resolved():
-                return
+                return {}
             if edge.has_input():
                 input_categories = edge.get_subject().get_categories()
                 for category in input_categories:

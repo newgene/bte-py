@@ -12,18 +12,18 @@ class QueryGraphHandler:
         self.logs = []
 
     def _validate_empty_nodes(self, query_graph):
-        if len(query_graph.nodes) == 0:
+        if len(query_graph['nodes']) == 0:
             raise InvalidQueryGraphError('Your Query Graph has no nodes defined.')
 
     def _validate_empty_edges(self, query_graph):
-        if len(query_graph.edges) == 0:
+        if len(query_graph['edges']) == 0:
             raise InvalidQueryGraphError('Your Query Graph has no edges defined.')
 
     def _validate_node_edge_correspondence(self, query_graph):
-        for edge_id in query_graph.edges:
-            if self.query_graph.edges['edge_id']['subject'] not in query_graph.nodes:
+        for edge_id in query_graph['edges']:
+            if self.query_graph['edges'][edge_id]['subject'] not in query_graph['nodes']:
                 raise InvalidQueryGraphError(f"The subject of edge {edge_id} is not defined in the query graph.")
-            if self.query_graph.edges['edge_id']['object'] not in query_graph.nodes:
+            if self.query_graph['edges'][edge_id]['object'] not in query_graph['nodes']:
                 raise InvalidQueryGraphError(f"The object of edge {edge_id} is not defined in the query graph.")
 
     def _validate(self, query_graph):
@@ -33,43 +33,43 @@ class QueryGraphHandler:
 
     def _store_nodes(self):
         nodes = {}
-        for node_id in self.query_graph.nodes:
-            nodes[node_id] = QNode(node_id, self.query_graph.nodes[node_id])
+        for node_id in self.query_graph['nodes']:
+            nodes[node_id] = QNode(node_id, self.query_graph['nodes'][node_id])
         self.logs.append(
             LogEntry('DEBUG', None, f"BTE identified {len(nodes)} QNodes from your query graph").get_log()
         )
         return nodes
 
     def _store_edges(self):
-        if not self.nodes:
+        if not hasattr(self, 'nodes'):
             self.nodes = self._store_nodes()
         edges = {}
-        for edge_id in self.query_graph.edges:
+        for edge_id in self.query_graph['edges']:
             edge_info = {
-                **self.query_graph.edges[edge_id],
+                **self.query_graph['edges'][edge_id],
                 **{
-                    'subject': self.nodes[self.query_graph.edges[edge_id]['subject']],
-                    'object': self.nodes[self.query_graph.edges[edge_id]['object']]
+                    'subject': self.nodes[self.query_graph['edges'][edge_id]['subject']],
+                    'object': self.nodes[self.query_graph['edges'][edge_id]['object']]
                 }
             }
             edges[edge_id] = QEdge(edge_id, edge_info)
             self.logs.append(
                 LogEntry('DEBUG', None, f"BTE identified {len(edges)} QEdges from your query graph").get_log()
             )
-            return edges
+        return edges
 
     def create_query_paths(self):
         self._validate(self.query_graph)
         paths = {}
         current_graph = self._find_first_level_edges()
-        paths[0] = [item.edge for item in current_graph]
+        paths[0] = [item['edge'] for item in current_graph]
         for i in range(MAX_DEPTH):
             current_graph = self._find_next_level_edges(current_graph)
             if len(current_graph) > 0 and i == MAX_DEPTH:
                 raise InvalidQueryGraphError(f"Your Query Graph exceeds the maximum query depth set in bte, which is {MAX_DEPTH}")
             if len(current_graph) == 0:
                 break
-            paths[i] = [item.edge for item in current_graph]
+            paths[i] = [item['edge'] for item in current_graph]
         self.logs.append(
             LogEntry(
                 'DEBUG',
@@ -80,7 +80,7 @@ class QueryGraphHandler:
         return paths
 
     def _find_first_level_edges(self):
-        if not self.edges:
+        if not hasattr(self, 'edges'):
             self.edges = self._store_edges()
         result = []
         for edge_id in self.edges:
@@ -104,17 +104,17 @@ class QueryGraphHandler:
         result = []
         for edge in self.edges.values():
             for grp in groups:
-                if edge.get_id() != grp.edge.get_id():
-                    if edge.subject.get_id() == grp.current_node.get_id():
+                if edge.get_id() != grp['edge'].get_id():
+                    if edge.subject.get_id() == grp['current_node'].get_id():
                         result.append({
                             'current_node': edge.object,
-                            'edge': QExeEdge(edge, False, grp.edge),
-                            'path_source_node': grp.path_source_node
+                            'edge': QExeEdge(edge, False, grp['edge']),
+                            'path_source_node': grp['path_source_node']
                         })
-                    elif edge.object.get_id() == grp.current_node.get_id():
+                    elif edge.object.get_id() == grp['current_node'].get_id():
                         result.append({
                             'current_node': edge.subject,
-                            'edge': QExeEdge(edge, True, grp.edge),
-                            'path_source_node': grp.path_source_node,
+                            'edge': QExeEdge(edge, True, grp['edge']),
+                            'path_source_node': grp['path_source_node'],
                         })
         return result
