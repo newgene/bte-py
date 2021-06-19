@@ -63,7 +63,7 @@ class QueryGraphHandler:
         paths = {}
         current_graph = self._find_first_level_edges()
         paths[0] = [item['edge'] for item in current_graph]
-        for i in range(MAX_DEPTH):
+        for i in range(1, MAX_DEPTH + 1):
             current_graph = self._find_next_level_edges(current_graph)
             if len(current_graph) > 0 and i == MAX_DEPTH:
                 raise InvalidQueryGraphError(f"Your Query Graph exceeds the maximum query depth set in bte, which is {MAX_DEPTH}")
