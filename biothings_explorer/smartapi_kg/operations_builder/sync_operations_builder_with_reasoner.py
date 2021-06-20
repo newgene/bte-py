@@ -21,6 +21,8 @@ class SyncOperationsBuilderWithReasoner(BaseOperationsBuilder):
 
     def parse_predicate_endpoint(self, metadata):
         ops = []
+        if 'predicates' not in metadata:
+            return ops
         for sbj in metadata['predicates']:
             for obj in metadata['predicates'][sbj]:
                 if isinstance(metadata['predicates'][sbj][obj], list):

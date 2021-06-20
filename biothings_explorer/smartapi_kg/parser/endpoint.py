@@ -88,7 +88,7 @@ class Endpoint:
         for method in ['get', 'post']:
             if method in self.path_item_object:
                 path_params = self.fetch_path_params(self.path_item_object[method])
-                if "x-bte-kgs-operations" in self.path_item_object[method]:
+                if "x-bte-kgs-operations" in self.path_item_object[method] and isinstance(self.path_item_object[method]['x-bte-kgs-operations'], list):
                     for rec in self.path_item_object[method]['x-bte-kgs-operations']:
                         operation = self.resolve_ref_if_provided(rec)
                         operation = operation if isinstance(operation, list) else [operation]

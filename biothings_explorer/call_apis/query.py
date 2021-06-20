@@ -80,10 +80,11 @@ class APIQueryDispatcher:
     def _group_output_ids_by_semantic_type(self, result):
         output_ids = {}
         for item in result:
-            output_type = item['$edge_metadata'].get('output_type')
-            if output_type not in output_ids:
-                output_ids[output_type] = []
-            output_ids[output_type].append(item['$output'].get('original'))
+            if item and item['$edge_metadata']:
+                output_type = item['$edge_metadata'].get('output_type')
+                if output_type not in output_ids:
+                    output_ids[output_type] = []
+                output_ids[output_type].append(item['$output'].get('original'))
         return output_ids
 
     def _annotate(self, result, enable=True):
