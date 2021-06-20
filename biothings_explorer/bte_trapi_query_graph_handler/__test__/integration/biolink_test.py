@@ -46,3 +46,11 @@ class TestBioLinkModelClass(unittest.TestCase):
         self.assertIn('subclass_of', res)
         self.assertIn('superclass_of', res)
         self.assertIn('related_to', res)
+
+    def test_get_descendant_predicates_if_input_is_in_biolink_model_but_doesnt_have_descendants_return_itself(self):
+        res = BioLinkModelInstance.get_descendant_predicates('subclass_of')
+        self.assertEqual(res, ['subclass_of'])
+
+    def test_get_descendant_predicates_if_input_is_not_in_biolink_return_itself(self):
+        res = BioLinkModelInstance.get_descendant_predicates('Gene1')
+        self.assertEqual(res, ['Gene1'])

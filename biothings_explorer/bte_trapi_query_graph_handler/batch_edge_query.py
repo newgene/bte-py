@@ -31,11 +31,19 @@ class BatchEdgeQueryHandler:
         try:
             filtered = []
             for item in response:
-                edge_predicate = item['$edge_metadata']['predicate']
-                predicate_filters = item['$edge_metadata']['trapi_qEdge_obj']['qEdge']['predicate']
-                predicate_filters = [remove_biolink_prefix(item) for item in predicate_filters]
-                if edge_predicate in predicate_filters:
-                    filtered.append(item)
+                if 'predicate' in item['$edge_metadata']['trapi_qEdge_obj']['qEdge'] \
+                        and 'expanded_predicates' in item['$edge_metadata']['trapi_qEdge_obj']['qEdge']:
+                    edge_predicate = item['$edge_metadata']['predicate']
+                    predicate_filters = []
+                    predicate_filters = item['$edge_metadata']['trapi_qEdge_obj']['qEdge']['expanded_predicates']
+                    if predicate_filters:
+                        predicate_filters = [*predicate_filters,
+                                             *item['$edge_metadata']['trapi_qEdge_obj']['qEdge']['predicate']]
+                        predicate_filters = [remove_biolink_prefix(item) for item in predicate_filters]
+                        if edge_predicate in predicate_filters:
+                            filtered.append(item)
+                    else:
+                        filtered.append(item)
             return filtered
         except Exception as e:
             print(e)

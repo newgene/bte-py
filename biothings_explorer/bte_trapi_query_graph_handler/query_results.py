@@ -25,4 +25,5 @@ class QueryResult:
             self.results.append({
                 'node_bindings': self._create_node_bindings(record),
                 'edge_bindings': self._create_edge_bindings(record),
+                'score': '1.0'
             })
