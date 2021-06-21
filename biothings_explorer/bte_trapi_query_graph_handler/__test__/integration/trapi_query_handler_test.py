@@ -25,8 +25,6 @@ class TestTRAPIQueryHandler(unittest.TestCase):
         }
     }
 
-    # TODO Fails
-    # also the test on the js package fails on due to a network error
     def test_query_with_one_query_edge(self):
         query_handler = TRAPIQueryHandler()
         query_handler.set_query_graph(self.OneHopQuery)

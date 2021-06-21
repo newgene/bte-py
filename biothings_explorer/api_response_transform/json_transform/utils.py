@@ -47,7 +47,12 @@ def get_parsed_json(template, json_doc):
     jsonpath_expr_list = parse(value)
 
     json_data = jsonpath_expr.find(json_doc)
-    json_data_list = jsonpath_expr_list.find(json_doc)
+    try:
+        json_data_list = jsonpath_expr_list.find(json_doc)
+    except Exception as e:
+        print(e)
+        json_data_list = []
+
     if len(json_data) > 0 and len(json_data_list) > 1:
         return [[match.value for match in jsonpath_expr_list.find(json_doc)]]
     else:

@@ -26,7 +26,7 @@ class QExeEdge:
         return [item for item in set(reduced)]
 
     def get_predicate(self):
-        if not self.predicate:
+        if not hasattr(self, 'predicate'):
             return None
         predicates = [remove_biolink_prefix(item) for item in to_array(self.predicate)]
         expanded_predicates = self.expand_predicates(predicates)
@@ -34,33 +34,33 @@ class QExeEdge:
 
     def get_subject(self):
         if self.reverse:
-            return self.q_edge['object']
-        return self.q_edge['subject']
+            return self.q_edge.object
+        return self.q_edge.subject
 
     def get_object(self):
         if self.reverse:
-            return self.q_edge['subject']
-        return self.q_edge['object']
+            return self.q_edge.subject
+        return self.q_edge.object
 
     def is_reversed(self):
         return self.reverse
 
     def get_input_curie(self):
-        curie = self.q_edge['subject'].get_curie() or self.q_edge['object'].get_curie()
+        curie = self.q_edge.subject.get_curie() or self.q_edge.object.get_curie()
         if isinstance(curie, list):
             return curie
         return [curie]
 
     def get_input_node(self):
-        return self.q_edge['object'] if self.reverse else self.q_edge['subject']
+        return self.q_edge.object if self.reverse else self.q_edge.subject
 
     def get_output_node(self):
-        return self.q_edge['subject'] if self.reverse else self.q_edge['object']
+        return self.q_edge.subject if self.reverse else self.q_edge.object
 
     def has_input_resolved(self):
         return not (len(self.input_equivalent_identifiers) == 0)
 
     def has_input(self):
         if self.reverse:
-            return self.q_edge['object'].has_input()
-        return self.q_edge['subject'].has_input()
+            return self.q_edge.object.has_input()
+        return self.q_edge.subject.has_input()

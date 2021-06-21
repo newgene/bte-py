@@ -8,6 +8,14 @@ from .log_entry import LogEntry
 
 class APIQueryDispatcher:
     def __init__(self, edges):
+        for count, edge in enumerate(edges):
+            if not isinstance(edges[count]['query_operation'], dict):
+                edges[count]['query_operation'] = edges[count]['query_operation'].__dict__
+                for key in list(edges[count]['query_operation']):
+                    value = edges[count]['query_operation'].pop(key)
+                    if key.startswith('_'):
+                        key = key[1:]
+                    edges[count]['query_operation'][key] = value
         self.edges = edges
         self.logs = []
 

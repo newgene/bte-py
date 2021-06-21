@@ -16,7 +16,7 @@ class QEdge2BTEEdgeHandler:
     def _find_apis_from_smart_api_edges(self, smartapi_edges):
         return [edge['association']['api_name'] for edge in smartapi_edges]
 
-    def _get_smartapi_edges(self, q_edge, kg):
+    def _get_smartapi_edges(self, q_edge, kg=None):
         kg = self.kg
         self.logs.append(
             LogEntry(
@@ -32,9 +32,9 @@ class QEdge2BTEEdgeHandler:
             'predicate': q_edge.get_predicate()
         }
         smartapi_edges = kg.filter(filter_criteria)
-        for item in smartapi_edges:
+        for count, item in enumerate(smartapi_edges):
             item['reasoner_edge'] = q_edge
-            smartapi_edges.append(item)
+            smartapi_edges[count] = item
         if len(smartapi_edges) == 0:
             self.logs.append(LogEntry('Warning', None, f"BTE didn't find any smartapi edges corresponding to {q_edge.get_id()}").get_log())
         else:
@@ -48,11 +48,11 @@ class QEdge2BTEEdgeHandler:
 
     def _create_non_batch_support_bte_edges(self, smartapi_edge):
         bte_edges = []
-        input_id = smartapi_edge['association']['input_id']
-        input_type = smartapi_edge['association']['input_type']
-        resolved_ids = smartapi_edge['reasoner_edge']['input_equivalent_identifiers']
+        input_id = smartapi_edge['association'].get('input_id')
+        input_type = smartapi_edge['association'].get('input_type')
+        resolved_ids = smartapi_edge['reasoner_edge'].input_equivalent_identifiers
         for curie in resolved_ids:
-            for entity in resolved_ids:
+            for entity in resolved_ids[curie]:
                 if entity.semantic_type == input_type and input_id in entity.db_ids:
                     for _id in entity.db_ids[input_id]:
                         edge = copy.deepcopy(smartapi_edge)
@@ -107,7 +107,11 @@ class QEdge2BTEEdgeHandler:
         return bte_edges
 
     def _create_bte_edges(self, edge):
-        support_batch = edge['query_operation']['supportBatch']
+        support_batch = None
+        if hasattr(edge['query_operation'], 'supportBatch'):
+            support_batch = edge['query_operation'].supportBatch
+        elif hasattr(edge['query_operation'], 'support_batch'):
+            support_batch = edge['query_operation'].support_batch
         if not support_batch:
             bte_edges = self._create_non_batch_support_bte_edges(edge)
         else:
@@ -122,7 +126,10 @@ class QEdge2BTEEdgeHandler:
                 new_edges = self._create_bte_edges(item)
                 tmp = []
                 for e in new_edges:
-                    e.filter = edge.filter
+                    if hasattr(edge, 'filter'):
+                        e['filter'] = edge.filter
+                    else:
+                        e['filter'] = None
                     tmp.append(e)
                 new_edges = tmp
                 bte_edges = [*bte_edges, *new_edges]

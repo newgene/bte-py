@@ -10,7 +10,7 @@ class AllSpecsSyncLoader(BaseLoader):
         self._file_path = path
 
     def fetch(self):
-        with open(self._file_path) as file:
+        with open(self._file_path, encoding='utf-8') as file:
             data = json.load(file)
             if 'hits' not in data:
                 result = {

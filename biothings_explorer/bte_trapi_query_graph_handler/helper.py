@@ -26,15 +26,15 @@ class QueryGraphHelper:
 
     def _get_output_id(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$input']['obj'][0]['primaryID']
+            return record['$input']['obj'][0].primary_id
         else:
-            return record['$output']['obj'][0]['primaryID']
+            return record['$output']['obj'][0].primary_id
 
     def _get_input_id(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$output']['obj'][0]['primaryID']
+            return record['$output']['obj'][0].primary_id
         else:
-            return record['$input']['obj'][0]['primaryID']
+            return record['$input']['obj'][0].primary_id
 
     def _get_api(self, record):
         return record['$edge_metadata'].get('api_name') or None
@@ -59,60 +59,60 @@ class QueryGraphHelper:
 
     def _get_input_category(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$output']['obj'][0].get('semanticType')
+            return record['$output']['obj'][0].semantic_type
         else:
-            return record['$input']['obj'][0].get('semanticType')
+            return record['$input']['obj'][0].semantic_type
 
     def _get_output_category(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$input']['obj'][0].get('semanticType')
+            return record['$input']['obj'][0].semantic_type
         else:
-            return record['$output']['obj'][0].get('semanticType')
+            return record['$output']['obj'][0].semantic_type
 
     def _get_output_label(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$input']['obj'][0].get('label')
+            return record['$input']['obj'][0].label
         else:
-            return record['$output']['obj'][0].get('label')
+            return record['$output']['obj'][0].label
 
     def _get_input_label(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            return record['$output']['obj'][0].get('label')
+            return record['$output']['obj'][0].label
         else:
-            return record['$input']['obj'][0].get('label')
+            return record['$input']['obj'][0].label
 
     def _get_input_equivalent_ids(self, record):
         try:
             if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-                return record['$output']['obj'][0]['curies']
+                return record['$output']['obj'][0].curies
             else:
-                return record['$input']['obj'][0]['curies']
+                return record['$input']['obj'][0].curies
         except Exception as e:
             return None
 
     def _get_input_attributes(self, record):
         try:
             if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-                return record['$output']['obj'][0]['attributes']
+                return record['$output']['obj'][0].attributes
             else:
-                return record['$input']['obj'][0]['attributes']
+                return record['$input']['obj'][0].attributes
         except Exception as e:
             return None
 
     def _get_output_equivalent_ids(self, record):
         try:
             if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-                return record['$input']['obj'][0]['curies']
+                return record['$input']['obj'][0].curies
             else:
-                return record['$output']['obj'][0]['curies']
+                return record['$output']['obj'][0].curies
         except Exception as e:
             return None
 
     def _get_output_attributes(self, record):
         try:
             if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-                return record['$input']['obj'][0]['attributes']
+                return record['$input']['obj'][0].attributes
             else:
-                return record['$output']['obj'][0]['attributes']
+                return record['$output']['obj'][0].attributes
         except Exception as e:
             return None

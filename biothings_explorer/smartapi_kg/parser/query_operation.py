@@ -22,7 +22,7 @@ class QueryOperationObject:
     def xBTEKGSOperation(self, new_op):
         if not isinstance(new_op, str):
             self._params = new_op.get('parameters')
-            self._request_body = new_op.get('request_body')
+            self._request_body = new_op.get('request_body') or new_op.get('requestBody')
             self._support_batch = new_op.get('supportBatch')
             self._input_separator = new_op.get('inputSeparator')
 
