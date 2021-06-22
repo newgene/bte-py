@@ -92,10 +92,10 @@ class KnowledgeGraph:
         }
 
     def update(self, bte_graph):
-        for node in bte_graph.nodes:
-            self.nodes[bte_graph.nodes[node]._primary_id] = self._create_node(bte_graph.nodes[node])
-        for edge in bte_graph.edges:
-            self.edges[edge] = self._create_node(bte_graph.edges[edge])
+        for node in bte_graph['nodes']:
+            self.nodes[bte_graph['nodes'][node]._primary_id] = self._create_node(bte_graph['nodes'][node])
+        for edge in bte_graph['edges']:
+            self.edges[edge] = self._create_edge(bte_graph['edges'][edge])
         self.kg = {
             'nodes': self.nodes,
             'edges': self.edges,

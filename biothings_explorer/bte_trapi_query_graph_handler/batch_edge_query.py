@@ -28,26 +28,22 @@ class BatchEdgeQueryHandler:
         return res
 
     def _post_query_filter(self, response):
-        try:
-            filtered = []
-            for item in response:
-                if 'predicate' in item['$edge_metadata']['trapi_qEdge_obj']['qEdge'] \
-                        and 'expanded_predicates' in item['$edge_metadata']['trapi_qEdge_obj']['qEdge']:
-                    edge_predicate = item['$edge_metadata']['predicate']
-                    predicate_filters = []
-                    predicate_filters = item['$edge_metadata']['trapi_qEdge_obj']['qEdge']['expanded_predicates']
-                    if predicate_filters:
-                        predicate_filters = [*predicate_filters,
-                                             *item['$edge_metadata']['trapi_qEdge_obj']['qEdge']['predicate']]
-                        predicate_filters = [remove_biolink_prefix(item) for item in predicate_filters]
-                        if edge_predicate in predicate_filters:
-                            filtered.append(item)
-                    else:
+        filtered = []
+        for item in response:
+            if hasattr(item['$edge_metadata']['trapi_qEdge_obj'].q_edge, 'predicate') \
+                    and hasattr(item['$edge_metadata']['trapi_qEdge_obj'].q_edge, 'expanded_predicates'):
+                edge_predicate = item['$edge_metadata']['predicate']
+                predicate_filters = []
+                predicate_filters = item['$edge_metadata']['trapi_qEdge_obj'].q_edge.expanded_predicates
+                if predicate_filters:
+                    predicate_filters = [*predicate_filters,
+                                         *item['$edge_metadata']['trapi_qEdge_obj'].q_edge.predicate]
+                    predicate_filters = [remove_biolink_prefix(item) for item in predicate_filters]
+                    if edge_predicate in predicate_filters:
                         filtered.append(item)
-            return filtered
-        except Exception as e:
-            print(e)
-            return response
+                else:
+                    filtered.append(item)
+        return filtered
 
     def query(self, q_edges):
         node_update = NodesUpdateHandler(q_edges)
@@ -62,15 +58,18 @@ class BatchEdgeQueryHandler:
             query_res = []
         else:
             edge_converter = QEdge2BTEEdgeHandler(non_cached_edges, self.kg)
+            # TODO edge_converter.convert returns incorrect size
             bte_edges = edge_converter.convert(non_cached_edges)
             self.logs = [*self.logs, *edge_converter.logs]
             if len(bte_edges) == 0 and len(cached_results) == 0:
                 return []
             expanded_bte_edges = self._expand_bte_edges(bte_edges)
+            # TODO query_res has incorrect size
             query_res = self._query_bte_edges(expanded_bte_edges)
             cache_handler.cache_edges(query_res)
         query_res = [*query_res, *cached_results]
         processed_query_res = self._post_query_filter(query_res)
+
         node_update.update(processed_query_res)
         return processed_query_res
 
