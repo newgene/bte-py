@@ -29,9 +29,16 @@ class APIQueryDispatcher:
                 request_func = requests.post
             config.pop('method')
             try:
-
                 response = request_func(**config)
-                data = response.json()
+                try:
+                    if response.status_code == 400:
+                        res.append(None)
+                        continue
+                    data = response.json()
+                except Exception as e:
+                    print(e)
+                    res.append(None)
+                    continue
             except requests.exceptions.HTTPError as e:
                 self.logs.append(LogEntry("ERROR", None, f"call-apis: Failed to make to following query: {str(config)}. The error is {str(e)}").get_log())
                 return None

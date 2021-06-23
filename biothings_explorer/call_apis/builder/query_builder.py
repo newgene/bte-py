@@ -10,7 +10,7 @@ class QueryBuilder:
     def get_url(self):
         return self.edge['query_operation']['server'] + self.edge['query_operation']['path']
 
-    def _get_url(self, edge, _input):
+    def _get_url(self, edge, raw_input):
         server = edge['query_operation']['server']
         if server.endswith('/'):
             server = server[0: len(server) - 1]
@@ -18,6 +18,10 @@ class QueryBuilder:
         if isinstance(edge['query_operation'].get('path_params'), list):
             for param in edge['query_operation']['path_params']:
                 val = edge['query_operation']['params'][param]
+                _input = raw_input
+                if isinstance(raw_input, list):
+                    _input = str(raw_input)[1:-1]
+
                 path = path.replace('{' + param + "}", val).replace("{inputs[0]}", _input)
         return server + path
 
@@ -27,21 +31,28 @@ class QueryBuilder:
                 return edge['query_operation'].get("inputSeparator", ',').join(edge['input'])
         return edge['input']
 
-    def _get_params(self, edge, _input):
+    def _get_params(self, edge, raw_input):
         params = {}
         for param in edge['query_operation']['params']:
             if isinstance(edge['query_operation'].get('path_params'), list) and param in edge['query_operation']['path_params']:
                 continue
             if isinstance(edge['query_operation']['params'][param], str):
+                _input = raw_input
+                if isinstance(raw_input, list):
+                    _input = str(raw_input)[1:-1]
+
                 params[param] = edge['query_operation']['params'][param].replace("{inputs[0]}", _input)
             else:
                 params[param] = edge['query_operation']['params'][param]
         return params
 
-    def _get_request_body(self, edge, _input):
+    def _get_request_body(self, edge, raw_input):
         if edge['query_operation'].get('request_body') and 'body' in edge['query_operation'].get('request_body'):
             for key in edge['query_operation']['request_body']['body']:
                 try:
+                    _input = raw_input
+                    if isinstance(raw_input, list):
+                        _input = str(raw_input)[1:-1]
                     edge['query_operation']['request_body']['body'][key] = edge['query_operation']['request_body']['body'][key].replace('{inputs[0]}', _input)
                 except AttributeError:
                     pass

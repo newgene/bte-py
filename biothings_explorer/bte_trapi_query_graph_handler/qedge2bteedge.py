@@ -78,9 +78,9 @@ class QEdge2BTEEdgeHandler:
         inputs = []
         bte_edges = []
         input_resolved_identifiers = {}
-        input_id = smart_api_edge['association']['input_id']
-        input_type = smart_api_edge['association']['input_type']
-        resolved_ids = smart_api_edge['reasoner_edge']['input_equivalent_identifiers']
+        input_id = smart_api_edge['association'].get('input_id')
+        input_type = smart_api_edge['association'].get('input_type')
+        resolved_ids = smart_api_edge['reasoner_edge'].input_equivalent_identifiers
         for curie in resolved_ids:
             for entity in resolved_ids[curie]:
                 if 'bte-trapi' in smart_api_edge['tags']:
@@ -88,14 +88,14 @@ class QEdge2BTEEdgeHandler:
                         input_resolved_identifiers[curie] = [entity]
                         inputs.append(entity.primary_id)
                         id_mapping[entity.primary_id] = curie
-                    elif entity.semantic_type == input_type and input_id in entity.db_ids:
-                        for _id in entity.db_ids[input_id]:
-                            if input_id in ID_WITH_PREFIXES or ':' in _id:
-                                id_mapping[_id] = curie
-                            else:
-                                id_mapping[input_id + ':' + _id] = curie
-                            input_resolved_identifiers[curie] = [entity]
-                            inputs.append(_id)
+                elif entity.semantic_type == input_type and input_id in entity.db_ids:
+                    for _id in entity.db_ids[input_id]:
+                        if input_id in ID_WITH_PREFIXES or ':' in _id:
+                            id_mapping[_id] = curie
+                        else:
+                            id_mapping[input_id + ':' + _id] = curie
+                        input_resolved_identifiers[curie] = [entity]
+                        inputs.append(_id)
         if len(id_mapping) > 0:
             edge = copy.deepcopy(smart_api_edge)
             edge['input'] = inputs
@@ -108,10 +108,15 @@ class QEdge2BTEEdgeHandler:
 
     def _create_bte_edges(self, edge):
         support_batch = None
-        if hasattr(edge['query_operation'], 'supportBatch'):
-            support_batch = edge['query_operation'].supportBatch
-        elif hasattr(edge['query_operation'], 'support_batch'):
-            support_batch = edge['query_operation'].support_batch
+        if isinstance(edge['query_operation'], dict):
+            support_batch = edge['query_operation']['support_batch']
+        else:
+            if hasattr(edge['query_operation'], 'supportBatch'):
+                support_batch = edge['query_operation'].supportBatch
+            elif hasattr(edge['query_operation'], 'support_batch'):
+                support_batch = edge['query_operation'].support_batch
+            elif hasattr(edge['query_operation'], '_support_batch'):
+                support_batch = edge['query_operation']._support_batch
         if not support_batch:
             bte_edges = self._create_non_batch_support_bte_edges(edge)
         else:
