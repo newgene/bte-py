@@ -4,6 +4,7 @@ from .transformers.cord_transformer import CordTransformer
 from .transformers.ctd_transformer import CTDTransformer
 from .transformers.semmed_transformer import SemmedTransformer
 from .transformers.opentarget_transformer import OpenTargetTransformer
+from .transformers.ebi_protein_transformer import EBIProteinTransformer
 from .transformers.transformer import BaseTransformer
 from .transformers.trapi_transformer import TRAPITransformer
 
@@ -25,13 +26,15 @@ class Transformer:
             self.tf = CordTransformer(self.data)
         elif api.startswith('SEMMED'):
             self.tf = SemmedTransformer(self.data)
-        elif api.startswith('BioLink API'):
+        elif api == 'BioLink API':
             self.tf = BiolinkTransformer(self.data)
-        elif api.startswith('biothings'):
+        elif api == 'EBI Proteins API':
+            self.tf = EBIProteinTransformer(self.data)
+        elif 'biothings' in tags:
             self.tf = BioThingsTransformer(self.data)
-        elif api.startswith('ctd'):
+        elif 'ctd' in tags:
             self.tf = CTDTransformer(self.data)
-        elif api.startswith('opentarget'):
+        elif 'opentarget' in tags:
             self.tf = OpenTargetTransformer(self.data)
         else:
             self.tf = BaseTransformer(self.data)

@@ -28,6 +28,7 @@ class NodesUpdateHandler:
         curies = self._get_curies(self.q_edges)
         if len(curies) == 0:
             for edge in q_edges:
+                # TODO output_equivalent_identifiers should not be empty on second iteration
                 edge.input_equivalent_identifiers = edge.prev_edge.output_equivalent_identifiers
             return
         equivalent_ids = self._get_equivalent_ids(curies)

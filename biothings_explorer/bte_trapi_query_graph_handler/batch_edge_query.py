@@ -58,13 +58,11 @@ class BatchEdgeQueryHandler:
             query_res = []
         else:
             edge_converter = QEdge2BTEEdgeHandler(non_cached_edges, self.kg)
-            # TODO edge_converter.convert returns incorrect size
             bte_edges = edge_converter.convert(non_cached_edges)
             self.logs = [*self.logs, *edge_converter.logs]
             if len(bte_edges) == 0 and len(cached_results) == 0:
                 return []
             expanded_bte_edges = self._expand_bte_edges(bte_edges)
-            # TODO query_res has incorrect size
             query_res = self._query_bte_edges(expanded_bte_edges)
             cache_handler.cache_edges(query_res)
         query_res = [*query_res, *cached_results]

@@ -46,10 +46,12 @@ class QEdge2BTEEdgeHandler:
             ).get_log()
         return smartapi_edges
 
+    # TODO returns wrong number of edges
     def _create_non_batch_support_bte_edges(self, smartapi_edge):
         bte_edges = []
         input_id = smartapi_edge['association'].get('input_id')
         input_type = smartapi_edge['association'].get('input_type')
+        # TODO input_equivalent_identifiers doesn't have correct data
         resolved_ids = smartapi_edge['reasoner_edge'].input_equivalent_identifiers
         for curie in resolved_ids:
             for entity in resolved_ids[curie]:
@@ -123,11 +125,13 @@ class QEdge2BTEEdgeHandler:
             bte_edges = self._create_batch_support_bte_edges(edge)
         return bte_edges
 
+    # TODO returns wrong bte_edges number on second iteration
     def convert(self, q_edges):
         bte_edges = []
         for edge in q_edges:
-            smartapi_edges = self._get_smartapi_edges(edge)
+            smartapi_edges = self._get_smartapi_edges(edge) #correct
             for item in smartapi_edges:
+                # TODO self._create_bte_edges returns wrong amount
                 new_edges = self._create_bte_edges(item)
                 tmp = []
                 for e in new_edges:

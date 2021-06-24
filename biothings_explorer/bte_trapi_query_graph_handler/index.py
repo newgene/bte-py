@@ -77,6 +77,7 @@ class TRAPIQueryHandler:
         kg = self._load_meta_kg()
         query_paths = self._process_query_graph(self.query_graph)
         handlers = self._create_batch_edge_query_handlers(query_paths, kg)
+        # TODO 2nd item of handlers has incorrect output_equivalent_identifiers
         for handler in handlers.values():
             res = handler.query(handler.q_edges)
             self.logs = [*self.logs, *handler.logs]

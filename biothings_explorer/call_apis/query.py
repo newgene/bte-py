@@ -88,7 +88,8 @@ class APIQueryDispatcher:
                 if res['status'] == 'fulfilled' and res['value']:
                     result = [*result, *res['value']]
             except Exception as e:
-                result = [*result, *res]
+                if res:
+                    result = [*result, *res]
         self.logs.append(LogEntry("DEBUG", None, f"call-apis: Total number of results returned for this query is {len(result)}").get_log())
         return result
 
