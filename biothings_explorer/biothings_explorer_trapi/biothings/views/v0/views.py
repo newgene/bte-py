@@ -14,3 +14,21 @@ class Predicates(RequestHandler):
             self.write(data)
         except Exception as e:
             self.write({'error': 'An unexpected error occurred'})
+
+
+class RouteQueryByAPI(RequestHandler):
+    def get(self, smartapiID):
+        self.set_header('Content-Type', 'application/json')
+        try:
+            handler = PredicatesHandler(smartapiID, '0.9.2')
+            predicates = handler.get_predicates()
+            self.write(json.dumps(predicates))
+        except Exception as e:
+            pass
+
+
+# TODO fix me
+class RouteQuery(RequestHandler):
+    def post(self):
+        data = json.loads(self.request.body)
+        query_graph = data['message']['query_graph']

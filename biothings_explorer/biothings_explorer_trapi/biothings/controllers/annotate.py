@@ -79,8 +79,8 @@ class NGDFilter:
                             o_id = 'NCBIGene:' + o_id
                         ngd_inputs.add(s_id + '-' + o_id)
                         id_dict[i] = s_id + '-' + o_id
-                ngd_results = self.query_ngd(list(ngd_inputs))
-                parsed_ngd_results = self.parse_response(ngd_results)
-                for i, rec in enumerate(self.query_result):
-                    if i in id_dict:
-                        rec['$ngd'] = parsed_ngd_results[id_dict[i]]
+            ngd_results = self.query_ngd(list(ngd_inputs))
+            parsed_ngd_results = self.parse_response(ngd_results)
+            for i, rec in enumerate(self.query_result):
+                if i in id_dict:
+                    rec['$ngd'] = parsed_ngd_results[id_dict[i]]
