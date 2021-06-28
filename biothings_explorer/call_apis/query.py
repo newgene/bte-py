@@ -48,7 +48,11 @@ class APIQueryDispatcher:
             #self.logs.append(LogEntry("DEBUG", None, f"call-apis: Succesfully made the following query: {str(query['config'])}").get_log())
             tf_obj = Transformer({'response': data, 'edge': edge})
             transformed = tf_obj.transform()
-            self.logs.append(LogEntry("DEBUG", None, f"call-apis: After transformation, BTE is able to retrieve: {len(transformed)} hits!").get_log())
+            try:
+                self.logs.append(LogEntry("DEBUG", None, f"call-apis: After transformation, BTE is able to retrieve: {len(transformed)} hits!").get_log())
+            except Exception as e:
+                print(e)
+                pass
             res.append(transformed)
         self.queue.dequeue()
         return res

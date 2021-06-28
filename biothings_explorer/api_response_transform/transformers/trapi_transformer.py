@@ -4,7 +4,7 @@ from .transformer import BaseTransformer
 class TRAPITransformer(BaseTransformer):
     def _get_unique_edges(self):
         edges = {}
-        if 'messages' in self.data['responses'] and 'results' in self.data['response']['message'] and isinstance(self.data['response']['message']['results'], list):
+        if 'messages' in self.data['response'] and 'results' in self.data['response']['message'] and isinstance(self.data['response']['message']['results'], list):
             for item in self.data['response']['message']['results']:
                 edges[item['edge_bindings']['e01'][0]['id']] = {
                     'subject': item['node_bindings']['n0'][0]['id'],

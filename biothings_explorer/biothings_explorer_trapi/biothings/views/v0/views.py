@@ -25,10 +25,3 @@ class RouteQueryByAPI(RequestHandler):
             self.write(json.dumps(predicates))
         except Exception as e:
             pass
-
-
-# TODO fix me
-class RouteQuery(RequestHandler):
-    def post(self):
-        data = json.loads(self.request.body)
-        query_graph = data['message']['query_graph']

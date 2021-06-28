@@ -83,4 +83,6 @@ class TRAPIQueryHandler:
             self.logs = [*self.logs, *handler.logs]
             if len(res) == 0:
                 return None
+            else:
+                handler.q_edges[0].output_equivalent_identifiers = res[0]['$edge_metadata']['trapi_qEdge_obj'].output_equivalent_identifiers
             handler.notify(res)

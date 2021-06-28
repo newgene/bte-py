@@ -27,15 +27,15 @@ class NodesUpdateHandler:
     def set_equivalent_ids(self, q_edges):
         curies = self._get_curies(self.q_edges)
         if len(curies) == 0:
-            for edge in q_edges:
+            for count, edge in enumerate(q_edges):
                 # TODO output_equivalent_identifiers should not be empty on second iteration
-                edge.input_equivalent_identifiers = edge.prev_edge.output_equivalent_identifiers
+                q_edges[count].input_equivalent_identifiers = q_edges[count].prev_edge.output_equivalent_identifiers
             return
         equivalent_ids = self._get_equivalent_ids(curies)
-        for edge in q_edges:
-            edge_equivalent_ids = functools.reduce(lambda res, key: {**res, key: equivalent_ids[key]}, [key for key in equivalent_ids if key in edge.get_input_curie()], {})
+        for count, edge in enumerate(q_edges):
+            edge_equivalent_ids = functools.reduce(lambda res, key: {**res, key: equivalent_ids[key]}, [key for key in equivalent_ids if key in q_edges[count].get_input_curie()], {})
             if len(edge_equivalent_ids) > 0:
-                edge.input_equivalent_identifiers = edge_equivalent_ids
+                q_edges[count].input_equivalent_identifiers = edge_equivalent_ids
         return
 
     def _create_equivalent_ids_object(self, record):
