@@ -109,7 +109,11 @@ def transform_complex_object(json_doc, template):
     if len(paths) == 1 and paths[0] == common_path:
         return transform_simple_object(json_doc, template)
     if common_path:
-        trimmed_json_doc = get_parsed_json(common_path, json_doc)[0]
+        try:
+            trimmed_json_doc = get_parsed_json(common_path, json_doc)[0]
+        except IndexError:
+            trimmed_json_doc = None
+            print("Index error")
         #trimmed_json_doc = [match.value for match in jsonpath_expr.find(json_doc)] #jsonpath_expr.find(json_doc)[0].value
         trimmed_template = remove_common_path_from_template(template, common_path)
     else:

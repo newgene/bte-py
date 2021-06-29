@@ -20,14 +20,14 @@ def main():
     """Construct and serve the tornado application."""
     app = Application([
         ('/v0/predicates', Predicates),
-        ('/v0/smartapi/([^/]+/predicates', RouteQueryByAPI),
+        ('/v0/smartapi/([^/]+)/predicates', RouteQueryByAPI),
         ('/v1/meta_knowledge_graph', RouteMetaKG),
-        ('/v1/smartapi/([^/]+D/meta_knowledge_graph', RouteMetaKGByAPI),
-        ('/v1/team/([^/]+D/meta_knowledge_graph', RouteMetaKGByTeam),
+        ('/v1/smartapi/([^/]+D)/meta_knowledge_graph', RouteMetaKGByAPI),
+        ('/v1/team/([^/]+D)/meta_knowledge_graph', RouteMetaKGByTeam),
         ('/v1/predicates', RoutePredicates),
         ('/v1/test/query', RouteQueryTest),
         ('/v1/query', V1RouteQuery),
-        ('/v1/smartapi/([^/]+D/query', RouteQueryV1ByAPI)
+        ('/v1/smartapi/([^/]+D)/query', RouteQueryV1ByAPI)
     ])
     http_server = HTTPServer(app)
     http_server.listen(options.port, address='127.0.0.1')

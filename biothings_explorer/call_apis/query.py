@@ -115,5 +115,6 @@ class APIQueryDispatcher:
             biomedical_resolver = Resolver('biolink')
             res = biomedical_resolver.resolve(grped_ids)
         for item in result:
-            item['$output']['obj'] = res[item['$output']['original']]
+            if item:
+                item['$output']['obj'] = res[item['$output']['original']]
         return result

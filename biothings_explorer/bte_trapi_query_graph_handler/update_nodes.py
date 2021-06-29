@@ -48,5 +48,5 @@ class NodesUpdateHandler:
 
     def update(self, query_result):
         for count, record in enumerate(query_result):
-            if query_result[count]['$output']['obj'][0].primary_id not in query_result[count]['$edge_metadata']['trapi_qEdge_obj'].output_equivalent_identifiers:
+            if query_result[count] and query_result[count]['$output']['obj'][0].primary_id not in query_result[count]['$edge_metadata']['trapi_qEdge_obj'].output_equivalent_identifiers:
                 query_result[count]['$edge_metadata']['trapi_qEdge_obj'].output_equivalent_identifiers[query_result[count]['$output']['obj'][0].primary_id] = query_result[count]['$output']['obj']

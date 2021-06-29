@@ -156,7 +156,6 @@ APIMETA = {
             "UNII",
             "KEGG",
             "UMLS",
-            "RHEA",
             "name"
         ],
         "semantic": "ChemicalSubstance",
@@ -220,9 +219,6 @@ APIMETA = {
             "LINCS": [
                 "unichem.lincs"
             ],
-            "RHEA": [
-                "chebi.xrefs.rhea"
-            ],
             "name": [
                 "chembl.pref_name",
                 "drugbank.name",
@@ -281,7 +277,6 @@ APIMETA = {
             "KEGG",
             "UMLS",
             "LINCS",
-            "RHEA",
             "name"
         ],
         "semantic": "ChemicalSubstance",
@@ -341,9 +336,6 @@ APIMETA = {
             ],
             "KEGG": [
                 "drugbank.xrefs.kegg.cid"
-            ],
-            "RHEA": [
-                "chebi.xrefs.rhea"
             ],
             "name": [
                 "chembl.pref_name",
@@ -443,6 +435,8 @@ APIMETA = {
             "ORPHANET",
             "EFO",
             "UMLS",
+            "SNOMEDCT",
+            "NCIT",
             "MESH",
             "HP",
             "GARD",
@@ -492,7 +486,9 @@ APIMETA = {
             ],
             "HP": [
                 "mondo.xrefs.hp"
-            ]
+            ],
+            "SNOMEDCT": ['mondo.xrefs.sctid', 'umls.snomed.preferred', 'umls.snomed.non-preferred'],
+            "NCIT": ['mondo.xrefs.ncit', 'disease_ontology.xrefs.ncit']
         }
     },
     "MolecularActivity": {
@@ -561,7 +557,6 @@ APIMETA = {
         "id_ranks": [
             "GO",
             "MetaCyc",
-            "RHEA",
             "name"
         ],
         "semantic": "CellularComponent",
@@ -574,9 +569,6 @@ APIMETA = {
             "MetaCyc": [
                 "xrefs.metacyc"
             ],
-            "RHEA": [
-                "xrefs.rhea"
-            ],
             "name": [
                 "name"
             ]
@@ -588,6 +580,7 @@ APIMETA = {
             "KEGG",
             "PHARMGKB",
             "WIKIPATHWAYS",
+            "BIOCARTA"
             "name"
         ],
         "semantic": "Pathway",

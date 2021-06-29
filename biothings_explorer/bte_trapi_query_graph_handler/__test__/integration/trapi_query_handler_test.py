@@ -4,12 +4,12 @@ from biothings_explorer.bte_trapi_query_graph_handler.index import TRAPIQueryHan
 
 class TestTRAPIQueryHandler(unittest.TestCase):
     disease_entity_node = {
-        "categories": "Disease",
-        "ids": "MONDO:0005737"
+        "categories": ["Disease"],
+        "ids": ["MONDO:0005737"]
     }
 
     gene_class_node = {
-        "categories": "Gene"
+        "categories": ["Gene"]
     }
 
     OneHopQuery = {
@@ -29,4 +29,5 @@ class TestTRAPIQueryHandler(unittest.TestCase):
         query_handler = TRAPIQueryHandler()
         query_handler.set_query_graph(self.OneHopQuery)
         query_handler.query()
+        #
         self.assertIn('nodes', query_handler.knowledge_graph.kg)

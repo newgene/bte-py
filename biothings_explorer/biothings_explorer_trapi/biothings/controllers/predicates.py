@@ -58,5 +58,5 @@ class PredicatesHandler:
             if output not in predicates[_input]:
                 predicates[_input][output] = []
             if pred not in predicates[_input][output]:
-                predicates[_input][output].append = pred
+                predicates[_input][output].append(pred)
         return predicates
