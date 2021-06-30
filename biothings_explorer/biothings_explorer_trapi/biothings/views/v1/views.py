@@ -45,11 +45,12 @@ class RouteQueryTest(RequestHandler):
         query_graph = data['message']['query_graph']
         smartapi = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
-        data = json.loads(smartapi)
-        handler = TRAPIQueryHandler({}, data, None, False)
+        handler = TRAPIQueryHandler({}, smartapi, None, False)
         handler.set_query_graph(query_graph)
         handler.query()
-        self.write(json.dumps(handler.get_response()))
+        # vanilla json dumps throws error when encountering datetime
+        # the below json dumps can also handle datetime errors
+        self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))
 
 
 class V1RouteQuery(RouteQueryTest):
@@ -63,7 +64,7 @@ class V1RouteQuery(RouteQueryTest):
         handler = TRAPIQueryHandler({'api_names': API_LIST}, smartapi)
         handler.set_query_graph(query_graph)
         handler.query()
-        self.write(json.dumps(handler.get_response()))
+        self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))
 
 
 class RouteQueryV1ByAPI(RequestHandler):
@@ -74,20 +75,19 @@ class RouteQueryV1ByAPI(RequestHandler):
         enableIDResolution = False if slug in ['5be0f321a829792e934545998b9c6afe', '978fe380a147a8641caf72320862697b'] else True
         smartapi_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
-        smartapi = json.loads(smartapi_path)
 
         handler = TRAPIQueryHandler(
             {
                 'smartAPIID': slug,
                 'enableIDResolution': enableIDResolution,
             },
-            smartapi,
+            smartapi_path,
             None,
             False
         )
         handler.set_query_graph(query_graph)
         handler.query()
-        self.write(json.dumps(handler.get_response()))
+        self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))
 
 
 class RouteQueryV1ByTeam(RequestHandler):
@@ -98,16 +98,15 @@ class RouteQueryV1ByTeam(RequestHandler):
         enableIDResolution = False if slug == 'Text Mining Provider' else True
         smartapi_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
-        smartapi = json.loads(smartapi_path)
         handler = TRAPIQueryHandler(
             {
                 'teamName': slug,
                 'enableIDResolution': enableIDResolution
             },
-            smartapi,
+            smartapi_path,
             None,
             False
         )
         handler.set_query_graph(query_graph)
         handler.query()
-        self.write(json.dumps(handler.get_response()))
+        self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))

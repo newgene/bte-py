@@ -10,7 +10,8 @@ from views.v1.views import (
     RoutePredicates,
     RouteQueryTest,
     V1RouteQuery,
-    RouteQueryV1ByAPI
+    RouteQueryV1ByAPI,
+    RouteQueryV1ByTeam
 )
 
 define('port', default=8888, help='port to listen on')
@@ -20,14 +21,15 @@ def main():
     """Construct and serve the tornado application."""
     app = Application([
         ('/v0/predicates', Predicates),
-        ('/v0/smartapi/([^/]+)/predicates', RouteQueryByAPI),
+        (r"/v0/smartapi/([^/]*)/predicates", RouteQueryByAPI),
         ('/v1/meta_knowledge_graph', RouteMetaKG),
-        ('/v1/smartapi/([^/]+D)/meta_knowledge_graph', RouteMetaKGByAPI),
-        ('/v1/team/([^/]+D)/meta_knowledge_graph', RouteMetaKGByTeam),
+        (r"/v1/smartapi/([^/]*)/meta_knowledge_graph", RouteMetaKGByAPI),
+        (r"/v1/team/([^/]*)/meta_knowledge_graph", RouteMetaKGByTeam),
         ('/v1/predicates', RoutePredicates),
         ('/v1/test/query', RouteQueryTest),
         ('/v1/query', V1RouteQuery),
-        ('/v1/smartapi/([^/]+D)/query', RouteQueryV1ByAPI)
+        (r"/v1/smartapi/([^/]*)/query", RouteQueryV1ByAPI),
+        (r"/v1/team/([^/]*)/query", RouteQueryV1ByTeam)
     ])
     http_server = HTTPServer(app)
     http_server.listen(options.port, address='127.0.0.1')

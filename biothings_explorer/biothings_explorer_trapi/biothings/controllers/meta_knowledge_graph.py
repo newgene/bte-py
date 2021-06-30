@@ -39,7 +39,7 @@ class MetaKnowledgeGraphHandler:
 
     def _modify_predicate(self, predicate):
         if predicate.startswith('biolink:'):
-            return 'biolink:' +  camel_to_snake(predicate[8:])
+            return 'biolink:' + camel_to_snake(predicate[8:])
         else:
             return 'biolink:' + camel_to_snake(predicate)
 
@@ -54,7 +54,9 @@ class MetaKnowledgeGraphHandler:
             'edges': []
         }
         predicates = {}
-        f = open('./ids.json', )
+        file_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'ids.json'))
+        f = open(file_path, )
 
         # returns JSON object as
         # a dictionary
@@ -67,12 +69,12 @@ class MetaKnowledgeGraphHandler:
         for op in kg.ops:
             _input = self._modify_category(op['association']['input_type'])
             output = self._modify_category(op['association']['output_type'])
-            pred = self._modify_category(op['assocation']['predicate'])
+            pred = self._modify_category(op['association']['predicate'])
             if _input not in predicates:
                 predicates[_input] = {}
             if output not in predicates[_input]:
                 predicates[_input][output] = []
-            if predicates[_input][output] not in pred:
+            if pred not in predicates[_input][output]:
                 predicates[_input][output].append(pred)
         for _input in predicates:
             for output in predicates[_input]:
