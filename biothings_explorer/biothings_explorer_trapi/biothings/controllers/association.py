@@ -24,7 +24,7 @@ def association(sub=None, obj=None, pred=None, api=None, source=None):
             'subject': op['association']['input_type'],
             'object': op['association']['output_type'],
             'predicate': op['association']['predicate'],
-            'provided_by': op['association']['source'],
+            'provided_by': op['association'].get('source'),
             'api': {
                 'name': op['association']['api_name'],
                 'smartapi': {

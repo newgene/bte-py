@@ -6,6 +6,7 @@ from biothings_explorer.biothings_explorer_trapi.biothings.controllers.predicate
 from biothings_explorer.bte_trapi_query_graph_handler.index import TRAPIQueryHandler
 from .config import API_LIST
 
+
 class RouteMetaKG(RequestHandler):
     def get(self):
         self.set_header('Content-Type', 'application/json')
