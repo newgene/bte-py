@@ -1,4 +1,5 @@
 import requests
+import json
 from .async_operations_builder import AsyncOperationsBuilder
 from ..parser.index import API
 
@@ -61,10 +62,13 @@ class AsyncOperationsBuilderWithReasoner(AsyncOperationsBuilder):
 
     def get_ops_from_predicates_endpoint(self, metadata):
         if metadata.get('url'):
-            response = requests.get(self.construct_query_url(metadata['url']))
-            if response.status_code == 200:
-                data = response.json()
-                return self.parse_predicate_endpoint(data, metadata)
+            with requests.get(self.construct_query_url(metadata['url']), stream=True) as response:
+                if response.status_code == 200:
+                    data_str = ''
+                    for chunk in (response.raw.read_chunked()):
+                        data_str = data_str + chunk.decode("UTF-8")
+                    data = json.loads(data_str)
+                    return self.parse_predicate_endpoint(data, metadata)
         return []
 
     def get_ops_from_predicates_endpoints(self, specs):
