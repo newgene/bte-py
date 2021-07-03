@@ -5,6 +5,9 @@ from biothings_explorer.trapi.biothings.controllers.meta_knowledge_graph import 
 from biothings_explorer.trapi.biothings.controllers.predicates import PredicatesHandler
 from biothings_explorer.query_graph_handler.index import TRAPIQueryHandler
 from .config import API_LIST
+from biothings_explorer.trapi.utils.common import remove_quotes_from_query
+from biothings_explorer.trapi.biothings.controllers.association import association
+import json
 
 
 class RouteMetaKG(RequestHandler):
@@ -56,16 +59,21 @@ class RouteQueryTest(RequestHandler):
 
 class V1RouteQuery(RouteQueryTest):
     def post(self):
-        self.set_header('Content-Type', 'application/json')
-        data = json.loads(self.request.body)
-        query_graph = data['message']['query_graph']
-        smartapi_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
-        smartapi = json.loads(smartapi_path)
-        handler = TRAPIQueryHandler({'api_names': API_LIST}, smartapi)
-        handler.set_query_graph(query_graph)
-        handler.query()
-        self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))
+        try:
+            self.set_header('Content-Type', 'application/json')
+            data = json.loads(self.request.body)
+            query_graph = data['message']['query_graph']
+            smartapi_path = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
+            smartapi = json.loads(smartapi_path)
+            handler = TRAPIQueryHandler({'api_names': API_LIST}, smartapi)
+            handler.set_query_graph(query_graph)
+            handler.query()
+            self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))
+        except Exception as e:
+            print(e)
+            self.set_status(400)
+            self.write({'error': 'Your input query graph is invalid'})
 
 
 class RouteQueryV1ByAPI(RequestHandler):
@@ -73,7 +81,8 @@ class RouteQueryV1ByAPI(RequestHandler):
         self.set_header('Content-Type', 'application/json')
         data = json.loads(self.request.body)
         query_graph = data['message']['query_graph']
-        enableIDResolution = False if slug in ['5be0f321a829792e934545998b9c6afe', '978fe380a147a8641caf72320862697b'] else True
+        enableIDResolution = False if slug in ['5be0f321a829792e934545998b9c6afe',
+                                               '978fe380a147a8641caf72320862697b'] else True
         smartapi_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
 

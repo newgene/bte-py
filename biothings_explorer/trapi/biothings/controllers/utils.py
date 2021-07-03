@@ -19,4 +19,7 @@ def remove_bio_link_prefix(_input):
 
 def camel_to_snake(name):
     name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+    name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name)
+    # replace spaces with underscores
+    name = re.sub(r"\s+", '_', name).lower()
+    return name

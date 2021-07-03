@@ -72,3 +72,35 @@ class TestModifyPredicateFunction(unittest.TestCase):
         handler = PredicatesHandler()
         res = handler._modify_predicate('biolink:treated_by')
         self.assertEqual(res, 'biolink:treated_by')
+
+    def test_biolink_prefixed_but_not_snakecased_prefix_should_return_the_snakecased_form(self):
+        handler = PredicatesHandler()
+        res = handler._modify_predicate('biolink:treated by')
+        self.assertEqual(res, 'biolink:treated_by')
+
+    def test_not_biolink_prefixed_and_not_snakecased_predicate_should_return_biolink_prefixed_and_snakecased_form(self):
+        handler = PredicatesHandler()
+        res = handler._modify_predicate('treated by')
+        self.assertEqual(res, 'biolink:treated_by')
+
+    def test_not_biolink_predixed_but_snakecased_predicate_should_return_biolink_prefixed_and_snakecased_form(self):
+        handler = PredicatesHandler()
+        res = handler._modify_predicate('treated_by')
+        self.assertEqual(res, 'biolink:treated_by')
+
+
+class TestGetPredicatesFunction(unittest.TestCase):
+    def test_default_should_render_correctly(self):
+        handler = PredicatesHandler()
+        res = handler.get_predicates()
+        self.assertIn('biolink:Gene', res)
+
+    def test_if_smartapi_id_provided_should_render_predicates_only_related_to_the_smartapi(self):
+        handler = PredicatesHandler('59dce17363dce279d389100834e43648')
+        res = handler.get_predicates()
+        self.assertIn('biolink:Gene', res)
+
+    def test_if_team_name_provided_should_render_predicates_only_related_to_the_smartapi(self):
+        handler = PredicatesHandler(None, 'Service Provider')
+        res = handler.get_predicates()
+        self.assertIn('biolink:Gene', res)

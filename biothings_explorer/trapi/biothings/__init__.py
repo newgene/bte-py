@@ -13,15 +13,14 @@ from .views.v1.views import (
     RouteQueryV1ByAPI,
     RouteQueryV1ByTeam
 )
-from .views.metakg import RouteMetaKG
+from .views.metakg import RouteMetaKG2
 from .views.performance import RoutePerformance
 
 
 define('port', default=8888, help='port to listen on')
 
 
-def main():
-    """Construct and serve the tornado application."""
+def make_app():
     app = Application([
         ('/v0/predicates', Predicates),
         (r"/v0/smartapi/([^/]*)/predicates", RouteQueryByAPI),
@@ -33,10 +32,21 @@ def main():
         ('/v1/query', V1RouteQuery),
         (r"/v1/smartapi/([^/]*)/query", RouteQueryV1ByAPI),
         (r"/v1/team/([^/]*)/query", RouteQueryV1ByTeam),
-        (r"/v1/metakg(?P<subject>\w+)(?P<object>\w+)(?P<predicate>\w+)(?P<api>\w+)(?P<provided_by>\w+)", RouteMetaKG),
+        # TODO the /metakg endpoint throws error when no params are passed
+        (r"/v1/metakg(?P<subject>\w+)?(?P<object>\w+)?(?P<predicate>\w+)?(?P<api>\w+)?(?P<provided_by>\w+)?", RouteMetaKG2),
         ('/v1/performance', RoutePerformance),
     ])
     http_server = HTTPServer(app)
     http_server.listen(options.port, address='127.0.0.1')
+    return http_server
+
+
+def main():
+    """Construct and serve the tornado application."""
+    make_app()
     print('Listening on http://localhost:%i' % options.port)
     IOLoop.current().start()
+
+
+def make_test_app():
+    return make_app()
