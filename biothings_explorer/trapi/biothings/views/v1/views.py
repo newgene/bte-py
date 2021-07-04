@@ -65,8 +65,7 @@ class V1RouteQuery(RouteQueryTest):
             query_graph = data['message']['query_graph']
             smartapi_path = os.path.abspath(
                 os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
-            smartapi = json.loads(smartapi_path)
-            handler = TRAPIQueryHandler({'api_names': API_LIST}, smartapi)
+            handler = TRAPIQueryHandler({'api_names': API_LIST}, smartapi_path)
             handler.set_query_graph(query_graph)
             handler.query()
             self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))
@@ -78,26 +77,32 @@ class V1RouteQuery(RouteQueryTest):
 
 class RouteQueryV1ByAPI(RequestHandler):
     def post(self, slug):
-        self.set_header('Content-Type', 'application/json')
-        data = json.loads(self.request.body)
-        query_graph = data['message']['query_graph']
-        enableIDResolution = False if slug in ['5be0f321a829792e934545998b9c6afe',
-                                               '978fe380a147a8641caf72320862697b'] else True
-        smartapi_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
+        try:
 
-        handler = TRAPIQueryHandler(
-            {
-                'smartAPIID': slug,
-                'enableIDResolution': enableIDResolution,
-            },
-            smartapi_path,
-            None,
-            False
-        )
-        handler.set_query_graph(query_graph)
-        handler.query()
-        self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))
+            self.set_header('Content-Type', 'application/json')
+            data = json.loads(self.request.body)
+            query_graph = data['message']['query_graph']
+            enableIDResolution = False if slug in ['5be0f321a829792e934545998b9c6afe',
+                                                   '978fe380a147a8641caf72320862697b'] else True
+            smartapi_path = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
+
+            handler = TRAPIQueryHandler(
+                {
+                    'smartAPIID': slug,
+                    'enableIDResolution': enableIDResolution,
+                },
+                smartapi_path,
+                None,
+                False
+            )
+            handler.set_query_graph(query_graph)
+            handler.query()
+            self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))
+        except Exception as e:
+            print(e)
+            self.set_status(400)
+            self.write({'error': 'Your input query graph is invalid'})
 
 
 class RouteQueryV1ByTeam(RequestHandler):
