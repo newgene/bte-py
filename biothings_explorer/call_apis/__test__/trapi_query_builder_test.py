@@ -1,3 +1,4 @@
+import json
 import unittest
 from ..builder.trapi_query_builder import TRAPIQueryBuilder
 
@@ -22,7 +23,8 @@ class TestTrapiQueryBuilder(unittest.TestCase):
         self.assertEqual(res['url'], 'https://google.com/query')
         #self.assertIn('timeout', res)
         #self.assertEqual(res['timeout'], 3000)
-        self.assertEqual(res['params']['message']['query_graph']['nodes']['n0']['ids'], ['123', '456'])
+        message = json.loads(res['data'])
+        self.assertEqual(message['query_graph']['nodes']['n0']['ids'], ['123', '456'])
         self.assertIn('biolink:Pathway', res['params']['message']['query_graph']['nodes']['n0']['categories'])
         self.assertIn('biolink:Gene', res['params']['message']['query_graph']['nodes']['n1']['categories'])
         self.assertIn('biolink:related_to', res['params']['message']['query_graph']['edges']['e01']['predicates'])

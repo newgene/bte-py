@@ -130,7 +130,7 @@ class QueryGraphHelper:
                 else:
                     return record['$input']['obj'][0].curies
         except Exception as e:
-            print(e)
+            print('_get_input_equivalent_ids', e)
             return None
 
     def _get_input_attributes(self, record):
@@ -158,7 +158,7 @@ class QueryGraphHelper:
                 else:
                     return record['$output']['obj'][0].curies
         except Exception as e:
-            print(e)
+            print('_get_output_equivalent_ids', e)
             return None
 
     def _get_output_attributes(self, record):

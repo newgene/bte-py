@@ -1,3 +1,6 @@
+import json
+
+
 class TRAPIQueryBuilder:
     def __init__(self, edge):
         self.start = 0
@@ -50,7 +53,8 @@ class TRAPIQueryBuilder:
         _input = self._get_input(self.edge)
         config = {
             'url': self._get_url(self.edge, _input),
-            'params': self._get_request_body(self.edge, _input),
+            #'params': json.dumps(self._get_request_body(self.edge, _input)),
+            'data': json.dumps(self._get_request_body(self.edge, _input)),
             'method': self.edge['query_operation'].get('method'),
             'headers': {
                 'Content-Type': 'application/json'

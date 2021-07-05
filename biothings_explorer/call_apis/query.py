@@ -34,6 +34,10 @@ class APIQueryDispatcher:
                     if response.status_code == 400:
                         res.append(None)
                         continue
+                    # TODO
+                    # find out why code lands here
+                    if response.status_code == 422:
+                        pass
                     data = response.json()
                 except Exception as e:
                     print(e)
@@ -47,6 +51,9 @@ class APIQueryDispatcher:
                 self.logs.append(LogEntry("DEBUG", None, "call-apis: This query needs to be paginated").get_log())
             #self.logs.append(LogEntry("DEBUG", None, f"call-apis: Succesfully made the following query: {str(query['config'])}").get_log())
             tf_obj = Transformer({'response': data, 'edge': edge})
+            # TODO
+            # data can sometimes have values like 'msg': 'field required' instead of actual data
+            # if this is the case the below function returns None
             transformed = tf_obj.transform()
             try:
                 self.logs.append(LogEntry("DEBUG", None, f"call-apis: After transformation, BTE is able to retrieve: {len(transformed)} hits!").get_log())
