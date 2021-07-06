@@ -30,7 +30,33 @@ class QueryResult:
             self._add_remaining_cached_query_results(cached_record['input_node_id'], results, result, cached_query_result_index + 1)
 
     def get_results(self):
-        return self.results
+        results = []
+        for output_node_id, cached_records in self.cached_query_results[0].items():
+            for cached_record in cached_records:
+                result = {
+                    'node_bindings': {
+                        cached_record['input_query_node_id']: [
+                            {
+                                'id': cached_record['input_node_id']
+                            }
+                        ],
+                        cached_record['output_query_node_id']: [
+                            {
+                                'id': cached_record['output_node_id']
+                            }
+                        ]
+                    },
+                    'edge_bindings': {
+                        cached_record['query_edge_id']: [
+                            {
+                                'id': cached_record['kg_edge_id']
+                            }
+                        ]
+                    }
+                }
+                results.append(result)
+                self._add_remaining_cached_query_results(cached_record['input_node_id'], results, result, 1)
+        return results
 
     def _create_node_bindings(self, record):
         return {
@@ -71,4 +97,4 @@ class QueryResult:
                     'output_node_id': output_node_id,
                 })
         # add items to the start of the array
-        self.cached_query_results = [*cached_query_result, *self.cached_query_results]
+        self.cached_query_results = [*cached_query_result.maps, *self.cached_query_results]

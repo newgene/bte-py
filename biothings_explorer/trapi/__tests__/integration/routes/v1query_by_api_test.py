@@ -70,3 +70,36 @@ class TestV1QueryByApiEndpoint(AsyncHTTPTestCase):
             data = json.loads(response.body.decode('utf-8'))
             self.assertIn('application/json', response.headers['Content-Type'])
             self.assertIn('CHEBI:32677', data['message']['knowledge_graph']['nodes'])
+            self.assertEqual(data['message']['knowledge_graph']['nodes']['CHEBI:32677']['attributes'][0]['value'], ["CHEBI:32677"])
+
+    def test_query_to_non_text_mining_kps_should_have_id_resolution_turned_on(self):
+        query_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__),
+                         os.pardir, os.pardir, os.pardir, 'examples', 'v1.1', 'serviceprovider', 'mychem.json'))
+        with open(query_path) as f:
+            query = json.load(f)
+            response = self.fetch('/v1/smartapi/8f08d1446e0bb9c2b323713ce83e2bd3/query', method='POST',
+                                  body=json.dumps(query))
+            self.assertEqual(response.code, 200)
+            data = json.loads(response.body.decode('utf-8'))
+            self.assertIn('application/json', response.headers['Content-Type'])
+            self.assertIn('NCBIGene:6530', data['message']['knowledge_graph']['nodes'])
+
+    # TODO
+    # tornado.util.TimeoutError: Operation timed out after 5 seconds
+    def test_query_to_text_mining_cooccurence_kp_should_be_correctly_paginated(self):
+        query_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__),
+                         os.pardir, os.pardir, os.pardir, 'examples', 'v1.1', 'textmining',
+                         'query_chemicals_related_to_disease.json'))
+        with open(query_path) as f:
+            query = json.load(f)
+            api_response = self.fetch('https://biothings.ncats.io/text_mining_co_occurrence_kp/query?q=object.id:%22MONDO:0005252%22%20AND%20subject.type:%22ChemicalSubstance%22')
+            api_data = json.loads(api_response.body.decode('utf-8'))
+            hits = api_data['total']
+            response = self.fetch('/v1/smartapi/5be0f321a829792e934545998b9c6afe/query', method='POST',
+                                  body=json.dumps(query))
+            data = json.loads(response.body.decode('utf-8'))
+            self.assertEqual(data['message']['knowledge_graph']['nodes']['CHEBI:26404']['attributes'][0]['value'],
+                             ['CHEBI:26404'])
+            self.assertEqual(len(data['message']['knowledge_graph']['nodes']), hits + 1)

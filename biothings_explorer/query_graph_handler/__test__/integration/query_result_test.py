@@ -77,9 +77,9 @@ class TestQueryResults(unittest.TestCase):
     def test_update_when_input_with_string_should_output_a_hash_of_40_characters(self):
         query_result = QueryResult()
         query_result.update([self.record])
-        self.assertEqual(len(query_result.results), 1)
-        self.assertIn('n1', query_result.results[0]['node_bindings'])
-        self.assertIn('e01', query_result.results[0]['edge_bindings'])
+        self.assertEqual(len(query_result.get_results()), 1)
+        self.assertIn('n1', query_result.get_results()[0]['node_bindings'])
+        self.assertIn('e01', query_result.get_results()[0]['edge_bindings'])
 
 
 class TestTwoRecords(unittest.TestCase):
@@ -197,3 +197,182 @@ class TestTwoRecords(unittest.TestCase):
         self.assertEqual(len(results[0]['edge_bindings']), 2)
         self.assertIn('e01', results[0]['edge_bindings'])
         self.assertIn('e02', results[0]['edge_bindings'])
+
+
+class TestThreeRecords(unittest.TestCase):
+    gene_node_start = QNode('n1', {'categories': 'Gene', 'ids': 'NCBIGene:3778'})
+    disease_node = QNode('n2', {'categories': 'Disease'})
+    gene_node_end1 = QNode('n3', {'categories': 'Gene'})
+    gene_node_end2 = QNode('n4', {'categories': 'Gene'})
+    edge1 = QEdge('e01', {'subject': gene_node_start, 'object': disease_node})
+    edge2 = QEdge('e02', {'subject': disease_node, 'object': gene_node_end1})
+    edge3 = QEdge('e03', {'subject': disease_node, 'object': gene_node_end2})
+
+    record1 = {
+        "$edge_metadata": {
+            "trapi_qEdge_obj": edge1,
+            "predicate": "biolink:gene_associated_with_condition",
+            "api_name": "Automat Pharos"
+        },
+        "publications": [
+            "PMID:123",
+            "PMID:1234"
+        ],
+        "$input": {
+            "original": "SYMBOL:KCNMA1",
+            "obj": [
+                {
+                    "primaryID": "NCBIGene:3778",
+                    "label": "KCNMA1",
+                    "dbIDs": {
+                        "SYMBOL": "KCNMA1",
+                        "NCBIGene": "3778"
+                    },
+                    "curies": [
+                        "SYMBOL:KCNMA1",
+                        "NCBIGene:3778"
+                    ]
+                }
+            ]
+        },
+        "$output": {
+            "original": "MONDO:0011122",
+            "obj": [
+                {
+                    "primaryID": "MONDO:0011122",
+                    "label": "obesity disorder",
+                    "dbIDs": {
+                        "MONDO": "0011122",
+                        "MESH": "D009765",
+                        "name": "obesity disorder"
+                    },
+                    "curies": [
+                        "MONDO:0011122",
+                        "MESH:D009765",
+                        "name:obesity disorder"
+                    ]
+                }
+            ]
+        }
+    }
+
+    record2 = {
+        "$edge_metadata": {
+            "trapi_qEdge_obj": edge2,
+            "predicate": "biolink:condition_associated_with_gene",
+            "api_name": "Automat Hetio"
+        },
+        "publications": [
+            "PMID:345",
+            "PMID:456"
+        ],
+        "$input": {
+            "original": "MONDO:0011122",
+            "obj": [
+                {
+                    "primaryID": "MONDO:0011122",
+                    "label": "obesity disorder",
+                    "dbIDs": {
+                        "MONDO": "0011122",
+                        "MESH": "D009765",
+                        "name": "obesity disorder"
+                    },
+                    "curies": [
+                        "MONDO:0011122",
+                        "MESH:D009765",
+                        "name:obesity disorder"
+                    ]
+                }
+            ]
+        },
+        "$output": {
+            "original": "SYMBOL:TULP3",
+            "obj": [
+                {
+                    "primaryID": "NCBIGene:7289",
+                    "label": "TULP3",
+                    "dbIDs": {
+                        "SYMBOL": "TULP3",
+                        "NCBIGene": "7289"
+                    },
+                    "curies": [
+                        "SYMBOL:TULP3",
+                        "NCBIGene:7289"
+                    ]
+                }
+            ]
+        }
+    }
+
+    record3 = {
+        "$edge_metadata": {
+            "trapi_qEdge_obj": edge3,
+            "predicate": "biolink:condition_associated_with_gene",
+            "api_name": "Automat Hetio"
+        },
+        "publications": [
+            "PMID:987",
+            "PMID:876"
+        ],
+        "$input": {
+            "original": "MONDO:0011122",
+            "obj": [
+                {
+                    "primaryID": "MONDO:0011122",
+                    "label": "obesity disorder",
+                    "dbIDs": {
+                        "MONDO": "0011122",
+                        "MESH": "D009765",
+                        "name": "obesity disorder"
+                    },
+                    "curies": [
+                        "MONDO:0011122",
+                        "MESH:D009765",
+                        "name:obesity disorder"
+                    ]
+                }
+            ]
+        },
+        "$output": {
+            "original": "SYMBOL:TECR",
+            "obj": [
+                {
+                    "primaryID": "NCBIGene:9524",
+                    "label": "TECR",
+                    "dbIDs": {
+                        "SYMBOL": "TECR",
+                        "NCBIGene": "9524"
+                    },
+                    "curies": [
+                        "SYMBOL:TECR",
+                        "NCBIGene:9524"
+                    ]
+                }
+            ]
+        }
+    }
+
+    def test_update_function_should_get_a_single_hop_followed_by_a_forked_second_hop(self):
+        query_result = QueryResult()
+        query_result.update([self.record1])
+        query_result.update([self.record2, self.record3])
+
+        results = query_result.get_results()
+        self.assertEqual(len(results), 2)
+        self.assertEqual(len(results[0]['node_bindings']), 3)
+        self.assertIn('n1', results[0]['node_bindings'])
+        self.assertIn('n2', results[0]['node_bindings'])
+        self.assertIn('n3', results[0]['node_bindings'])
+
+        self.assertEqual(len(results[0]['edge_bindings']), 2)
+        self.assertIn('e01', results[0]['edge_bindings'])
+        self.assertIn('e02', results[0]['edge_bindings'])
+
+        self.assertEqual(len(results[1]['node_bindings']), 3)
+        self.assertIn('n1', results[1]['node_bindings'])
+        self.assertIn('n2', results[1]['node_bindings'])
+        self.assertIn('n4', results[1]['node_bindings'])
+
+        self.assertEqual(len(results[1]['edge_bindings']), 2)
+        self.assertIn('e01', results[1]['edge_bindings'])
+        self.assertIn('e03', results[1]['edge_bindings'])

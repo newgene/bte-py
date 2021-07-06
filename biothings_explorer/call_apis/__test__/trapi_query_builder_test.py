@@ -23,8 +23,9 @@ class TestTrapiQueryBuilder(unittest.TestCase):
         self.assertEqual(res['url'], 'https://google.com/query')
         #self.assertIn('timeout', res)
         #self.assertEqual(res['timeout'], 3000)
-        message = json.loads(res['data'])
+        data = json.loads(res['data'])
+        message = data['message']
         self.assertEqual(message['query_graph']['nodes']['n0']['ids'], ['123', '456'])
-        self.assertIn('biolink:Pathway', res['params']['message']['query_graph']['nodes']['n0']['categories'])
-        self.assertIn('biolink:Gene', res['params']['message']['query_graph']['nodes']['n1']['categories'])
-        self.assertIn('biolink:related_to', res['params']['message']['query_graph']['edges']['e01']['predicates'])
+        self.assertIn('biolink:Pathway', message['query_graph']['nodes']['n0']['categories'])
+        self.assertIn('biolink:Gene', message['query_graph']['nodes']['n1']['categories'])
+        self.assertIn('biolink:related_to', message['query_graph']['edges']['e01']['predicates'])
