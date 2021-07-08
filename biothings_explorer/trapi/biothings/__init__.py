@@ -2,6 +2,7 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.options import define, options
 from tornado.web import Application
+from dotenv import load_dotenv
 from .views.v0.views import Predicates, RouteQueryByAPI
 from .views.v1.views import (
     RouteMetaKG,
@@ -16,7 +17,7 @@ from .views.v1.views import (
 from .views.metakg import RouteMetaKG2
 from .views.performance import RoutePerformance
 
-
+load_dotenv()
 define('port', default=8888, help='port to listen on')
 
 
