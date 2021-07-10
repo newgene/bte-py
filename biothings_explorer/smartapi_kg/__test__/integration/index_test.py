@@ -66,7 +66,6 @@ class TestConstructMetaKG(unittest.TestCase):
         self.assertEqual(meta_kg.ops[0]['association']['x-translator']['component'], 'KP')
         self.assertEqual(meta_kg.ops[4]['association']['x-translator']['component'], 'KP')
 
-    # Fails
     def test_construct_meta_kg_including_reasoner_tags(self):
         meta_kg = MetaKG()
         meta_kg.construct_MetaKG(True, {'smart_API_id': '912372f46127b79fb387cd2397203709'})
@@ -78,6 +77,9 @@ class TestConstructMetaKG(unittest.TestCase):
             self.assertEqual(op['query_operation']['path'], '/query')
             self.assertEqual(op['query_operation']['method'], 'post')
 
+    # ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate
+    # happens when GETting this endpoint 'https://openpredict.semanticscience.org/predicates'
+    # patched it by doing insecure requests anyways
     def test_construct_meta_kg_including_reasoner_tags_with_no_restrictions(self):
         meta_kg = MetaKG()
         meta_kg.construct_MetaKG(True, {})

@@ -66,7 +66,8 @@ class AsyncOperationsBuilderWithReasoner(AsyncOperationsBuilder):
             # sometimes the request is in chunked mode but we can't know beforehand
             # so we expect chunks first, if that fails fallback to regular get request
             try:
-                with requests.get(self.construct_query_url(metadata['url']), stream=True) as response:
+                # Using verify=False to bypass SSL: CERTIFICATE_VERIFY_FAILED error on some specific requests
+                with requests.get(self.construct_query_url(metadata['url']), stream=True, verify=False) as response:
                     if response.status_code == 200:
                         data_str = ''
                         for chunk in (response.raw.read_chunked()):

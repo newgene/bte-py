@@ -17,13 +17,14 @@ class TestV1_1Endpoints(AsyncHTTPTestCase):
         data = json.loads(response.body.decode('utf-8'))
         self.assertIn('application/json', response.headers['Content-Type'])
         self.assertIn('nodes', data)
-        self.assertIn('nodes.biolink:Gene', data)
-        self.assertIn('nodes.biolink:Gene.id_prefixes', data)
+        self.assertIn('biolink:Gene', data['nodes'])
+        self.assertIn('id_prefixes', data['nodes']['biolink:Gene'])
         self.assertIn('edges', data)
         assertion_item = {
             "subject": "biolink:ChemicalSubstance",
             "predicate": "biolink:entity_positively_regulates_entity",
             "object": "biolink:Gene"
-          }
+        }
         # check if this "assertion_item" object is a subset on any of the data['edges'] items
-        self.assertTrue(any([True if all(dict_item in item.items() for dict_item in assertion_item.items()) else False for item in data['edges']]))
+        check_for_subset = [True if assertion_item.items() <= item.items() else False for item in data['edges']]
+        self.assertTrue(any(check_for_subset))

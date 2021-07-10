@@ -16,6 +16,7 @@ from .views.v1.views import (
 )
 from .views.metakg import RouteMetaKG2
 from .views.performance import RoutePerformance
+from .views.frontpage import RouteFrontPage
 
 load_dotenv()
 define('port', default=8888, help='port to listen on')
@@ -23,6 +24,7 @@ define('port', default=8888, help='port to listen on')
 
 def make_app():
     app = Application([
+        ('/', RouteFrontPage),
         ('/v0/predicates', Predicates),
         (r"/v0/smartapi/([^/]*)/predicates", RouteQueryByAPI),
         ('/v1/meta_knowledge_graph', RouteMetaKG),
