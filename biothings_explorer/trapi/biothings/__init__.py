@@ -36,7 +36,7 @@ def make_app():
         (r"/v1/smartapi/([^/]*)/query", RouteQueryV1ByAPI),
         (r"/v1/team/([^/]*)/query", RouteQueryV1ByTeam),
         # TODO the /metakg endpoint throws error when no params are passed
-        (r"/v1/metakg(?P<subject>\w+)?(?P<object>\w+)?(?P<predicate>\w+)?(?P<api>\w+)?(?P<provided_by>\w+)?", RouteMetaKG2),
+        (r"/metakg(?P<subject>\w+)?(?P<object>\w+)?(?P<predicate>\w+)?(?P<api>\w+)?(?P<provided_by>\w+)?", RouteMetaKG2),
         ('/v1/performance', RoutePerformance),
     ])
     http_server = HTTPServer(app)

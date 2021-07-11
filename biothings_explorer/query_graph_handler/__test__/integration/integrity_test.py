@@ -34,7 +34,8 @@ class TestTRAPIQueryHandler(unittest.TestCase):
             res = query_handler.get_response()
             self.assertIn('NCBIGene:111', res['message']['knowledge_graph']['nodes'])
 
-    def test_when_looking_for_chemicals_targeting_il1_signaling_atway_curcumin_should_pop_up(self):
+    # Can fail sometimes during testing, also slow to finish
+    def test_when_looking_for_chemicals_targeting_il1_signaling_patway_curcumin_should_pop_up(self):
         query_handler = TRAPIQueryHandler({}, None, None, True)
         with open(self.example_folder3) as f1:
             query = json.load(f1)

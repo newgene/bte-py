@@ -69,7 +69,7 @@ class MetaKnowledgeGraphHandler:
         for op in kg.ops:
             _input = self._modify_category(op['association']['input_type'])
             output = self._modify_category(op['association']['output_type'])
-            pred = self._modify_category(op['association']['predicate'])
+            pred = self._modify_predicate(op['association']['predicate'])
             if _input not in predicates:
                 predicates[_input] = {}
             if output not in predicates[_input]:
