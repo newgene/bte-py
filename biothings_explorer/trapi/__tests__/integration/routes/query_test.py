@@ -58,6 +58,7 @@ class TestQueryEndpoint(AsyncHTTPTestCase):
 
     # TODO FIX ME: there is a problem with the query returning no results, probably has to do with
     # the query_graph_handler package
+    # js package also fails on this test
     def test_multi_hop_query_results_should_have_combined_edges(self):
         query_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
