@@ -86,7 +86,8 @@ class TestV1QueryByApiEndpoint(AsyncHTTPTestCase):
             self.assertIn('NCBIGene:6530', data['message']['knowledge_graph']['nodes'])
 
     # TODO FIX ME
-    # tornado.simple_httpclient.HTTPTimeoutError: Timeout during request
+    # returns 400
+    # index out of range error from the query_graph_handler package
     def test_query_to_text_mining_cooccurence_kp_should_be_correctly_paginated(self):
         query_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),

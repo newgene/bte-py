@@ -1,6 +1,7 @@
 import json
 import os
 from biothings_explorer.smartapi_kg.metakg import MetaKG
+from biothings_explorer.trapi.utils.errors.predicates_error import PredicatesLoadingError
 from .utils import camel_to_snake
 
 
@@ -26,10 +27,10 @@ class MetaKnowledgeGraphHandler:
             else:
                 kg.construct_MetaKG_sync(True, {})
             if len(kg.ops) == 0:
-                raise Exception('Not found - 0 operations')
+                raise PredicatesLoadingError('Not found - 0 operations')
             return kg
         except Exception as e:
-            raise Exception('Failed to load MetaKG')
+            raise PredicatesLoadingError(f"Failed to load MetaKG {str(e)}")
 
     def _modify_category(self, category):
         if category.startswith('biolink:'):

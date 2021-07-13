@@ -78,7 +78,6 @@ class V1RouteQuery(RouteQueryTest):
 class RouteQueryV1ByAPI(RequestHandler):
     def post(self, slug):
         try:
-
             self.set_header('Content-Type', 'application/json')
             data = json.loads(self.request.body)
             query_graph = data['message']['query_graph']
