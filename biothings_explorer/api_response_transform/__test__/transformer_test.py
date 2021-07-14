@@ -8,6 +8,7 @@ from biothings_explorer.api_response_transform.transformers.transformer import B
 
 class TestOpentargetTransformer(unittest.TestCase):
     def setUp(self):
+        # TODO can throw urllib3.exceptions.MaxRetryError error
         res = requests.get('https://platform-api.opentargets.io/v3/platform/public/evidence/filter?target=ENSG00000088832&size=100&fields=drug&datasource=chembl')
         self.api_response = res.json()
 
