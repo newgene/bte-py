@@ -4,6 +4,7 @@ import os
 from biothings_explorer.trapi.biothings.controllers.meta_knowledge_graph import MetaKnowledgeGraphHandler
 from biothings_explorer.trapi.biothings.controllers.predicates import PredicatesHandler
 from biothings_explorer.query_graph_handler.index import TRAPIQueryHandler
+from biothings_explorer.trapi.utils.errors.predicates_error import PredicatesLoadingError
 from .config import API_LIST
 from biothings_explorer.trapi.utils.common import remove_quotes_from_query
 from biothings_explorer.trapi.biothings.controllers.association import association
@@ -12,18 +13,26 @@ import json
 
 class RouteMetaKG(RequestHandler):
     def get(self):
-        self.set_header('Content-Type', 'application/json')
-        meta_kg_handler = MetaKnowledgeGraphHandler(None)
-        kg = meta_kg_handler.get_kg()
-        self.write(json.dumps(kg))
+        try:
+            self.set_header('Content-Type', 'application/json')
+            meta_kg_handler = MetaKnowledgeGraphHandler(None)
+            kg = meta_kg_handler.get_kg()
+            self.write(json.dumps(kg))
+        except PredicatesLoadingError as e:
+            self.set_status(404)
+            self.write(json.dumps(e.args[0]))
 
 
 class RouteMetaKGByAPI(RequestHandler):
     def get(self, slug):
-        self.set_header('Content-Type', 'application/json')
-        meta_kg_handler = MetaKnowledgeGraphHandler(slug)
-        kg = meta_kg_handler.get_kg()
-        self.write(json.dumps(kg))
+        try:
+            self.set_header('Content-Type', 'application/json')
+            meta_kg_handler = MetaKnowledgeGraphHandler(slug)
+            kg = meta_kg_handler.get_kg()
+            self.write(json.dumps(kg))
+        except PredicatesLoadingError as e:
+            self.set_status(404)
+            self.write(json.dumps(e.args[0]))
 
 
 class RouteMetaKGByTeam(RequestHandler):

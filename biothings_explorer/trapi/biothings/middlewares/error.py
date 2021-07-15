@@ -18,3 +18,7 @@ class BadRequest(EndRequest):
         super().__init__(400, log_message, *args, **kwargs)
         self.kwargs = dict(kwargs) or {}
         self.kwargs.pop('reason', None)
+
+
+class PredicatesLoadingError(Exception):
+    pass

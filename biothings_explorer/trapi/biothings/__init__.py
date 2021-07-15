@@ -35,7 +35,6 @@ def make_app():
         ('/v1/query', V1RouteQuery),
         (r"/v1/smartapi/([^/]*)/query", RouteQueryV1ByAPI),
         (r"/v1/team/([^/]*)/query", RouteQueryV1ByTeam),
-        # TODO the /metakg endpoint throws error when no params are passed
         (r"/metakg", RouteMetaKG2),
         ('/v1/performance', RoutePerformance),
     ])

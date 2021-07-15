@@ -27,10 +27,16 @@ class MetaKnowledgeGraphHandler:
             else:
                 kg.construct_MetaKG_sync(True, {})
             if len(kg.ops) == 0:
-                raise PredicatesLoadingError('Not found - 0 operations')
+                raise PredicatesLoadingError({
+                    'error': 'Unable to load predicates',
+                    'more_info': 'Not Found - 0 operations'
+                })
             return kg
-        except Exception as e:
-            raise PredicatesLoadingError(f"Failed to load MetaKG {str(e)}")
+        except PredicatesLoadingError as e:
+            raise PredicatesLoadingError({
+                'error': 'Unable to load predicates',
+                'more_info': f"Failed to Load MetaKG: PredicatesLoadingError: {e.args[0]['more_info']}"
+            })
 
     def _modify_category(self, category):
         if category.startswith('biolink:'):

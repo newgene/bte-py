@@ -75,7 +75,7 @@ class AsyncOperationsBuilderWithReasoner(AsyncOperationsBuilder):
                         data = json.loads(data_str)
                         return self.parse_predicate_endpoint(data, metadata)
             except ResponseNotChunked:
-                response = requests.get(self.construct_query_url(metadata['url']))
+                response = requests.get(self.construct_query_url(metadata['url']), verify=False)
                 data = response.json()
                 return self.parse_predicate_endpoint(data, metadata)
             except Exception as e:
