@@ -31,43 +31,36 @@ class QueryResult:
 
     def get_results(self):
         results = []
-        for output_node_id, cached_records in self.cached_query_results[0].items():
-            for cached_record in cached_records:
-                result = {
-                    'node_bindings': {
-                        cached_record['input_query_node_id']: [
-                            {
-                                'id': cached_record['input_node_id']
-                            }
-                        ],
-                        cached_record['output_query_node_id']: [
-                            {
-                                'id': cached_record['output_node_id']
-                            }
-                        ]
-                    },
-                    'edge_bindings': {
-                        cached_record['query_edge_id']: [
-                            {
-                                'id': cached_record['kg_edge_id']
-                            }
-                        ]
+        try:
+            for output_node_id, cached_records in self.cached_query_results[0].items():
+                for cached_record in cached_records:
+                    result = {
+                        'node_bindings': {
+                            cached_record['input_query_node_id']: [
+                                {
+                                    'id': cached_record['input_node_id']
+                                }
+                            ],
+                            cached_record['output_query_node_id']: [
+                                {
+                                    'id': cached_record['output_node_id']
+                                }
+                            ]
+                        },
+                        'edge_bindings': {
+                            cached_record['query_edge_id']: [
+                                {
+                                    'id': cached_record['kg_edge_id']
+                                }
+                            ]
+                        },
+                        'score': '1.0'
                     }
-                }
-                results.append(result)
-                self._add_remaining_cached_query_results(cached_record['input_node_id'], results, result, 1)
+                    results.append(result)
+                    self._add_remaining_cached_query_results(cached_record['input_node_id'], results, result, 1)
+        except IndexError as e:
+            pass
         return results
-
-    def _create_node_bindings(self, record):
-        return {
-            helper._get_input_query_node_id(record): [{'id': helper._get_input_id(record)}],
-            helper._get_output_query_node_id(record): [{'id': helper._get_output_id(record)}]
-        }
-
-    def _create_edge_bindings(self, record):
-        return {
-            record['$edge_metadata']['trapi_qEdge_obj'].get_id(): [{'id': helper._get_kg_edge_id(record)}]
-        }
 
     def update(self, query_result):
         if len(self.cached_query_results) > 0:

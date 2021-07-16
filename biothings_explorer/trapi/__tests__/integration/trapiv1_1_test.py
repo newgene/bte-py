@@ -163,7 +163,7 @@ class TestV1_1Endpoints(AsyncHTTPTestCase):
             self.assertEqual(data['error'], 'Your input query graph is invalid')
 
     # TODO
-    # throws list index out of range
+    # node not in nodes, issue with the query_graph_handler package
     def test_post_v1_query_with_disease2gene_query(self):
         disease2gene_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
@@ -182,7 +182,7 @@ class TestV1_1Endpoints(AsyncHTTPTestCase):
             self.assertIn('MONDO:0005737', data['message']['knowledge_graph']['nodes'])
 
     # TODO
-    # throws list index out of range
+    # node not in nodes, issue with the query_graph_handler package
     def test_post_v1_query_with_query_that_doesnt_provide_input_category(self):
         query_without_category_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),

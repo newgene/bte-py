@@ -1,6 +1,7 @@
 import os
 import re
 from biothings_explorer.smartapi_kg.metakg import MetaKG
+from biothings_explorer.trapi.utils.errors.predicates_error import PredicatesLoadingError
 from .utils import camel_to_snake
 
 
@@ -25,10 +26,16 @@ class PredicatesHandler:
             else:
                 kg.construct_MetaKG_sync(True, {})
             if len(kg.ops) == 0:
-                raise Exception('Failed to Load MetaKG')
+                raise PredicatesLoadingError({
+                    'error': 'Unable to load predicates',
+                    'more_info': ""
+                })
             return kg
         except Exception as e:
-            raise Exception('Failed to Load MetaKG')
+            raise PredicatesLoadingError({
+                'error': 'Unable to load predicates',
+                'more_info': f"Failed to Load MetaKG: PredicatesLoadingError: {e.args[0]['more_info']}"
+            })
 
     def _modify_category(self, category):
         if category.startswith('biolink:'):

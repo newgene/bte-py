@@ -7,15 +7,9 @@ import os
 
 
 class TestV1QueryByTeamEndpoint(AsyncHTTPTestCase):
-    # def __init__(self):
-    #     self.__timeout = 2500
-    #     super().__init__()
 
     def get_app(self):
         return make_test_app()
-
-    def get_new_ioloop(self):
-        return ioloop.IOLoop.instance()
 
     def test_input_query_graph_that_doesnt_pass_swagger_validation_return_400(self):
         invalid_input_query_graph = {

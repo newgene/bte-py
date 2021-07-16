@@ -60,26 +60,13 @@ class TestQueryResults(unittest.TestCase):
         }
     }
 
-    def test_create_node_bindings_when_input_with_string_should_output_a_has_of_40_characters(self):
-        query_result = QueryResult()
-        res = query_result._create_node_bindings(self.record)
-        self.assertIn('n1', res)
-        self.assertIn('n2', res)
-        self.assertEqual('NCBIGene:632', res['n1'][0]['id'])
-        self.assertEqual('CHEMBL.COMPOUND:CHEMBL1200983', res['n2'][0]['id'])
-
-    def test_create_edge_bindings_when_input_with_string_should_output_a_hash_of_40_characters(self):
-        query_result = QueryResult()
-        res = query_result._create_edge_bindings(self.record)
-        self.assertIn('e01', res)
-        self.assertEqual(len(res['e01']), 1)
-
     def test_update_when_input_with_string_should_output_a_hash_of_40_characters(self):
         query_result = QueryResult()
         query_result.update([self.record])
         self.assertEqual(len(query_result.get_results()), 1)
         self.assertIn('n1', query_result.get_results()[0]['node_bindings'])
         self.assertIn('e01', query_result.get_results()[0]['edge_bindings'])
+        self.assertIn('score', query_result.get_results()[0])
 
 
 class TestTwoRecords(unittest.TestCase):
