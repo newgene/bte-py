@@ -66,14 +66,6 @@ class TRAPIQueryHandler:
 
     def query(self):
         self._initialize_response()
-        smartapi_id = None
-        if hasattr(self, 'smartapi_id'):
-            smartapi_id = self.smartapi_id
-
-        team = None
-        if hasattr(self, 'team'):
-            team = self.team
-
         kg = self._load_meta_kg()
         query_paths = self._process_query_graph(self.query_graph)
         handlers = self._create_batch_edge_query_handlers(query_paths, kg)
