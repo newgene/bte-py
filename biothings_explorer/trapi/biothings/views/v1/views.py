@@ -73,7 +73,7 @@ class V1RouteQuery(RouteQueryTest):
             data = json.loads(self.request.body)
             query_graph = data['message']['query_graph']
             smartapi_path = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
+                os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'data', 'smartapi_specs.json'))
             handler = TRAPIQueryHandler({'api_names': API_LIST}, smartapi_path)
             handler.set_query_graph(query_graph)
             handler.query()
@@ -93,7 +93,7 @@ class RouteQueryV1ByAPI(RequestHandler):
             enableIDResolution = False if slug in ['5be0f321a829792e934545998b9c6afe',
                                                    '978fe380a147a8641caf72320862697b'] else True
             smartapi_path = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
+                os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'data', 'smartapi_specs.json'))
 
             handler = TRAPIQueryHandler(
                 {
@@ -121,7 +121,7 @@ class RouteQueryV1ByTeam(RequestHandler):
             query_graph = data['message']['query_graph']
             enableIDResolution = False if slug == 'Text Mining Provider' else True
             smartapi_path = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'test', 'smartapi.json'))
+                os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'data', 'smartapi_specs.json'))
             handler = TRAPIQueryHandler(
                 {
                     'teamName': slug,
