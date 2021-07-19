@@ -11,7 +11,7 @@ class SyncOperationsBuilder(BaseOperationsBuilder):
 
     def build(self):
         specs = sync_loader_factory(
-            self._options.get('smart_API_id'),
+            self._options.get('smart_API_id') or self._options.get('smartAPIID'),
             self._options.get('team_name') or self._options.get('teamName'),
             self._options.get('tag'),
             self._options.get('component'),

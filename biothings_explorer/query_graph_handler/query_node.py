@@ -6,8 +6,8 @@ from .biolink import BioLinkModelInstance
 class QNode:
     def __init__(self, _id, info):
         self.id = _id
-        self.category = info.get('categories') or 'NamedThing'
-        self.curie = info.get('ids')
+        self.category = info.get('categories') or info.get('category') or 'NamedThing'
+        self.curie = info.get('ids') or info.get('id')
 
     def get_id(self):
         return self.id

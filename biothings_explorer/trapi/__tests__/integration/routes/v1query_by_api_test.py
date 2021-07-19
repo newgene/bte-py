@@ -57,7 +57,6 @@ class TestV1QueryByApiEndpoint(AsyncHTTPTestCase):
             self.assertIn('application/json', response.headers['Content-Type'])
             self.assertEqual(data['error'], 'Your input query graph is invalid')
 
-    # TODO: fix me
     def test_query_to_text_mining_targeted_association_kp_should_have_id_resolution_turned_off(self):
         query_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
@@ -72,6 +71,7 @@ class TestV1QueryByApiEndpoint(AsyncHTTPTestCase):
             self.assertIn('CHEBI:32677', data['message']['knowledge_graph']['nodes'])
             self.assertEqual(data['message']['knowledge_graph']['nodes']['CHEBI:32677']['attributes'][0]['value'], ["CHEBI:32677"])
 
+    # TODO FIX ME tornado.simple_httpclient.HTTPTimeoutError: Timeout during request
     def test_query_to_non_text_mining_kps_should_have_id_resolution_turned_on(self):
         query_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
@@ -87,7 +87,7 @@ class TestV1QueryByApiEndpoint(AsyncHTTPTestCase):
 
     # TODO FIX ME
     # returns 400
-    # index out of range error from the query_graph_handler package
+    # 'message' not found in data
     def test_query_to_text_mining_cooccurence_kp_should_be_correctly_paginated(self):
         query_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),

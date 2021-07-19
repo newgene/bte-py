@@ -45,6 +45,9 @@ class BatchEdgeQueryHandler:
                     filtered.append(item)
         return filtered
 
+    # TODO: q_edges is an empty list when running
+    # test_query_to_text_mining_cooccurence_kp_should_be_correctly_paginated test
+    # one q_edge should be present
     def query(self, q_edges):
         node_update = NodesUpdateHandler(q_edges)
         node_update.set_equivalent_ids(q_edges)
