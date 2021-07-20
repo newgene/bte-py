@@ -68,20 +68,15 @@ class RouteQueryTest(RequestHandler):
 
 class V1RouteQuery(RouteQueryTest):
     def post(self):
-        try:
-            self.set_header('Content-Type', 'application/json')
-            data = json.loads(self.request.body)
-            query_graph = data['message']['query_graph']
-            smartapi_path = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'data', 'smartapi_specs.json'))
-            handler = TRAPIQueryHandler({'api_names': API_LIST}, smartapi_path)
-            handler.set_query_graph(query_graph)
-            handler.query()
-            self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))
-        except Exception as e:
-            print(e)
-            self.set_status(400)
-            self.write({'error': 'Your input query graph is invalid'})
+        self.set_header('Content-Type', 'application/json')
+        data = json.loads(self.request.body)
+        query_graph = data['message']['query_graph']
+        smartapi_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'data', 'smartapi_specs.json'))
+        handler = TRAPIQueryHandler({'api_names': API_LIST}, smartapi_path)
+        handler.set_query_graph(query_graph)
+        handler.query()
+        self.write(json.dumps(handler.get_response(), indent=4, sort_keys=True, default=str))
 
 
 class RouteQueryV1ByAPI(RequestHandler):

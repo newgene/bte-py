@@ -43,9 +43,9 @@ class APIQueryDispatcher:
                     print(e)
                     res.append(None)
                     continue
-            except requests.exceptions.HTTPError as e:
+            except Exception as e:
                 self.logs.append(LogEntry("ERROR", None, f"call-apis: Failed to make to following query: {str(config)}. The error is {str(e)}").get_log())
-                return None
+                continue
             edge = query.edge
             if query.need_pagination(data):
                 self.logs.append(LogEntry("DEBUG", None, "call-apis: This query needs to be paginated").get_log())

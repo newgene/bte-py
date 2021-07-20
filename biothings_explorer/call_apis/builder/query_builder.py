@@ -84,6 +84,8 @@ class QueryBuilder:
     def get_next(self):
         self.start += 1000
         config = self.construct_request_config()
+        if not config.get('params'):
+            config['params'] = {}
         config['params']['from'] = self.start
         self.config = config
         return config

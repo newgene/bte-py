@@ -71,7 +71,6 @@ class TestV1QueryByApiEndpoint(AsyncHTTPTestCase):
             self.assertIn('CHEBI:32677', data['message']['knowledge_graph']['nodes'])
             self.assertEqual(data['message']['knowledge_graph']['nodes']['CHEBI:32677']['attributes'][0]['value'], ["CHEBI:32677"])
 
-    # TODO FIX ME tornado.simple_httpclient.HTTPTimeoutError: Timeout during request
     def test_query_to_non_text_mining_kps_should_have_id_resolution_turned_on(self):
         query_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
@@ -85,9 +84,6 @@ class TestV1QueryByApiEndpoint(AsyncHTTPTestCase):
             self.assertIn('application/json', response.headers['Content-Type'])
             self.assertIn('NCBIGene:6530', data['message']['knowledge_graph']['nodes'])
 
-    # TODO FIX ME
-    # returns 400
-    # 'message' not found in data
     def test_query_to_text_mining_cooccurence_kp_should_be_correctly_paginated(self):
         query_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
@@ -101,8 +97,6 @@ class TestV1QueryByApiEndpoint(AsyncHTTPTestCase):
             response = self.fetch('/v1/smartapi/5be0f321a829792e934545998b9c6afe/query', method='POST',
                                   body=json.dumps(query), connect_timeout=360, request_timeout=360)
             data = json.loads(response.body.decode('utf-8'))
-            # nodes should be 3k+ items not 300
-            # query_results are empty, might have to do something with the updates to the query_graph_handler package
             self.assertEqual(data['message']['knowledge_graph']['nodes']['CHEBI:26404']['attributes'][0]['value'],
                              ['CHEBI:26404'])
             self.assertEqual(len(data['message']['knowledge_graph']['nodes']), hits + 1)
