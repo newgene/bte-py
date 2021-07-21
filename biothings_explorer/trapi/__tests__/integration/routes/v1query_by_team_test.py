@@ -109,7 +109,7 @@ class TestV1QueryByTeamEndpoint(AsyncHTTPTestCase):
         hits = api_data['total']
         with open(query_path) as f:
             query = json.load(f)
-            response = self.fetch('/v1/team/Text%20Mining%20Provider/query', method='POST', body=json.dumps(query))
+            response = self.fetch('/v1/team/Text%20Mining%20Provider/query', method='POST', body=json.dumps(query), request_timeout=5000)
             self.assertEqual(response.code, 200)
             self.assertIn('application/json', response.headers['Content-Type'])
             data = json.loads(response.body.decode('utf-8'))
