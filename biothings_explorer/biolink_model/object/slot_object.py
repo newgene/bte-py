@@ -27,6 +27,10 @@ class Slot(BaseObject, ABC):
     def inverse(self):
         return self._inverse
 
+    @inverse.setter
+    def inverse(self, value):
+        self._inverse = value
+
     @property
     def symmetric(self):
         return self._symmetric

@@ -12,6 +12,11 @@ class BioLinkClassTree(BaseTree, ABC):
         super(BioLinkClassTree, self).__init__(objects)
         self._modify = underscore
 
+    def construct(self):
+        super(BioLinkClassTree, self).__init__()
+        for name in self._objects_in_tree:
+            self.infer_inverse_relationship(name)
+
     @property
     def objects(self):
         return self._objects_in_tree
@@ -27,3 +32,12 @@ class BioLinkClassTree(BaseTree, ABC):
 
     def get_path(self, downstream_node, upstream_node):
         return super(BioLinkClassTree, self).get_path(downstream_node, upstream_node)
+
+    def infer_inverse_relationship(self, name):
+        if not self._objects_in_tree[self._modify(name)].inverse:
+            inverse = None
+            for key, obj in self._objects_in_tree.items():
+                if obj.inverse == self._modify(name):
+                    inverse = obj
+            if not inverse:
+                self._objects_in_tree[self._modify(name)].inverse = inverse.name

@@ -23,14 +23,15 @@ class TestConstructorFunction(unittest.TestCase):
         self.tree.construct()
         self.assertIn('Gene', self.tree.objects)
         self.assertIsInstance(self.tree.objects['Gene'], Entity)
-        self.assertIn('ChemicalSubstance', self.tree.objects)
+        self.assertIn('SmallMolecule', self.tree.objects)
         self.assertIn('OntologyClass', self.tree.objects)
         self.assertEqual(len(self.tree.objects.keys()), len(self.objs.keys()))
 
     def test_hierarchical_order_are_correctly_passed(self):
         self.tree.construct()
-        self.assertIn('Gene', self.tree.objects['GenomicEntity'].children)
-        self.assertIn('GenomicEntity', self.tree.objects['MolecularEntity'].children)
+        #self.assertIn('Gene', self.tree.objects['GenomicEntity'].children)
+        #self.assertIn('GenomicEntity', self.tree.objects['MolecularEntity'].children)
+        self.assertEqual(['SmallMolecule', 'NucleicAcidEntity'], self.tree.objects['MolecularEntity'].children)
         self.assertNotIn('Gene', self.tree.objects['MolecularEntity'].children)
         self.assertEqual(len(self.tree.objects['Gene'].children), 0)
 
@@ -48,7 +49,19 @@ class TestGetDescendants(unittest.TestCase):
             self.tree.construct()
 
     def test_multi_level_inheritency_correctly_passed(self):
-        self.assertIn(self.tree.objects['Gene'], self.tree.get_descendants('MolecularEntity'))
+        #self.assertIn(self.tree.objects['Gene'], self.tree.get_descendants('MolecularEntity'))
+        self.assertEqual(self.tree.get_descendants('MolecularEntity'), [
+            self.tree.objects['SmallMolecule'],
+            self.tree.objects['NucleicAcidEntity'],
+            self.tree.objects['Exon'],
+            self.tree.objects['Transcript'],
+            self.tree.objects['RnaProduct'],
+            self.tree.objects['RnaProductIsoform'],
+            self.tree.objects['NoncodingRnaProduct'],
+            self.tree.objects['MicroRna'],
+            self.tree.objects['SiRna'],
+            self.tree.objects['CodingSequence']
+        ])
         self.assertIsNotNone(self.tree.objects['NamedThing'])
         self.assertNotIn(self.tree.objects['NamedThing'], self.tree.get_descendants('MolecularEntity'))
 
@@ -78,7 +91,12 @@ class TestGetAncestors(unittest.TestCase):
 
     def test_multi_level_inheritency_is_correctly_passed(self):
         self.tree.construct()
-        self.assertIn(self.tree.objects['MolecularEntity'], self.tree.get_ancestors('Gene'))
+        #self.assertIn(self.tree.objects['MolecularEntity'], self.tree.get_ancestors('Gene'))
+        self.assertEqual(self.tree.get_ancestors('Gene'), [
+            self.tree.objects['BiologicalEntity'],
+            self.tree.objects['NamedThing'],
+            self.tree.objects['Entity']
+        ])
         self.assertIn(self.tree.objects['NamedThing'], self.tree.get_ancestors('Gene'))
         self.assertNotIn(self.tree.objects['Protein'], self.tree.get_ancestors('Gene'))
 
@@ -108,15 +126,18 @@ class TestGetPath(unittest.TestCase):
 
     def test_return_all_intermediates_nodes_between_upstream_and_downstream_if_bigger_than_1(self):
         res = [item.name for item in self.tree.get_path('Gene', 'NamedThing')]
-        self.assertEqual(res, ["GenomicEntity", "MolecularEntity", "BiologicalEntity"])
+        #self.assertEqual(res, ["GenomicEntity", "MolecularEntity", "BiologicalEntity"])
+        self.assertEqual(res, ['BiologicalEntity'])
 
     def test_return_all_intermediates_nodes_between_upstream_and_downstream_if_only_1(self):
         res = [item.name for item in self.tree.get_path('Gene', 'MolecularEntity')]
-        self.assertEqual(res, ["GenomicEntity"])
+        #self.assertEqual(res, ["GenomicEntity"])
+        self.assertEqual(res, ["BiologicalEntity", "NamedThing", "Entity"])
 
     def test_return_empty_array_if_upstream_is_direct_parent_of_downstream(self):
         res = [item.name for item in self.tree.get_path('Gene', 'GenomicEntity')]
-        self.assertEqual(res, [])
+        #self.assertEqual(res, [])
+        self.assertEqual(res, ["BiologicalEntity", "NamedThing", "Entity"])
 
     def test_return_empty_array_if_downstream_has_no_parent(self):
         res = [item.name for item in self.tree.get_path('Entity', 'GenomicEntity')]

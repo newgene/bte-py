@@ -31,7 +31,17 @@ class TestConstructFunction(unittest.TestCase):
         self.assertIn('negatively_regulates', self.tree.objects['regulates'].children)
         self.assertIn('disrupted_by', self.tree.objects['affected_by'].children)
         self.assertNotIn('negatively_regulates', self.tree.objects['affected_by'].children)
-        self.assertEqual(len(self.tree.objects['negatively_regulates'].children), 0)
+        self.assertEqual(len(self.tree.objects['negatively_regulates'].children), 2)
+        self.assertEqual(self.tree.objects['negatively_regulates'].children, [
+            'process_negatively_regulates_process',
+            'entity_negatively_regulates_entity',
+        ])
+
+    def test_non_explicit_inverses_are_correctly_inferred(self):
+        self.tree.construct()
+        self.assertEqual('condition_associated_with_gene', self.tree.objects['gene_associated_with_condition'].inverse)
+        self.assertEqual('approved_for_treatment_by', self.tree.objects['approved_to_treat'].inverse)
+        self.assertEqual('has_catalyst', self.tree.objects['catalyzes'].inverse)
 
 
 class TestGetDescendantsFunction(unittest.TestCase):
@@ -51,7 +61,7 @@ class TestGetDescendantsFunction(unittest.TestCase):
         self.assertNotIn(self.tree.objects['related_to'], self.tree.get_descendants('superclass_of'))
 
     def test_entity_without_descendants_should_return_empty_array(self):
-        self.assertEqual(len(self.tree.get_descendants('negatively_regulates')), 0)
+        self.assertEqual(len(self.tree.get_descendants('process_positively_regulated_by_process')), 0)
         self.assertEqual(len(self.tree.get_descendants('superclass_of')), 0)
 
     def test_entity_not_in_the_tree_should_throw_an_error(self):

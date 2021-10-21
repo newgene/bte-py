@@ -20,6 +20,8 @@ class Entity(BaseObject, ABC):
         if self._name == 'Gene':
             self._id_prefixes = ['SYMBOL', 'OMIM', 'UMLS', *id_prefixes]
         elif self._name == 'ChemicalSubstance':
+            self._id_prefixes = ['UMLS'] if not id_prefixes else ['UMLS', *id_prefixes]
+        elif self._name == 'SmallMolecule':
             self._id_prefixes = ['UMLS', *id_prefixes]
         elif self._name == 'Disease':
             self._id_prefixes = ['GARD', *id_prefixes]

@@ -12,7 +12,6 @@ class BaseTree(ABC):
         self._objects_in_tree = {}
         self._modify = lambda _input: _input
 
-
     @property
     def objects(self):
         return self._objects_in_tree
@@ -35,12 +34,18 @@ class BaseTree(ABC):
         for name in self._objects_in_yaml:
             self.add_new_object_to_tree(name)
         for name in self._objects_in_yaml:
+            thisobj = self._objects_in_yaml[name]
             if 'is_a' in self._objects_in_yaml[name]:
                 try:
-                    self._objects_in_tree.get(self._modify(self._objects_in_yaml.get(name, {})['is_a'])).add_child(name)
+                    self._objects_in_tree.get(self._modify(thisobj['is_a'])).add_child(name)
                 except Exception as e:
                     print(e)
                     pass
+            if thisobj['mixins']:
+                for item in self._objects_in_yaml:
+                    [name1, mixin] = item
+                    if mixin.mixin and name1 in thisobj['mixins']:
+                        self._objects_in_tree[self._modify(name1)].add_child(name)
 
     def get_descendants(self, name):
         self.check_if_node_in_tree(name)
