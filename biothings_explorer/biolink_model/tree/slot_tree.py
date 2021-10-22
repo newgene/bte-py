@@ -13,7 +13,7 @@ class BioLinkClassTree(BaseTree, ABC):
         self._modify = underscore
 
     def construct(self):
-        super(BioLinkClassTree, self).__init__()
+        super(BioLinkClassTree, self).construct()
         for name in self._objects_in_tree:
             self.infer_inverse_relationship(name)
 
@@ -39,5 +39,5 @@ class BioLinkClassTree(BaseTree, ABC):
             for key, obj in self._objects_in_tree.items():
                 if obj.inverse == self._modify(name):
                     inverse = obj
-            if not inverse:
+            if inverse:
                 self._objects_in_tree[self._modify(name)].inverse = inverse.name

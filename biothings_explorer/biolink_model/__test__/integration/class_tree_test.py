@@ -14,7 +14,7 @@ class TestConstructorFunction(unittest.TestCase):
     def setUp(self):
         file = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink.yaml'))
-        with open(file) as f:
+        with open(file, encoding="utf-8") as f:
             obj = yaml.load(f)
             self.objs = obj.get('classes')
             self.tree = BioLinkClassTree(self.objs)
@@ -42,7 +42,7 @@ class TestGetDescendants(unittest.TestCase):
     def setUp(self):
         file = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink.yaml'))
-        with open(file) as f:
+        with open(file, encoding="utf8") as f:
             obj = yaml.load(f)
             self.objs = obj.get('classes')
             self.tree = BioLinkClassTree(self.objs)
@@ -50,6 +50,7 @@ class TestGetDescendants(unittest.TestCase):
 
     def test_multi_level_inheritency_correctly_passed(self):
         #self.assertIn(self.tree.objects['Gene'], self.tree.get_descendants('MolecularEntity'))
+        # FIX ME
         self.assertEqual(self.tree.get_descendants('MolecularEntity'), [
             self.tree.objects['SmallMolecule'],
             self.tree.objects['NucleicAcidEntity'],
@@ -83,7 +84,7 @@ class TestGetAncestors(unittest.TestCase):
     def setUp(self):
         file = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink.yaml'))
-        with open(file) as f:
+        with open(file, encoding="utf8") as f:
             obj = yaml.load(f)
             self.objs = obj.get('classes')
             self.tree = BioLinkClassTree(self.objs)
@@ -118,7 +119,7 @@ class TestGetPath(unittest.TestCase):
     def setUp(self):
         file = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink.yaml'))
-        with open(file) as f:
+        with open(file, encoding="utf8") as f:
             obj = yaml.load(f)
             self.objs = obj.get('classes')
             self.tree = BioLinkClassTree(self.objs)

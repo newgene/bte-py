@@ -20,7 +20,7 @@ class BaseTree(ABC):
         tmp_objs = {}
         for obj in objects:
             tmp_objs[obj.name] = obj
-        return tmp_objs.values()
+        return [item for item in tmp_objs.values()]
 
     def check_if_node_in_tree(self, name):
         if self._modify(name) not in self._objects_in_tree:
@@ -41,10 +41,9 @@ class BaseTree(ABC):
                 except Exception as e:
                     print(e)
                     pass
-            if thisobj['mixins']:
-                for item in self._objects_in_yaml:
-                    [name1, mixin] = item
-                    if mixin.mixin and name1 in thisobj['mixins']:
+            if thisobj.get('mixins'):
+                for name1, mixin in self._objects_in_yaml.items():
+                    if mixin.get('mixin') and name1 in thisobj['mixins']:
                         self._objects_in_tree[self._modify(name1)].add_child(name)
 
     def get_descendants(self, name):

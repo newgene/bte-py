@@ -13,7 +13,7 @@ class TestConstructFunction(unittest.TestCase):
     def setUp(self):
         file_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink.yaml'))
-        with open(file_path) as f:
+        with open(file_path, encoding="utf8") as f:
             jsonObj = yaml.load(f)
             self.objs = jsonObj.get('slots')
             self.tree = BioLinkSlotTree(self.objs)
@@ -50,7 +50,7 @@ class TestGetDescendantsFunction(unittest.TestCase):
     def setUp(self):
         file_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink.yaml'))
-        with open(file_path) as f:
+        with open(file_path, encoding="utf8") as f:
             jsonObj = yaml.load(f)
             self.objs = jsonObj.get('slots')
             self.tree = BioLinkSlotTree(self.objs)
@@ -78,7 +78,7 @@ class TestGetAncestorsFunction(unittest.TestCase):
     def setUp(self):
         file_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink.yaml'))
-        with open(file_path) as f:
+        with open(file_path, encoding="utf8") as f:
             jsonObj = yaml.load(f)
             self.objs = jsonObj.get('slots')
             self.tree = BioLinkSlotTree(self.objs)
@@ -108,7 +108,7 @@ class TestGetPathFunction(unittest.TestCase):
     def setUp(self):
         file_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'data', 'biolink.yaml'))
-        with open(file_path) as f:
+        with open(file_path, encoding="utf8") as f:
             jsonObj = yaml.load(f)
             self.objs = jsonObj.get('slots')
             self.tree = BioLinkSlotTree(self.objs)

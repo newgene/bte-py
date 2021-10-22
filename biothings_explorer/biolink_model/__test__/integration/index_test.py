@@ -30,6 +30,7 @@ class TestBioLinkModule(unittest.TestCase):
     def test_biolink_slot_tree_object_is_correctly_retrieved_in_async_mode(self):
         biolink = BioLink()
         biolink.load()
+        # slot_tree not populated here
         self.assertIsInstance(biolink.slot_tree, BioLinkSlotTree)
         self.assertIn('related_to', biolink.slot_tree.objects)
 

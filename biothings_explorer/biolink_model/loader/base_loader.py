@@ -5,7 +5,7 @@ import yaml
 class Loader(ABC):
     def yaml_2_json(self, _input):
         try:
-            with open(_input) as f:
+            with open(_input, encoding="utf8") as f:
                 doc = yaml.load(f)
                 return doc
         except Exception as e:
