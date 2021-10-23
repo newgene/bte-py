@@ -121,10 +121,10 @@ class TestValidatorClass(unittest.TestCase):
         self.assertIn('OMIM:123', vd.resolvable['Disease'])
 
     def test_valid_answers_can_be_retrieved_through_valid_property_of_the_class(self):
-        test_data = {"Gene": ["NCBIGene:1017", "kkk:1323"], "ChemicalSubstance": ["DRUGBANK:DB0001"]}
+        test_data = {"Gene": ["NCBIGene:1017", "kkk:1323"], "SmallMolecule": ["DRUGBANK:DB0001"]}
         vd = DefaultValidator(test_data)
         vd.validate()
         self.assertIn('Gene', vd.resolvable)
         self.assertEqual(vd.resolvable['Gene'], ['NCBIGene:1017'])
-        self.assertIn('ChemicalSubstance', vd.resolvable)
-        self.assertEqual(vd.resolvable['ChemicalSubstance'], ["DRUGBANK:DB0001"])
+        self.assertIn('SmallMolecule', vd.resolvable)
+        self.assertEqual(vd.resolvable['SmallMolecule'], ["DRUGBANK:DB0001"])

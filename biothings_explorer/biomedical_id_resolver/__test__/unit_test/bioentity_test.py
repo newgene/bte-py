@@ -12,7 +12,7 @@ CDK2_DB_IDs = {
 RILUZOLE_DB_IDS = {
     "CHEMBL.COMPOUND": ["CHEMBL744"],
     "name": ["Riluzole", "RILUZOLE"],
-    "PUBCHEM": ["5070"],
+    "PUBCHEM.COMPOUND": ["5070"],
 }
 
 DB_ID_WITH_NO_PRIMARY = {
@@ -23,7 +23,7 @@ DISEASE_DB_IDS = {
     "MONDO": ["MONDO:12345"]
 }
 
-CHEMBL7512_DB_IDS = { "CHEMBL.COMPOUND": ["CHEMBL7512"], "PUBCHEM": ["53428"] }
+CHEMBL7512_DB_IDS = { "CHEMBL.COMPOUND": ["CHEMBL7512"], "PUBCHEM.COMPOUND": ["53428"] }
 
 
 class TestResolvableBioEntityClass(unittest.TestCase):
@@ -53,23 +53,23 @@ class TestResolvableBioEntityClass(unittest.TestCase):
         self.assertEqual('CDK2', label)
 
     def test_if_symbol_not_provided_in_db_ids_and_name_is_provided_should_return_name(self):
-        entity = ResolvableBioEntity('ChemicalSubstance', RILUZOLE_DB_IDS, {})
+        entity = ResolvableBioEntity('SmallMolecule', RILUZOLE_DB_IDS, {})
         label = entity.label
         self.assertEqual(label, 'Riluzole')
 
     def test_if_both_symbol_and_name_are_not_provided_in_ids_should_return_primary_id(self):
-        entity = ResolvableBioEntity('ChemicalSubstance', CHEMBL7512_DB_IDS, {})
+        entity = ResolvableBioEntity('SmallMolecule', CHEMBL7512_DB_IDS, {})
         label = entity.label
-        self.assertEqual(label, 'CHEMBL.COMPOUND:CHEMBL7512')
+        self.assertEqual(label, 'PUBCHEM.COMPOUND:53428')
 
     def test_get_curies(self):
-        entity = ResolvableBioEntity('ChemicalSubstance', CHEMBL7512_DB_IDS, {})
+        entity = ResolvableBioEntity('SmallMolecule', CHEMBL7512_DB_IDS, {})
         curies = entity.curies
         self.assertIn('CHEMBL.COMPOUND:CHEMBL7512', curies)
         self.assertEqual(len(curies), 2)
 
     def test_get_db_ids(self):
-        entity = ResolvableBioEntity('ChemicalSubstance', CHEMBL7512_DB_IDS, {})
+        entity = ResolvableBioEntity('SmallMolecule', CHEMBL7512_DB_IDS, {})
         db_ids = entity.db_ids
         self.assertEqual(db_ids, CHEMBL7512_DB_IDS)
 
@@ -91,17 +91,17 @@ class TestIrresolvableBioEntityClass(unittest.TestCase):
         self.assertEqual(label, 'KK:123')
 
     def test_get_curies_function(self):
-        entity = IrresolvableBioEntity('ChemicalSubstance', 'KK:123')
+        entity = IrresolvableBioEntity('SmallMolecule', 'KK:123')
         curies = entity.curies
         self.assertEqual(curies, ['KK:123'])
 
     def test_get_db_ids(self):
-        entity = IrresolvableBioEntity('ChemicalSubstance', 'KK:123')
+        entity = IrresolvableBioEntity('SmallMolecule', 'KK:123')
         db_ids = entity.db_ids
         self.assertEqual(db_ids, {'KK': ['KK:123']})
 
     def test_get_attributes_function(self):
-        entity = IrresolvableBioEntity('ChemicalSubstance', 'KK:123')
+        entity = IrresolvableBioEntity('SmallMolecule', 'KK:123')
         attributes = entity.attributes
         self.assertEqual(attributes, {})
 

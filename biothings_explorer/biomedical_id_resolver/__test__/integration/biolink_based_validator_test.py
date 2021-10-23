@@ -94,11 +94,11 @@ class IntegrationTestForBioLinkBasedValidator(unittest.TestCase):
 
     def test_item_with_comma_in_it_should_be_counted_as_irresolvable(self):
         _input = {
-            'ChemicalSubstance': ["KEGG:1,2"]
+            'SmallMolecule': ["KEGG:1,2"]
         }
 
         validator = BioLinkBasedValidator(_input)
         validator.validate()
         self.assertEqual(validator.resolvable, {})
-        self.assertIn('ChemicalSubstance', validator.irresolvable)
-        self.assertEqual(validator.irresolvable['ChemicalSubstance'], ["KEGG:1,2"])
+        self.assertIn('SmallMolecule', validator.irresolvable)
+        self.assertEqual(validator.irresolvable['SmallMolecule'], ["KEGG:1,2"])

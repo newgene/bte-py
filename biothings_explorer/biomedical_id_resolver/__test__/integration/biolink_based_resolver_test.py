@@ -16,13 +16,13 @@ class TestIdResolver(unittest.TestCase):
 
     def test_biothings_output_include_integer_should_ne_converted_to_string(self):
         resolver = BioLinkBasedResolver()
-        res = resolver.resolve({'ChemicalSubstance': ["CHEMBL.COMPOUND:CHEMBL744"]})
+        res = resolver.resolve({'SmallMolecule': ["CHEMBL.COMPOUND:CHEMBL744"]})
         self.assertIsInstance(res['CHEMBL.COMPOUND:CHEMBL744'][0], ResolvableBioEntity)
         self.assertEqual(res['CHEMBL.COMPOUND:CHEMBL744'][0].db_ids['PUBCHEM.COMPOUND'], ['5070'])
 
     def test_valid_inputs_from_multiple_semantic_types_should_be_correctly_resolved(self):
         resolver = BioLinkBasedResolver()
-        res = resolver.resolve({'Gene': ["NCBIGene:1017"], "ChemicalSubstance": ["DRUGBANK:DB01609"]})
+        res = resolver.resolve({'Gene': ["NCBIGene:1017"], "SmallMolecule": ["DRUGBANK:DB01609"]})
         self.assertIn('NCBIGene:1017', res)
         self.assertEqual(len(res['NCBIGene:1017']), 1)
         self.assertIsInstance(res['NCBIGene:1017'][0], ResolvableBioEntity)
@@ -49,7 +49,7 @@ class TestIdResolver(unittest.TestCase):
         resolver = BioLinkBasedResolver()
         res = resolver.resolve({
             'Gene': [*fake_ncbi_gene_inputs, *fake_omim_gene_inputs],
-            'ChemicalSubstance': fake_drug_bank_inputs
+            'SmallMolecule': fake_drug_bank_inputs
         })
         self.assertEqual(len(res.keys()), len(fake_drug_bank_inputs) + len(fake_omim_gene_inputs) +
                          len(fake_ncbi_gene_inputs))
@@ -109,7 +109,7 @@ class TestIdResolver(unittest.TestCase):
 
     def test_input_with_space_in_it_should_be_correctly_resolved(self):
         resolver = BioLinkBasedResolver()
-        res = resolver.resolve({'ChemicalSubstance': ["name:Regorafenib", "name:Sunitinib", "name:Imatinib", "name:Ponatinib", "name:Dasatinib", "name:Bosutinib", "name:Imatinib Mesylate"]})
+        res = resolver.resolve({'SmallMolecule': ["name:Regorafenib", "name:Sunitinib", "name:Imatinib", "name:Ponatinib", "name:Dasatinib", "name:Bosutinib", "name:Imatinib Mesylate"]})
         self.assertIn('name:Imatinib Mesylate', res)
         self.assertIn('name:Regorafenib', res)
         self.assertEqual(len(res['name:Imatinib Mesylate']), 1)

@@ -25,7 +25,7 @@ class TestIDResolver(unittest.TestCase):
 
     def test_lincs_id_should_be_resolved(self):
         resolver = DefaultResolver()
-        res = resolver.resolve({'ChemicalSubstance': ['LINCS:LSM-2471']})
+        res = resolver.resolve({'SmallMolecule': ['LINCS:LSM-2471']})
         self.assertIn('LINCS:LSM-2471', res)
         self.assertEqual(len(res['LINCS:LSM-2471']), 1)
         self.assertIsInstance(res['LINCS:LSM-2471'][0], ResolvableBioEntity)
@@ -70,13 +70,13 @@ class TestIDResolver(unittest.TestCase):
 
     def test_biothings_output_include_integer_should_be_converted_to_string(self):
         resolver = DefaultResolver()
-        res = resolver.resolve({'ChemicalSubstance': ['CHEMBL.COMPOUND:CHEMBL744']})
+        res = resolver.resolve({'SmallMolecule': ['CHEMBL.COMPOUND:CHEMBL744']})
         self.assertIsInstance(res['CHEMBL.COMPOUND:CHEMBL744'][0], ResolvableBioEntity)
         self.assertEqual(res['CHEMBL.COMPOUND:CHEMBL744'][0].db_ids['PUBCHEM.COMPOUND'], ["5070"])
 
     def test_valid_inputs_from_multiple_semantic_types_should_be_correctly_resolved(self):
         resolver = DefaultResolver()
-        res = resolver.resolve({'Gene': ["NCBIGene:1017"], 'ChemicalSubstance': ["DRUGBANK:DB01609"]})
+        res = resolver.resolve({'Gene': ["NCBIGene:1017"], 'SmallMolecule': ["DRUGBANK:DB01609"]})
         self.assertIn('NCBIGene:1017', res)
         self.assertEqual(len(res['NCBIGene:1017']), 1)
         self.assertIsInstance(res['NCBIGene:1017'][0], ResolvableBioEntity)
@@ -103,7 +103,7 @@ class TestIDResolver(unittest.TestCase):
         resolver = DefaultResolver()
         res = resolver.resolve({
             'Gene': [*fake_ncbi_gene_inputs, *fake_omim_gene_inputs],
-            'ChemicalSubstance': fake_drug_bank_inputs
+            'SmallMolecule': fake_drug_bank_inputs
         })
         self.assertEqual(len(res.keys()), len(fake_drug_bank_inputs) + len(fake_ncbi_gene_inputs) + len(fake_omim_gene_inputs))
         self.assertIsInstance(res['OMIM:0'][0], IrresolvableBioEntity)
@@ -156,7 +156,7 @@ class TestIDResolver(unittest.TestCase):
 
     def test_chemical_attributes_are_correctly_retrieved(self):
         resolver = DefaultResolver()
-        res = resolver.resolve({'ChemicalSubstance': ['CHEMBL.COMPOUND:CHEMBL744']})
+        res = resolver.resolve({'SmallMolecule': ['CHEMBL.COMPOUND:CHEMBL744']})
         self.assertIn('Benzothiazoles', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['drugbank_taxonomy_class'])
         self.assertIn('4', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['chembl_max_phase'])
         self.assertIn('Small molecule', res['CHEMBL.COMPOUND:CHEMBL744'][0].attributes['chembl_molecule_type'])
@@ -199,17 +199,16 @@ class TestIDResolver(unittest.TestCase):
         res = resolver.resolve({'Disease': ["NCIT:C116936"]})
         self.assertIsInstance(res["NCIT:C116936"][0], ResolvableBioEntity)
 
-    @unittest.SkipTest
     def test_chemical_ids_can_be_resolved_as_rhea_ids(self):
         resolver = DefaultResolver()
-        res = resolver.resolve({'ChemicalSubstance': ['PUBCHEM.COMPOUND:5460389']})
+        res = resolver.resolve({'SmallMolecule': ["PUBCHEM.COMPOUND:5460389"]})
         self.assertIsInstance(res['PUBCHEM.COMPOUND:5460389'][0], ResolvableBioEntity)
-        self.assertIn('RHEA', res['PUBCHEM.COMPOUND:5460389'][0].db_ids)
-        self.assertIn('RHEA:37975', res['PUBCHEM.COMPOUND:5460389'][0].db_ids['RHEA'])
+        self.assertIn('RHEA', res["PUBCHEM.COMPOUND:5460389"][0].db_ids)
+        self.assertIn('RHEA:37975', res["PUBCHEM.COMPOUND:5460389"][0].db_ids['RHEA'])
 
-    @unittest.SkipTest
+    #@unittest.SkipTest
     def test_rhea_ids_can_be_correctly_resolved(self):
         resolver = DefaultResolver()
-        res = resolver.resolve({'ChemicalSubstance': ['RHEA:37975']})
+        res = resolver.resolve({'MolecularActivity': ['RHEA:37975']})
         self.assertIsInstance(res['RHEA:37975'][0], ResolvableBioEntity)
-        self.assertEqual(res['RHEA:37975'][0].primary_id, 'CHEBI:16169')
+        self.assertEqual(res['RHEA:37975'][0].primary_id, 'GO:0010176')
