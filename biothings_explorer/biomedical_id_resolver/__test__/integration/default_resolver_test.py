@@ -29,7 +29,7 @@ class TestIDResolver(unittest.TestCase):
         self.assertIn('LINCS:LSM-2471', res)
         self.assertEqual(len(res['LINCS:LSM-2471']), 1)
         self.assertIsInstance(res['LINCS:LSM-2471'][0], ResolvableBioEntity)
-        self.assertEqual(res['LINCS:LSM-2471'][0].primary_id, 'CHEBI:8863')
+        self.assertEqual(res['LINCS:LSM-2471'][0].primary_id, 'PUBCHEM.COMPOUND:5070')
         self.assertEqual(res['LINCS:LSM-2471'][0].db_ids['LINCS'], ["LSM-2471"])
 
     def test_protein_uniprot_id_should_be_resolved(self):
@@ -154,6 +154,7 @@ class TestIDResolver(unittest.TestCase):
         self.assertEqual(res['NCBIGene:1017'][0].label, 'CDK2')
         self.assertIsInstance(res['NCBIGene:1017'][1], IrresolvableBioEntity)
 
+    # FIX ME
     def test_chemical_attributes_are_correctly_retrieved(self):
         resolver = DefaultResolver()
         res = resolver.resolve({'SmallMolecule': ['CHEMBL.COMPOUND:CHEMBL744']})
@@ -199,6 +200,7 @@ class TestIDResolver(unittest.TestCase):
         res = resolver.resolve({'Disease': ["NCIT:C116936"]})
         self.assertIsInstance(res["NCIT:C116936"][0], ResolvableBioEntity)
 
+    # FIX ME
     def test_chemical_ids_can_be_resolved_as_rhea_ids(self):
         resolver = DefaultResolver()
         res = resolver.resolve({'SmallMolecule': ["PUBCHEM.COMPOUND:5460389"]})
