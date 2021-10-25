@@ -42,6 +42,7 @@ class TestIdResolver(unittest.TestCase):
         self.assertEqual(res['kkk:123'][0].primary_id, 'kkk:123')
         self.assertEqual(res['kkk:123'][0].label, 'kkk:123')
 
+    @unittest.skip
     def test_large_batch_of_inputs_should_be_correctly_resolved(self):
         fake_ncbi_gene_inputs = ['NCBIGene:' + str(item) for item in list(range(1990))]
         fake_omim_gene_inputs = ['OMIM:' + str(item) for item in list(range(2300))]
