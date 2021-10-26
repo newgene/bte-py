@@ -115,6 +115,12 @@ class BioThingsQueryBuilder(QueryBuilder):
             }
         )
 
+        # try:
+        #
+        #     data = r.json()
+        # except Exception as e:
+        #     print(e)
+        #     return {}
         data = r.json()
         return self.get_db_ids(prefix, self.semantic_type, data)
 

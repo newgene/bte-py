@@ -31,8 +31,9 @@ def query(api_input):
         data = r.json()
         queries.append(data)
     result = {}
-    for _query, count in enumerate(queries):
-        result[count]: _query
+    for outer_key, _query in enumerate(queries):
+        for key, value in enumerate(_query):
+            result[value] = _query[value]
     return result
 
 
@@ -83,8 +84,9 @@ def resolvable_entity(sri_entry):
 
     for id_obj in entry['equivalent_identifiers']:
         id_type = id_obj['identifier'].split(':')[0]
-        if isinstance(entry['dbIDs'], list):
+        if not isinstance(entry['dbIDs'].get(id_type), list):
             entry['dbIDs'][id_type] = []
+
         if id_type in CURIE['ALWAYS_PREFIXED']:
             entry['dbIDs'][id_type].append(id_obj['identifier'])
         else:
@@ -109,8 +111,8 @@ def transform_results(results):
 
 def map_input_semantic_types(original_input, result):
     for semantic_type in original_input:
-        if semantic_type == 'unknonwn':
-            return
+        if semantic_type == 'unknown' or semantic_type == 'NamedThing' or not semantic_type:
+            continue
         unique_inputs = list(set(original_input[semantic_type]))
         for curie in unique_inputs:
             entry = result[curie][0]
