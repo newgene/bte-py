@@ -45,7 +45,8 @@ class TRAPIQueryBuilder:
                         }
                     }
                 }
-            }
+            },
+            "submitter": "infores:bte"
         }
         return qg
 

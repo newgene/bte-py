@@ -58,9 +58,6 @@ class QueryBuilder:
                 except AttributeError:
                     pass
 
-            #body = edge['query_operation']['request_body']['body']
-            #reduced = functools.reduce(lambda accumulator, key: accumulator + key + '=' + str(body[key]).replace('{inputs[0]}', _input) + '&', body.keys(), '')
-            #return reduced[:len(reduced) - 1]
             return edge['query_operation']['request_body']['body']
 
     # axios has a different config from python requests so params and data are swapped

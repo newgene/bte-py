@@ -1,4 +1,5 @@
 import requests
+import time
 from .builder.builder_factory import builder_factory
 from .query_queue import APIQueryQueue
 from ..api_response_transform.index import Transformer
@@ -23,6 +24,8 @@ class APIQueryDispatcher:
         res = []
         for query in queries:
             config = query.get_config()
+            if 'arax.ncats.io' in config['url']:
+                time.sleep(1)
             if config['method'].lower() == 'get':
                 request_func = requests.get
             else:
