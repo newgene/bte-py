@@ -2,7 +2,7 @@ import requests
 from .builder.builder_factory import builder_factory
 from .query_queue import APIQueryQueue
 from ..api_response_transform.index import Transformer
-from ..biomedical_id_resolver.resolver import generate_invalid_bioentities, Resolver
+from ..biomedical_id_resolver.resolver import generate_invalid_bioentities, resolve_sri, Resolver
 from .log_entry import LogEntry
 
 
@@ -119,8 +119,7 @@ class APIQueryDispatcher:
         if not enable:
             res = generate_invalid_bioentities(grped_ids)
         else:
-            biomedical_resolver = Resolver('biolink')
-            res = biomedical_resolver.resolve(grped_ids)
+            res = resolve_sri(grped_ids)
         for item in result:
             if item:
                 item['$output']['obj'] = res[item['$output']['original']]

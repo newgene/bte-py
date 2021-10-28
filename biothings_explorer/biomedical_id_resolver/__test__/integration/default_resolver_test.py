@@ -201,13 +201,12 @@ class TestIDResolver(unittest.TestCase):
         res = resolver.resolve({'Disease': ["NCIT:C116936"]})
         self.assertIsInstance(res["NCIT:C116936"][0], ResolvableBioEntity)
 
-    # FIX ME
-    def test_chemical_ids_can_be_resolved_as_rhea_ids(self):
+    def test_molecular_activity_ids_can_be_resolved_as_rhea_ids(self):
         resolver = DefaultResolver()
-        res = resolver.resolve({'SmallMolecule': ["PUBCHEM.COMPOUND:5460389"]})
-        self.assertIsInstance(res['PUBCHEM.COMPOUND:5460389'][0], ResolvableBioEntity)
-        self.assertIn('RHEA', res["PUBCHEM.COMPOUND:5460389"][0].db_ids)
-        self.assertIn('RHEA:37975', res["PUBCHEM.COMPOUND:5460389"][0].db_ids['RHEA'])
+        res = resolver.resolve({'MolecularActivity': ["GO:0010176"]})
+        self.assertIsInstance(res['GO:0010176'][0], ResolvableBioEntity)
+        self.assertIn('RHEA', res["GO:0010176"][0].db_ids)
+        self.assertIn('RHEA:37975', res["GO:0010176"][0].db_ids['RHEA'])
 
     #@unittest.SkipTest
     def test_rhea_ids_can_be_correctly_resolved(self):

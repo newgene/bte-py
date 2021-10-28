@@ -25,18 +25,18 @@ class TRAPITransformer(BaseTransformer):
         }
 
         if 'attributes' in edge and isinstance(edge['attributes'], list):
-            for attr in edge['attributes']:
-                if 'name' in attr and 'value' in attr:
-                    if attr['name'] not in ['subject', 'object']:
-                        res[attr['name']] = attr['value']
-            res = self._update_edge_metadata(res)
-            res = self._update_input(res, edge_binding['subject'])
+            res['edge-attributes'] = edge['attributes']
+
+        res = self._update_edge_metadata(res)
+        res = self._update_input(res, edge_binding['subject'])
+        if '$input' in res and 'obj' in res['$input'] and res['$input']['obj']:
             return res
 
     def transform(self):
         edge_bindings = self._get_unique_edges()
-        tmp = []
+        data = []
         for edge in edge_bindings:
             edge_info = self._get_edge_info(edge)
             if edge_info:
-                return self._transform_individual_edge(edge_info, edge_bindings[edge])
+                data.append(self._transform_individual_edge(edge_info, edge_bindings[edge]))
+        return data

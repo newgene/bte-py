@@ -1,4 +1,5 @@
 import functools
+from .template_funcs import rm_prefix, repl_prefix, slice
 
 
 class QueryBuilder:

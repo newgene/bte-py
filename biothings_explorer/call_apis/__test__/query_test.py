@@ -126,7 +126,7 @@ class TestQueryClass(unittest.TestCase):
             },
             {
                 "$edge_metadata": {
-                    "output_type": "ChemicalSubstance"
+                    "output_type": "SmallMolecule"
                 },
                 "$output": {
                     "original": "CHEBI:1234"
@@ -150,7 +150,7 @@ class TestQueryClass(unittest.TestCase):
             },
             {
                 "$edge_metadata": {
-                    "output_type": "ChemicalSubstance"
+                    "output_type": "SmallMolecule"
                 },
                 "$output": {
                     "original": "CHEBI:1234"

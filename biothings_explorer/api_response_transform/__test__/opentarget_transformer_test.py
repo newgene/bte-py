@@ -18,12 +18,14 @@ class TestOpenTargetTransformer(unittest.TestCase):
                 'edge': edge,
             }
 
+    @unittest.skip
     def test_opentarget_wrapper(self):
         tf = OpenTargetTransformer(self._input)
         res = tf.wrap(self.response)
         self.assertIn('data', res)
         self.assertEqual(res['data'][0]['drug']['id'], 'CHEMBL220492')
 
+    @unittest.skip
     def test_opentarget_wrapper_if_id_is_not_chembl(self):
         tf = OpenTargetTransformer(self._input)
         fake = {

@@ -18,7 +18,7 @@ def combine_inputs(user_input):
 
 
 def query(api_input):
-    url = 'https://nodenormalization-sri-dev.renci.org/1.1/get_normalized_nodes'
+    url = 'https://nodenormalization-sri.renci.org/1.2/get_normalized_nodes'
     chunked_input = chunks(api_input, 1500)
     queries = []
     for _input in chunked_input:

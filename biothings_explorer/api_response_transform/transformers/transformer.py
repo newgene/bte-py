@@ -52,6 +52,13 @@ class BaseTransformer:
             'original': None if not self.edge.get('original_input') else self.edge['original_input'][_input],
             'obj': None if not (self.edge.get('input_resolved_identifiers') and self.edge.get('original_input')) else self.edge['input_resolved_identifiers'][self.edge['original_input'][_input]]
         }
+        if self.edge.get('input_resolved_identifiers') and not res['$input']['original'] and not res['$input']['obj']:
+            for curie in self.edge['input_resolved_identifiers']:
+                if _input in self.edge['input_resolved_identifiers'][curie][0]['curies']:
+                    res['$input'] = {
+                        'original': curie,
+                        'obj': self.edge['input_resolved_identifiers'][curie]
+                    }
         return res
 
     def _remove_non_edge_data(self, res):
