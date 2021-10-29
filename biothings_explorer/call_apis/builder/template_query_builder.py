@@ -17,10 +17,14 @@ class TemplateQueryBuilder:
         if server.endswith('/'):
             server = server[0:len(server) - 1]
         path = edge['query_operation']['path']
-        if isinstance(edge['query_operation']['path_params'], list):
+        if isinstance(edge['query_operation'].get('path_params'), list):
             for param in edge['query_operation']['path_params']:
                 val = edge['query_operation']['params'][param]
-                path = Environment().from_string(path.replace("{" + param + "}", val), _input).render()
+                if isinstance(_input, dict):
+                    path = Environment().from_string(path.replace("{" + param + "}", val), _input).render()
+                else:
+                    path = Environment().from_string(path.replace("{" + param + "}", val)).render()
+
         return server + path
 
     def _get_input(self, edge):
@@ -28,11 +32,14 @@ class TemplateQueryBuilder:
 
     def _get_params(self, edge, _input):
         params = {}
-        for param in edge['query_operation'][params]:
-            if isinstance(edge['query_operation']['path_params'], list) and param in edge['query_operation']['path_params']:
+        for param in edge['query_operation']['params']:
+            if isinstance(edge['query_operation'].get('path_params'), list) and param in edge['query_operation']['path_params']:
                 return
-            if isinstance(edge['query_operation'][param], str):
-                params[param] = Environment().from_string(edge['query_operation']['params'][param], _input).render()
+            if isinstance(edge['query_operation']['params'].get(param), str):
+                if isinstance(_input, dict):
+                    params[param] = Environment().from_string(edge['query_operation']['params'][param], _input).render()
+                else:
+                    params[param] = Environment().from_string(edge['query_operation']['params'][param]).render()
             else:
                 params[param] = edge['query_operation']['params'][param]
         return params
@@ -40,11 +47,18 @@ class TemplateQueryBuilder:
     def _get_request_body(self, edge, _input):
         if edge['query_operation'].get('request_body') and 'body' in edge['query_operation']['request_body']:
             body = edge['query_operation']['request_body']['body']
-            if isinstance(edge['query_operation']['requestBodyType'], dict):
-                data = json.loads(Environment().from_string(body, _input).render())
+            if isinstance(edge['query_operation'].get('requestBodyType'), dict):
+                if isinstance(_input, dict):
+                    data_template = Environment().from_string(body, _input).render()
+                else:
+                    data_template = Environment().from_string(body, _input).render()
+
+                data = json.loads(data_template)
             else:
                 reduced = functools.reduce(lambda prev, current: prev + current + "=" +
-                                           Environment().from_string(str(body[current]), _input).render() + "&",
+                                           (Environment().from_string(str(body[current]), _input).render()
+                                            if isinstance(str(body[current]), dict) else
+                                            Environment().from_string(str(body[current])).render()) + "&",
                                            body, "")
                 data = reduced[0:len(reduced) - 1]
             return data
