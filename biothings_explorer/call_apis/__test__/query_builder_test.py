@@ -213,7 +213,6 @@ class TestQueryBuilder(unittest.TestCase):
         self.assertEqual(res['method'], 'get')
         self.assertIsNone(res['params'])
 
-
     def test_non_biothings_tagged_api_should_return_false(self):
         edge = {
             "query_operation": {

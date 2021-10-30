@@ -20,6 +20,10 @@ class TemplateQueryBuilder:
         if isinstance(edge['query_operation'].get('path_params'), list):
             for param in edge['query_operation']['path_params']:
                 val = edge['query_operation']['params'][param]
+                # convert list values to single values
+                for key, value in enumerate(_input):
+                    if isinstance(_input, dict) and isinstance(_input[value], list):
+                        _input[value] = _input[value][0]
                 if isinstance(_input, dict):
                     path = Environment().from_string(path.replace("{" + param + "}", val), _input).render()
                 else:
@@ -33,8 +37,9 @@ class TemplateQueryBuilder:
     def _get_params(self, edge, _input):
         params = {}
         for param in edge['query_operation']['params']:
-            if isinstance(edge['query_operation'].get('path_params'), list) and param in edge['query_operation']['path_params']:
-                return
+            if isinstance(edge['query_operation'].get('path_params'), list) and param in edge['query_operation'][
+                'path_params']:
+                continue
             if isinstance(edge['query_operation']['params'].get(param), str):
                 if isinstance(_input, dict):
                     params[param] = Environment().from_string(edge['query_operation']['params'][param], _input).render()
@@ -55,11 +60,16 @@ class TemplateQueryBuilder:
 
                 data = json.loads(data_template)
             else:
-                reduced = functools.reduce(lambda prev, current: prev + current + "=" +
-                                           (Environment().from_string(str(body[current]), _input).render()
-                                            if isinstance(str(body[current]), dict) else
-                                            Environment().from_string(str(body[current])).render()) + "&",
-                                           body, "")
+                try:
+                    reduced = functools.reduce(lambda prev, current: prev + current + "=" +
+                                                                     Environment().from_string(str(body[current]),
+                                                                                               _input).render() + "&",
+                                               body, "")
+                except ValueError:
+
+                    reduced = functools.reduce(lambda prev, current: prev + current + "=" +
+                                                                     Environment().from_string(
+                                                                         str(body[current])).render() + "&", body, "")
                 data = reduced[0:len(reduced) - 1]
             return data
 
