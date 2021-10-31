@@ -74,17 +74,20 @@ class QueryBuilder:
     def need_pagination(self, api_response):
         if self.edge['query_operation']['method'] == 'get' and 'biothings' in self.edge['tags']:
             if api_response['total'] > self.start + len(api_response['hits']):
-                self.has_next = True
-                return True
+                if self.start + len(api_response['hits']) < 10000:
+                    self.has_next = True
+                    return True
         self.has_next = False
         return False
 
     def get_next(self):
-        self.start += 1000
+        self.start = min(self.start + 1000, 9999)
         config = self.construct_request_config()
         if not config.get('params'):
             config['params'] = {}
         config['params']['from'] = self.start
+        if config['params']['size'] + self.start > 10000:
+            config['params']['size'] = 10000 - self.start
         self.config = config
         return config
 

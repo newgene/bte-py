@@ -8,7 +8,7 @@ class BioThingsTransformer(BaseTransformer):
             res = {}
             for item in self.data['response']:
                 if 'notfound' not in item:
-                    _input = generate_curie(self.edge['association']['input_id'], item['query'])
+                    _input = generate_curie(self.edge['association'].get('input_id'), item['query'])
                     if _input in res:
                         res[_input].append(item)
                     else:
