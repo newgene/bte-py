@@ -95,7 +95,7 @@ class TestSRIResolver(unittest.TestCase):
         self.assertEqual(res['NCBIGene:1017'][1]['semanticType'], 'Disease')
 
     def test_large_batch_of_inputs_should_be_correctly_resolved_and_should_not_give_an_error(self):
-        fake_ncbi_gene_inputs = [f"NCBIGene: {i}" for i in range(5000)]
+        fake_ncbi_gene_inputs = [f"NCBIGene:{i}" for i in range(5000)]
         _input = {
             'Gene': fake_ncbi_gene_inputs
         }

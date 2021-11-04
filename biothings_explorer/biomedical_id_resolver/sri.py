@@ -19,7 +19,8 @@ def combine_inputs(user_input):
 
 def query(api_input):
     url = 'https://nodenormalization-sri.renci.org/1.2/get_normalized_nodes'
-    chunked_input = chunks(api_input, 1500)
+    # chunks of 1500 continuously throw 414 unlike the js version
+    chunked_input = chunks(api_input, 100)
     queries = []
     for _input in chunked_input:
         params = {'curie': [item for item in _input]}
@@ -28,8 +29,12 @@ def query(api_input):
             url = f"{url}?{search}"
 
         r = requests.get(url)
-        data = r.json()
-        queries.append(data)
+        # Sometimes throws 502
+        try:
+            data = r.json()
+            queries.append(data)
+        except Exception as e:
+            pass
     result = {}
     for outer_key, _query in enumerate(queries):
         for key, value in enumerate(_query):
@@ -71,7 +76,7 @@ def resolvable_entity(sri_entry):
     entry = sri_entry
 
     entry['primaryID'] = entry['id']['identifier']
-    entry['label'] = entry['id']['label'] or entry['id']['identifier']
+    entry['label'] = entry['id'].get('label') or entry['id']['identifier']
     entry['attributes'] = {}
     entry['semanticType'] = entry['type'][0].split(':')[1]
     entry['_leafSemanticType'] = entry['semanticType']

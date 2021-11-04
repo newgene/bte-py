@@ -35,12 +35,8 @@ class BaseTree(ABC):
             self.add_new_object_to_tree(name)
         for name in self._objects_in_yaml:
             thisobj = self._objects_in_yaml[name]
-            if 'is_a' in self._objects_in_yaml[name]:
-                try:
-                    self._objects_in_tree.get(self._modify(thisobj['is_a'])).add_child(name)
-                except Exception as e:
-                    print(e)
-                    pass
+            if 'is_a' in thisobj:
+                self._objects_in_tree.get(self._modify(thisobj['is_a'])).add_child(name)
             if thisobj.get('mixins'):
                 for name1, mixin in self._objects_in_yaml.items():
                     if mixin.get('mixin') and name1 in thisobj['mixins']:

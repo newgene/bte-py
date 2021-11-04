@@ -73,10 +73,13 @@ class QueryBuilder:
 
     def need_pagination(self, api_response):
         if self.edge['query_operation']['method'] == 'get' and 'biothings' in self.edge['tags']:
-            if api_response['total'] > self.start + len(api_response['hits']):
-                if self.start + len(api_response['hits']) < 10000:
-                    self.has_next = True
-                    return True
+            try:
+                if api_response['total'] > self.start + len(api_response['hits']):
+                    if self.start + len(api_response['hits']) < 10000:
+                        self.has_next = True
+                        return True
+            except KeyError as e:
+                print(e)
         self.has_next = False
         return False
 

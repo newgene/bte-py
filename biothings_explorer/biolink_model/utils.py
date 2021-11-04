@@ -9,4 +9,9 @@ def smart_title(s):
 
 
 def pascal_case(s):
-    return ' '.join([w.capitalize() if w.islower() else w for w in s.split()]).replace(' ', '')
+    # if s == 'Microrna':
+    #     print(s)
+    #
+    if len(s.split()) == 1 and s[0].isupper():
+        return s
+    return ' '.join([w.lower().capitalize() for w in s.split()]).replace(' ', '')
