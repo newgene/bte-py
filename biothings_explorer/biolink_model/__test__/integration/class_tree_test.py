@@ -49,8 +49,6 @@ class TestGetDescendants(unittest.TestCase):
             self.tree.construct()
 
     def test_multi_level_inheritency_correctly_passed(self):
-        #self.assertIn(self.tree.objects['Gene'], self.tree.get_descendants('MolecularEntity'))
-        # FIX ME
         self.assertEqual(self.tree.get_descendants('MolecularEntity'), [
             self.tree.objects['SmallMolecule'],
             self.tree.objects['NucleicAcidEntity'],

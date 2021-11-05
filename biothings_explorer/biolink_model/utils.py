@@ -1,3 +1,5 @@
+import re
+
 def underscore(_input):
     if isinstance(_input, str):
         return _input.replace(' ', '_').replace(',', '')
@@ -9,9 +11,8 @@ def smart_title(s):
 
 
 def pascal_case(s):
-    # if s == 'Microrna':
-    #     print(s)
-    #
-    if len(s.split()) == 1 and s[0].isupper():
-        return s
+    # converts strings like microRNA to "micro RNA"
+    rx = re.compile(r'(?<=[a-z])(?=[A-Z])')
+    s = rx.sub(' ', s)
+
     return ' '.join([w.lower().capitalize() for w in s.split()]).replace(' ', '')
