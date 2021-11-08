@@ -5,6 +5,7 @@ from .graph.knowledge_graph import KnowledgeGraph
 from .query_results import QueryResult
 from .exceptions.invalid_query_graph_error import InvalidQueryGraphError
 from .graph.graph import Graph
+from .edge_manager import EdgeManager
 import os
 
 
@@ -55,20 +56,18 @@ class TRAPIQueryHandler:
             else:
                 raise InvalidQueryGraphError()
 
-    def _create_batch_edge_query_handlers(self, query_paths, kg):
-        handlers = {}
-        for index in query_paths:
-            handlers[index] = BatchEdgeQueryHandler(kg, self.resolve_output_ids)
-            handlers[index].set_edges(query_paths[index])
-            handlers[index].subscribe(self.query_results)
-            handlers[index].subscribe(self.bte_graph)
-        return handlers
+    def _create_batch_edge_query_handlers_for_current(self, current_edge, kg):
+        handler = BatchEdgeQueryHandler(kg, self.resolve_output_ids)
+        handler.set_edges(current_edge)
+        handler.subscribe(self.query_results)
+        handler.subscribe(self.bte_graph)
+        return handler
 
     def query(self):
         self._initialize_response()
         kg = self._load_meta_kg()
         query_paths = self._process_query_graph(self.query_graph)
-        handlers = self._create_batch_edge_query_handlers(query_paths, kg)
+        handlers = self._create_batch_edge_query_handlers_for_current(query_paths, kg)
         for handler in handlers.values():
             res = handler.query(handler.q_edges)
             self.logs = [*self.logs, *handler.logs]
@@ -77,3 +76,22 @@ class TRAPIQueryHandler:
             else:
                 handler.q_edges[0].output_equivalent_identifiers = res[0]['$edge_metadata']['trapi_qEdge_obj'].output_equivalent_identifiers
             handler.notify(res)
+
+    def query_2(self):
+        self._initialize_response()
+        kg = self._load_meta_kg(self.smartapi_id, self.team)
+        query_edges = self._process_query_graph(self.query_graph)
+        manager = EdgeManager(query_edges, kg)
+        while manager.get_edges_not_executed():
+            current_edge = manager.get_next()
+            if current_edge['requires_intersection']:
+                current_edge.choose_lower_entity_value()
+            handler = self._create_batch_edge_query_handlers_for_current(current_edge, kg)
+            res = handler.query_2(handler.q_edges)
+            if len(res) == 0:
+                return
+            manager.update_edges_entity_counts(res, current_edge)
+            current_edge['executed'] = True
+        manager.gather_results()
+        mock_handler = self._create_batch_edge_query_handlers_for_current([], kg)
+        mock_handler.notify(manager.results)
