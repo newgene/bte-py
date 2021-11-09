@@ -81,17 +81,20 @@ class TRAPIQueryHandler:
         self._initialize_response()
         kg = self._load_meta_kg(self.smartapi_id, self.team)
         query_edges = self._process_query_graph(self.query_graph)
-        manager = EdgeManager(query_edges, kg)
+        manager = EdgeManager(query_edges)
         while manager.get_edges_not_executed():
             current_edge = manager.get_next()
-            if current_edge['requires_intersection']:
-                current_edge.choose_lower_entity_value()
+            # if current_edge['requires_intersection']:
+            #     current_edge.choose_lower_entity_value()
             handler = self._create_batch_edge_query_handlers_for_current(current_edge, kg)
             res = handler.query_2(handler.q_edges)
+            self.logs = [*self.logs, *handler.logs]
             if len(res) == 0:
                 return
+            current_edge.store_results(res)
             manager.update_edges_entity_counts(res, current_edge)
             current_edge['executed'] = True
         manager.gather_results()
+        self.logs = [*self.logs, *manager.logs]
         mock_handler = self._create_batch_edge_query_handlers_for_current([], kg)
         mock_handler.notify(manager.results)

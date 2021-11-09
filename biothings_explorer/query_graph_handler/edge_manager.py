@@ -1,18 +1,45 @@
 from .batch_edge_query import BatchEdgeQueryHandler
+from .log_entry import LogEntry
 
 
 class EdgeManager:
-    def __init__(self, edges, kg):
+    def __init__(self, edges):
         self.edges = [item for sublist in edges.values() for item in sublist]
-        self.kg = kg
-        self.resolve_output_ids = True
         self.logs = []
         self.results = []
+
+    def init(self):
+        pass
+
+    def pre_send_off_check(self, _next):
+        if _next['requires_entity_count_choice']:
+            _next.choose_lower_entity_value()
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    'Next edge will pick lower entity value to use for query.'
+                ).get_log()
+            )
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f"Edge manager is sending next edge {_next.get_id()} for execution."
+            ).get_log()
+        )
+        return _next
 
     def get_next(self):
         available_edges = [edge for edge in self.edges if not edge['executed']]
         if len(available_edges) == 0:
-            pass
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    f"Cannot get next edge, {available_edges} available edges found."
+                ).get_log()
+            )
         lowest_entity_count = None
         _next = None
         current_obj_lowest = 0
@@ -31,9 +58,16 @@ class EdgeManager:
                 if current_sub_lowest <= lowest_entity_count:
                     _next = edge
         if not _next:
-            all_empty = [edge for edge in available_edges if not edge['object_entity_count'] and not edge['subject_entity_count']]
+            all_empty = [edge for edge in available_edges if
+                         not edge['object_entity_count'] and not edge['subject_entity_count']]
             if len(all_empty) == 0:
-                pass
+                self.logs.append(
+                    LogEntry(
+                        'DEBUG',
+                        None,
+                        "Cannot get next edge, No available edges found."
+                    ).get_log()
+                )
             return all_empty[0]
         return _next
 
@@ -58,6 +92,13 @@ class EdgeManager:
     def _reduce_edge_results_with_neighbor_edge(self, edge, neighbor):
         first = edge['results']
         second = neighbor['results']
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f"Edge manager will try to intersect ({len(first)}) & ({len(second)}) results"
+            ).get_log()
+        )
         results = []
         dropped = 0
         for f in first:
@@ -81,6 +122,21 @@ class EdgeManager:
                             if shares_ids:
                                 results.append(f)
         dropped = len(first) - len(results)
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f'Edge manager is intersecting results for "{edge.get_id()}" Kept ({len(results)}) / Dropped ({dropped})'
+            ).get_log()
+        )
+        if len(results) == 0:
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    f'After intersection of "{edge.get_id()}" and "{neighbor.get_id()}" edge manager got 0 results.'
+                ).get_log()
+            )
         return results
 
     def gather_results(self):
@@ -91,6 +147,20 @@ class EdgeManager:
                 edge.store_results(current)
                 _next = self._reduce_edge_results_with_neighbor_edge(neighbor, edge)
                 neighbor.store_results(_next)
+                self.logs.append(
+                    LogEntry(
+                        'DEBUG',
+                        None,
+                        f'"${edge.get_id()}" keeps ({len(current)}) results and "${neighbor.getID()}" keeps ({len(_next)}) results!'
+                    ).get_log()
+                )
         for edge in self.edges:
             for r in edge['results']:
                 self.results.append(r)
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f'Edge manager collected ({len(self.results)}) results!'
+            ).get_log()
+        )
