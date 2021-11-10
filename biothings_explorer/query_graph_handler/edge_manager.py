@@ -11,6 +11,14 @@ class EdgeManager:
     def init(self):
         pass
 
+    def log_entity_counts(self):
+        for edge in self.edges:
+            pass
+
+    def refresh_edges(self):
+        for edge in self.edges:
+            edge.update_entity_counts()
+
     def pre_send_off_check(self, _next):
         if _next['requires_entity_count_choice']:
             _next.choose_lower_entity_value()
@@ -28,6 +36,7 @@ class EdgeManager:
                 f"Edge manager is sending next edge {_next.get_id()} for execution."
             ).get_log()
         )
+        self.log_entity_counts()
         return _next
 
     def get_next(self):
@@ -71,18 +80,18 @@ class EdgeManager:
             return all_empty[0]
         return _next
 
-    def update_edges_entity_counts(self, results, current_edge):
-        entities = set()
-        for res in results:
-            if not isinstance(res['$output'], list) and 'original' in res['$output']:
-                if not isinstance(res['$output']['original'], list):
-                    entities.add(res['$output']['original'])
-        entities = [*entities]
-        current_node_ids = [current_edge['object']['id'], current_edge['subject']['id']]
-        for node_id in current_node_ids:
-            for edge in self.edges:
-                if node_id in edge['connecting_nodes'] and edge.get_id() != current_edge.get_id():
-                    edge.update_entity_count_by_id(node_id, entities)
+    # def update_edges_entity_counts(self, results, current_edge):
+    #     entities = set()
+    #     for res in results:
+    #         if not isinstance(res['$output'], list) and 'original' in res['$output']:
+    #             if not isinstance(res['$output']['original'], list):
+    #                 entities.add(res['$output']['original'])
+    #     entities = [*entities]
+    #     current_node_ids = [current_edge['object']['id'], current_edge['subject']['id']]
+    #     for node_id in current_node_ids:
+    #         for edge in self.edges:
+    #             if node_id in edge['connecting_nodes'] and edge.get_id() != current_edge.get_id():
+    #                 edge.update_entity_count_by_id(node_id, entities)
 
     def get_edges_not_executed(self):
         found = [edge for edge in self.edges if not edge['executed']]
@@ -139,7 +148,7 @@ class EdgeManager:
             )
         return results
 
-    def gather_results(self):
+    def gather_results_old(self):
         for index, edge in enumerate(self.edges):
             neighbor = self.edges[index + 1]
             if not neighbor:
@@ -164,3 +173,44 @@ class EdgeManager:
                 f'Edge manager collected ({len(self.results)}) results!'
             ).get_log()
         )
+
+    def gather_results(self):
+        for edge in self.edges:
+            current = self._filter_edge_results(edge)
+            edge['results'] = current
+        for edge in self.edges:
+            for r in edge['results']:
+                self.results.append(r)
+
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f'Edge manager collected ({len(self.results)}) results!'
+            ).get_log()
+        )
+
+    def _filter_edge_results(self, edge):
+        keep = []
+        results = edge['results']
+        sub_curies = edge['subject']['curie']
+        obj_curies = edge['object']['curie']
+        objs = sub_curies if edge['reverse'] else obj_curies
+        subs = obj_curies if edge['reverse'] else sub_curies
+
+        for res in results:
+            ids = set()
+            output_match = False
+            input_match = False
+            for o in res['$input']['obj']:
+                for prefix in o['_dbIDs']:
+                    ids.add(prefix + ':' + o['_dbIDs'][prefix])
+                input_match = len(list(set(*ids) & set(subs)))
+            o_ids = set()
+            for o in res['$output']['obj']:
+                for prefix in o['_dbIDs']:
+                    o_ids.add(prefix + ':' + o['_dbIDs'][prefix])
+                output_match = len(list(set(*o_ids) & set(objs)))
+            if input_match and output_match:
+                keep.append(res)
+        return keep

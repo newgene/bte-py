@@ -6,11 +6,12 @@ from .utils import to_array, remove_biolink_prefix
 
 
 class BatchEdgeQueryHandler:
-    def __init__(self, kg, resolve_output_ids=True):
+    def __init__(self, kg, resolve_output_ids=True, options=None):
         self.kg = kg
         self.subscribers = []
         self.logs = []
         self.resolve_output_ids = resolve_output_ids
+        self.caching = options and options['caching']
 
     def set_edges(self, q_edges):
         self.q_edges = q_edges
@@ -51,7 +52,7 @@ class BatchEdgeQueryHandler:
     def query(self, q_edges):
         node_update = NodesUpdateHandler(q_edges)
         node_update.set_equivalent_ids(q_edges)
-        cache_handler = CacheHandler(q_edges)
+        cache_handler = CacheHandler(q_edges, self.caching)
         data = cache_handler.categorize_edges(q_edges)
         cached_results = data['cached_results']
         non_cached_edges = data['non_cached_edges']

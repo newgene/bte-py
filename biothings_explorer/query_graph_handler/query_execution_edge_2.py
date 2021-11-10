@@ -14,8 +14,8 @@ class UpdatedExeEdge:
         self.output_equivalent_identifiers = {}
         self.object = q_edge['object']
         self.subject = q_edge['subject']
-        self.object_entity_count = None
-        self.subject_entity_count = None
+        self.object_entity_count = self.object['entity_count']
+        self.subject_entity_count = self.subject['entity_count']
         self.executed = False
         self.logs = []
         self.results = []
@@ -23,26 +23,88 @@ class UpdatedExeEdge:
         self.init()
 
     def init(self):
-        self.check_initial_entity_count()
-        self.check_connecting_nodes()
-        self.check_if_results_need_intersection()
+        #self.check_initial_entity_count()
+        #self.check_connecting_nodes()
+        #self.check_if_results_need_intersection()
+        self.check_edge_entity_counts()
 
-    def check_connecting_nodes(self):
-        self.connecting_nodes.append(self.subject['id'])
-        self.connecting_nodes.append(self.object['id'])
+    def check_edge_entity_counts(self):
+        self.requires_entity_count_choice = True if self.object_entity_count and self.subject_entity_count else False
 
-    def check_initial_entity_count(self):
-        self.object_entity_count = self.object.has_input() if len(self.object['curie']) else None
-        self.subject_entity_count = self.subject.has_input() if len(self.subject['curie']) else None
+    def extract_curies_from_response(self, res):
+        _all = {}
+        for result in res:
+            for o in result['$input']['obj']:
+                _type = o['_leafSemanticType']
+                if not _all.get(_type):
+                    _all[_type] = {}
+                original = result['$input']['original']
+                original_aliases = set()
+                for prefix in o['_dbIDs']:
+                    original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
+                original_aliases = [*original_aliases]
+                was_found = False
+                for alias in original_aliases:
+                    if _all[_type].get(alias):
+                        was_found = True
+                if not was_found:
+                    _all[_type][original] = original_aliases
+            for o in result['$output']['obj']:
+                _type = o['_leafSemanticType']
+                if not _all.get(_type):
+                    _all[_type] = {}
+                original = result['$output']['original']
+                original_aliases = set()
+                for prefix in o['_dbIDs']:
+                    original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
+                original_aliases = [*original_aliases]
+                was_found = False
+                for alias in original_aliases:
+                    if _all[_type].get(alias):
+                        was_found = True
+                if not was_found:
+                    _all[_type][original] = original_aliases
+        return _all
 
-    def update_entity_count_by_id(self, node_id, entities):
-        if self.subject['id'] == node_id:
-            self.q_edge['subject']['curie'] = entities
-            self.subject_entity_count = len(entities)
-        elif self.object['id'] == node_id:
-            self.q_edge['object']['curie'] = entities
-            self.object_entity_count = len(entities)
-        self.check_if_results_need_intersection()
+    def update_node_curies(self, res):
+        curies_by_semantic_type = self.extract_curies_from_response(res)
+        self.process_curies(curies_by_semantic_type)
+
+    def process_curies(self, curies):
+        for semantic_type in curies:
+            self.find_node_and_add_curie(curies[semantic_type], semantic_type)
+
+    def find_node_and_add_curie(self, curies, semantic_type):
+        sub_cat = str(self.q_edge['subject']['category'])
+        obj_cat = str(self.q_edge['object']['category'])
+        if semantic_type in sub_cat:
+            self.q_edge['subject'].update_curies(curies)
+        elif semantic_type in obj_cat:
+            self.q_edge['object'].update_curies(curies)
+        else:
+            pass
+
+    def update_entity_counts(self):
+        self.object_entity_count = self.object['entity_count']
+        self.subject_entity_count = self.subject['entity_count']
+        self.check_edge_entity_counts()
+
+    # def check_connecting_nodes(self):
+    #     self.connecting_nodes.append(self.subject['id'])
+    #     self.connecting_nodes.append(self.object['id'])
+
+    # def check_initial_entity_count(self):
+    #     self.object_entity_count = self.object.has_input() if len(self.object['curie']) else None
+    #     self.subject_entity_count = self.subject.has_input() if len(self.subject['curie']) else None
+
+    # def update_entity_count_by_id(self, node_id, entities):
+    #     if self.subject['id'] == node_id:
+    #         self.q_edge['subject']['curie'] = entities
+    #         self.subject_entity_count = len(entities)
+    #     elif self.object['id'] == node_id:
+    #         self.q_edge['object']['curie'] = entities
+    #         self.object_entity_count = len(entities)
+    #     self.check_if_results_need_intersection()
 
     def check_if_results_need_intersection(self):
         self.requires_entity_count_choice = True if self.object_entity_count and self.subject_entity_count else False
@@ -93,6 +155,8 @@ class UpdatedExeEdge:
 
     def store_results(self, res):
         self.results = res
+        self.update_node_curies(res)
+        self.check_edge_entity_counts()
 
     def get_id(self):
         return self.q_edge.get_id()

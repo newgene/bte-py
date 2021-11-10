@@ -8,10 +8,10 @@ load_dotenv()
 
 
 class CacheHandler:
-    def __init__(self, q_edges, logs=[]):
+    def __init__(self, q_edges, caching, logs=[]):
         self.q_edges = q_edges
         self.logs = logs
-        self.cache_enabled = enable_redis
+        self.cache_enabled = enable_redis if caching else False
         self.logs.append(
             LogEntry('DEBUG', None, f"REDIS cache is {'' if self.cache_enabled else 'not'} enabled")
         )

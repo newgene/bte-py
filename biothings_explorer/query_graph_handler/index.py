@@ -27,6 +27,9 @@ class TRAPIQueryHandler:
     def get_response(self):
         self.bte_graph.notify()
         return {
+            'workflow': [
+                {'id': 'lookup'}
+            ],
             'message': {
                 'query_graph': self.query_graph,
                 'knowledge_graph': self.knowledge_graph.kg,
@@ -55,6 +58,15 @@ class TRAPIQueryHandler:
                 raise e
             else:
                 raise InvalidQueryGraphError()
+
+    def _create_batch_edge_query_handlers(self, query_paths, kg):
+        handlers = {}
+        for index in query_paths:
+            handlers[index] = BatchEdgeQueryHandler(kg, self.resolve_output_ids, {'caching': self.options['caching']})
+            handlers[index].set_edges(query_paths[index])
+            handlers[index].subscribe(self.query_results)
+            handlers[index].subscribe(self.bte_graph)
+        return handlers
 
     def _create_batch_edge_query_handlers_for_current(self, current_edge, kg):
         handler = BatchEdgeQueryHandler(kg, self.resolve_output_ids)
@@ -92,7 +104,8 @@ class TRAPIQueryHandler:
             if len(res) == 0:
                 return
             current_edge.store_results(res)
-            manager.update_edges_entity_counts(res, current_edge)
+            #manager.update_edges_entity_counts(res, current_edge)
+            manager.refresh_edges()
             current_edge['executed'] = True
         manager.gather_results()
         self.logs = [*self.logs, *manager.logs]
