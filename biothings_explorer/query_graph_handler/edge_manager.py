@@ -9,7 +9,13 @@ class EdgeManager:
         self.results = []
 
     def init(self):
-        pass
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f"Edge manager is managing {len(self.edges)} edges."
+            ).get_log()
+        )
 
     def log_entity_counts(self):
         for edge in self.edges:
@@ -33,7 +39,7 @@ class EdgeManager:
             LogEntry(
                 'DEBUG',
                 None,
-                f"Edge manager is sending next edge {_next.get_id()} for execution."
+                f"Edge manager is sending next edge '{_next.get_id()}' for execution."
             ).get_log()
         )
         self.log_entity_counts()
@@ -135,7 +141,7 @@ class EdgeManager:
             LogEntry(
                 'DEBUG',
                 None,
-                f'Edge manager is intersecting results for "{edge.get_id()}" Kept ({len(results)}) / Dropped ({dropped})'
+                f"Edge manager is intersecting results for '{edge.get_id()}' Kept ({len(results)}) / Dropped ({dropped})"
             ).get_log()
         )
         if len(results) == 0:
@@ -143,7 +149,7 @@ class EdgeManager:
                 LogEntry(
                     'DEBUG',
                     None,
-                    f'After intersection of "{edge.get_id()}" and "{neighbor.get_id()}" edge manager got 0 results.'
+                    f"After intersection of '{edge.get_id()}' and '{neighbor.get_id()}' edge manager got 0 results."
                 ).get_log()
             )
         return results
@@ -160,28 +166,12 @@ class EdgeManager:
                     LogEntry(
                         'DEBUG',
                         None,
-                        f'"${edge.get_id()}" keeps ({len(current)}) results and "${neighbor.getID()}" keeps ({len(_next)}) results!'
+                        f"'${edge.get_id()}' keeps ({len(current)}) results and '${neighbor.getID()}' keeps ({len(_next)}) results!"
                     ).get_log()
                 )
         for edge in self.edges:
             for r in edge['results']:
                 self.results.append(r)
-        self.logs.append(
-            LogEntry(
-                'DEBUG',
-                None,
-                f'Edge manager collected ({len(self.results)}) results!'
-            ).get_log()
-        )
-
-    def gather_results(self):
-        for edge in self.edges:
-            current = self._filter_edge_results(edge)
-            edge['results'] = current
-        for edge in self.edges:
-            for r in edge['results']:
-                self.results.append(r)
-
         self.logs.append(
             LogEntry(
                 'DEBUG',
@@ -203,14 +193,64 @@ class EdgeManager:
             output_match = False
             input_match = False
             for o in res['$input']['obj']:
-                for prefix in o['_dbIDs']:
-                    ids.add(prefix + ':' + o['_dbIDs'][prefix])
+                if o.get('_dbIDs'):
+                    for prefix in o:
+                        ids.add(prefix + ':' + o['_dbIDs'][prefix])
+                elif o.get('curie'):
+                    ids.add(o['curie'])
+                else:
+                    ids.add(res['$input']['original'])
                 input_match = len(list(set(*ids) & set(subs)))
             o_ids = set()
             for o in res['$output']['obj']:
-                for prefix in o['_dbIDs']:
-                    o_ids.add(prefix + ':' + o['_dbIDs'][prefix])
+                if o.get('_dbIDs'):
+                    for prefix in o['_dbIDs']:
+                        o_ids.add(prefix + ':' + o['_dbIDs'][prefix])
+                elif o.get('curie'):
+                    o_ids.add(o['curie'])
+                else:
+                    o_ids.add(res['$output']['original'])
                 output_match = len(list(set(*o_ids) & set(objs)))
             if input_match and output_match:
                 keep.append(res)
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    f"'{edge.get_id()}' kept ({len(keep)}) / dropped ({len(results) - len(keep)}) results."
+                ).get_log()
+            )
         return keep
+
+    def gather_results(self):
+        results = []
+        self.refresh_edges()
+        for edge in self.edges:
+            filtered_res = self._filter_edge_results(edge)
+            if len(filtered_res) == 0:
+                self.logs.append(
+                    LogEntry(
+                        'DEBUG',
+                        None,
+                        f"Warning: Edge '{edge.get_id()}' resulted in (0) results."
+                    ).get_log()
+                )
+                return False
+            self.logs = [*self.logs, *edge.logs]
+            edge.results = filtered_res
+            results = [*results, *filtered_res]
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    f"'${edge.get_id()}' keeps ({len(filtered_res)}) results!"
+                ).get_log()
+            )
+            self.results = results
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    f"Edge manager collected ({len(self.results)}) results!"
+                ).get_log()
+            )

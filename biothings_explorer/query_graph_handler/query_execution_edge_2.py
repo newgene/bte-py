@@ -2,6 +2,7 @@ import functools
 from .utils import remove_biolink_prefix, to_array
 from .helper import QueryGraphHelper
 from .biolink import BioLinkModelInstance
+from .log_entry import LogEntry
 
 
 class UpdatedExeEdge:
@@ -82,7 +83,12 @@ class UpdatedExeEdge:
         elif semantic_type in obj_cat:
             self.q_edge['object'].update_curies(curies)
         else:
-            pass
+            if 'NamedThing' in sub_cat:
+                self.q_edge['subject'].update_curies(curies)
+            elif 'NamedThing' in obj_cat:
+                self.q_edge['object'].update_curies(curies)
+            else:
+                pass
 
     def update_entity_counts(self):
         self.object_entity_count = self.object['entity_count']
@@ -111,47 +117,21 @@ class UpdatedExeEdge:
 
     def choose_lower_entity_value(self):
         if self.object_entity_count and self.subject_entity_count:
-            if self.object_entity_count > self.subject_entity_count:
+            if self.object_entity_count == self.subject_entity_count:
+                self.reverse = True
+                self.held_subject_curies = self.q_edge['subject']['curie']
+                self.q_edge['subject'].hold_curie()
+
+            elif self.object_entity_count > self.subject_entity_count:
                 self.reverse = False
-                self.q_edge['object'].pop('curie')
+                self.held_object_curies = self.q_edge['object']['curie']
+                self.q_edge['object'].hold_curie()
             else:
                 self.reverse = True
-                self.q_edge['subject'].pop('curie')
-
-    def intersect_and_save_results(self, current_results, all_edges):
-        for index, edge in enumerate(all_edges):
-            if edge.get_id() == self.q_edge.get_id():
-                if all_edges[index - 1]:
-                    neighbor = all_edges[index - 1]
-                    prev_edge_res = self.intersect_results(neighbor['results'], current_results)
-                if all_edges[index + 1]:
-                    neighbor = all_edges[index + 1]
-                    next_edge_res = self.intersect_results(current_results, neighbor['results'])
-        self.results = current_results
-
-    def intersect_results(self, first, second):
-        results = []
-        dropped = 0
-        for f in first:
-            first_semantic_types = f['$input']['obj']
-            for f_type in first_semantic_types:
-                for s in second:
-                    second_semantic_types = s['$input']['obj']
-                    second_semantic_types = second_semantic_types + s['$output']['obj']
-                    for s_type in second_semantic_types:
-                        if f_type['_leafSemanticType'] == s_type['_leafSemanticType']:
-                            f_ids = set()
-                            for prefix in f_type['_dbIDs']:
-                                f_ids.add(prefix + ':' + f_type['_dbIDs'][prefix])
-                            s_ids = set()
-                            for prefix in s_type['_dbIDs']:
-                                s_ids.add(prefix + ':' + s_type['_dbIDs'][prefix])
-                            for f_id in f_ids:
-                                for s_id in s_ids:
-                                    if f_id == s_id:
-                                        results.append(f)
-        dropped = len(first) + len(second) - len(results)
-        return results
+                self.held_subject_curies = self.q_edge['subject']['curie']
+                self.q_edge['subject'].hold_curie()
+        else:
+            pass
 
     def store_results(self, res):
         self.results = res
