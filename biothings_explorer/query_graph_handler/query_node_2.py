@@ -23,18 +23,30 @@ class QNode:
     def update_curies(self, curies):
         if not self.curie:
             self.curie = []
-        if len(self.held_curie) and not len(self.curie):
+        if len(self.held_curie):
             self.curie = self.held_curie
             self.held_curie = []
-        if not len(self.curie):
-            self.curie = curies.keys()
+        if self._is_broad_type():
+            self.curie = [*self.curie, *curies.keys()]
         else:
-            self.curie = self.intersect_curies(self.curie, curies)
+            if not len(self.curie):
+                self.curie = curies.keys()
+            else:
+                intersection = self.intersect_curies(self.curie, curies)
+                self.curie = intersection if len(intersection) else self.curie
         self.entity_count = len(self.curie)
 
     def hold_curie(self):
         self.held_curie = self.curie
         self.curie = None
+
+    def _is_broad_type(self):
+        if 'NamedThing' in str(self.category):
+            return True
+        elif 'Or' in str(self.category):
+            return True
+        else:
+            return False
 
     def intersect_curies(self, curies, new_curies):
         keep = set()
@@ -42,7 +54,7 @@ class QNode:
             for alias in new_curies[original]:
                 if alias in curies or original in new_curies:
                     keep.add(original)
-        return [*keep]
+        return list(keep)
 
     def get_id(self):
         return self.id
@@ -84,7 +96,7 @@ class QNode:
         if not self.equivalent_ids:
             self.equivalent_ids = equivalent_ids
         else:
-            self.equivalent_ids = {*self.equivalent_ids, *equivalent_ids}
+            self.equivalent_ids = {**self.equivalent_ids, **equivalent_ids}
 
     def has_input(self):
         return True if self.curie else False

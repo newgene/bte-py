@@ -15,22 +15,12 @@ class UpdatedExeEdge:
         self.output_equivalent_identifiers = {}
         self.object = q_edge['object']
         self.subject = q_edge['subject']
-        self.object_entity_count = self.object['entity_count']
-        self.subject_entity_count = self.subject['entity_count']
+        #self.object_entity_count = self.object['entity_count']
+        #self.subject_entity_count = self.subject['entity_count']
         self.executed = False
         self.logs = []
         self.results = []
         self.requires_intersection = False
-        self.init()
-
-    def init(self):
-        #self.check_initial_entity_count()
-        #self.check_connecting_nodes()
-        #self.check_if_results_need_intersection()
-        self.check_edge_entity_counts()
-
-    def check_edge_entity_counts(self):
-        self.requires_entity_count_choice = True if self.object_entity_count and self.subject_entity_count else False
 
     def extract_curies_from_response(self, res):
         _all = {}
@@ -90,11 +80,6 @@ class UpdatedExeEdge:
             else:
                 pass
 
-    def update_entity_counts(self):
-        self.object_entity_count = self.object['entity_count']
-        self.subject_entity_count = self.subject['entity_count']
-        self.check_edge_entity_counts()
-
     # def check_connecting_nodes(self):
     #     self.connecting_nodes.append(self.subject['id'])
     #     self.connecting_nodes.append(self.object['id'])
@@ -113,22 +98,21 @@ class UpdatedExeEdge:
     #     self.check_if_results_need_intersection()
 
     def check_if_results_need_intersection(self):
-        self.requires_entity_count_choice = True if self.object_entity_count and self.subject_entity_count else False
+        self.requires_entity_count_choice = True if self.object['entity_count'] and self.subject['entity_count'] else False
 
     def choose_lower_entity_value(self):
-        if self.object_entity_count and self.subject_entity_count:
-            if self.object_entity_count == self.subject_entity_count:
-                self.reverse = True
+        if self.object['entity_count'] and self.subject['entity_count']:
+            if self.object['entity_count'] == self.subject['entity_count']:
+                self.reverse = False
                 self.held_subject_curies = self.q_edge['subject']['curie']
+                #TODO delete this?
                 self.q_edge['subject'].hold_curie()
 
-            elif self.object_entity_count > self.subject_entity_count:
+            elif self.object['entity_count'] > self.subject['entity_count']:
                 self.reverse = False
-                self.held_object_curies = self.q_edge['object']['curie']
                 self.q_edge['object'].hold_curie()
             else:
                 self.reverse = True
-                self.held_subject_curies = self.q_edge['subject']['curie']
                 self.q_edge['subject'].hold_curie()
         else:
             pass
@@ -136,7 +120,6 @@ class UpdatedExeEdge:
     def store_results(self, res):
         self.results = res
         self.update_node_curies(res)
-        self.check_edge_entity_counts()
 
     def get_id(self):
         return self.q_edge.get_id()

@@ -129,7 +129,8 @@ class QEdge2BTEEdgeHandler:
     def convert(self, q_edges):
         bte_edges = []
         for edge in q_edges:
-            smartapi_edges = self._get_smartapi_edges(edge) #correct
+            smartapi_edges = self._get_smartapi_edges(edge)
+            apis = [api['association']['api_name'] for api in smartapi_edges]
             for item in smartapi_edges:
                 # TODO self._create_bte_edges returns wrong amount
                 new_edges = self._create_bte_edges(item)

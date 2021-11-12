@@ -61,6 +61,18 @@ class TRAPIQueryHandler:
             else:
                 raise InvalidQueryGraphError()
 
+    def _process_query_graph_2(self, query_graph):
+        try:
+            query_graph_handler = QueryGraphHandler(query_graph)
+            res = query_graph_handler.calculate_edges()
+            self.logs = [*self.logs, *query_graph_handler.logs]
+            return res
+        except Exception as e:
+            if isinstance(e, InvalidQueryGraphError):
+                raise e
+            else:
+                raise InvalidQueryGraphError()
+
     def _create_batch_edge_query_handlers(self, query_paths, kg):
         handlers = {}
         for index in query_paths:
@@ -92,10 +104,9 @@ class TRAPIQueryHandler:
             handler.notify(res)
 
     def query_2(self):
-        edge_exec_order = []
         self._initialize_response()
         kg = self._load_meta_kg(self.smartapi_id, self.team)
-        query_edges = self._process_query_graph(self.query_graph)
+        query_edges = self._process_query_graph_2(self.query_graph)
         manager = EdgeManager(query_edges)
         while manager.get_edges_not_executed():
             current_edge = manager.get_next()
@@ -108,17 +119,9 @@ class TRAPIQueryHandler:
                 return
             current_edge.store_results(res)
             #manager.update_edges_entity_counts(res, current_edge)
-            manager.refresh_edges()
-            edge_exec_order.append(current_edge.get_id())
+            #manager.refresh_edges()
             current_edge['executed'] = True
         manager.gather_results()
         self.logs = [*self.logs, *manager.logs]
-        self.logs.append(
-            LogEntry(
-                'DEBUG',
-                None,
-                f"Edge manager execution order '${json.dumps(edge_exec_order)}'"
-            ).get_log()
-        )
         mock_handler = self._create_batch_edge_query_handlers_for_current([], kg)
         mock_handler.notify(manager.results)
