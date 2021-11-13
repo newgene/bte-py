@@ -157,6 +157,7 @@ class EdgeManager:
 
     def gather_results(self):
         results = []
+        broken_chain = False
         #self.refresh_edges()
         for edge in self.edges:
             filtered_res = self._filter_edge_results(edge)
@@ -168,7 +169,7 @@ class EdgeManager:
                         f"Warning: Edge '{edge.get_id()}' resulted in (0) results."
                     ).get_log()
                 )
-                return False
+                broken_chain = True
             self.logs = [*self.logs, *edge.logs]
             edge.results = filtered_res
             results = [*results, *filtered_res]
@@ -187,3 +188,20 @@ class EdgeManager:
                     f"Edge manager collected ({len(self.results)}) results!"
                 ).get_log()
             )
+        if broken_chain:
+            results = []
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    'One or more edges resulted in (0) results. No complete paths can be formed.'
+                ).get_log()
+            )
+        self.results = results
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f"Edge manager collected ({len(self.results)}) results!"
+            ).get_log()
+        )

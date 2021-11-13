@@ -59,7 +59,9 @@ class CacheHandler:
                         'db_ids': record['$input']['obj'][0]['db_ids'],
                         'curies': record['$input']['obj'][0]['curies'],
                         'label': record['$input']['obj'][0]['label'],
-                        'primary_id': record['$input']['obj'][0]['primary_id']
+                        'primary_id': record['$input']['obj'][0]['primary_id'],
+                        'semantic_type': record['$input']['obj'][0]['semantic_type'],
+                        'attributes': record['$input']['obj'][0]['attributes']
                     }
                 ]
             },
@@ -70,7 +72,9 @@ class CacheHandler:
                         'db_ids': record['$output']['obj'][0]['db_ids'],
                         'curies': record['$output']['obj'][0]['curies'],
                         'label': record['$output']['obj'][0]['label'],
-                        'primary_id': record['$output']['obj'][0]['primary_id']
+                        'primary_id': record['$output']['obj'][0]['primary_id'],
+                        'semantic_type': record['$output']['obj'][0]['semantic_type'],
+                        'attributes': record['$output']['obj'][0]['attributes']
                     }
                 ]
             }

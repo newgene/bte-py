@@ -54,3 +54,11 @@ class TestBioLinkModelClass(unittest.TestCase):
     def test_get_descendant_predicates_if_input_is_not_in_biolink_return_itself(self):
         res = BioLinkModelInstance.get_descendant_predicates('Gene1')
         self.assertEqual(res, ['Gene1'])
+
+
+class TestGetDescendantsFunction(unittest.TestCase):
+    def test_if_input_is_in_biolink_model_return_all_its_descendants_and_itself(self):
+        res = BioLinkModelInstance.get_descendant_classes('MolecularEntity')
+        self.assertIn('SmallMolecule', res)
+        self.assertIn('NucleicAcidEntity', res)
+        self.assertIn('MolecularEntity', res)

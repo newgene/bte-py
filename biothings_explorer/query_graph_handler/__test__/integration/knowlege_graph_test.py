@@ -6,7 +6,7 @@ from biothings_explorer.query_graph_handler.knowledge_graph import KnowledgeGrap
 
 class TestingKnowledgeGraph(unittest.TestCase):
     gene_node1 = QNode('n1', {'categories': 'Gene', 'ids': 'NCBIGene:1017'})
-    chemical_node1 = QNode('n3', {'categories': 'ChemicalSubstance'})
+    chemical_node1 = QNode('n3', {'categories': 'SmallMolecule'})
     edge1 = QEdge('e01', {'subject': gene_node1, 'object': chemical_node1})
     record = {
         "$edge_metadata": {
@@ -39,7 +39,7 @@ class TestingKnowledgeGraph(unittest.TestCase):
                     "PUBCHEM": "1234",
                     "name": "RILUZOLE"
                 },
-                "semanticType": "ChemicalSubstance",
+                "semanticType": "SmallMolecule",
                 "curies": ['CHEMBL.COMPOUND:CHEMBL744', 'PUBCHEM:1234', "name:RILUZOLE"]
             }]
         },
@@ -61,7 +61,7 @@ class TestingKnowledgeGraph(unittest.TestCase):
         kg = KnowledgeGraph()
         res = kg._create_output_node(self.record)
         self.assertIn('categories', res)
-        self.assertEqual(res['categories'], 'biolink:ChemicalSubstance')
+        self.assertEqual(res['categories'], 'biolink:SmallMolecule')
         self.assertIn('name', res)
         self.assertEqual(res['name'], 'RILUZOLE')
         self.assertIn('type', res['attributes'][0])

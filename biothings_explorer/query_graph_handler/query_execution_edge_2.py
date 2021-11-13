@@ -22,63 +22,85 @@ class UpdatedExeEdge:
         self.results = []
         self.requires_intersection = False
 
-    def extract_curies_from_response(self, res):
+    def extract_curies_from_response(self, res, is_reversed):
         _all = {}
+        types_to_include = [remove_biolink_prefix(category) for category in self.q_edge['subject']] if is_reversed else \
+            [remove_biolink_prefix(category) for category in self.q_edge['object']]
         for result in res:
             for o in result['$input']['obj']:
                 _type = o['_leafSemanticType']
-                if not _all.get(_type):
-                    _all[_type] = {}
-                original = result['$input']['original']
-                original_aliases = set()
-                for prefix in o['_dbIDs']:
-                    original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
-                original_aliases = [*original_aliases]
-                was_found = False
-                for alias in original_aliases:
-                    if _all[_type].get(alias):
-                        was_found = True
-                if not was_found:
-                    _all[_type][original] = original_aliases
+                if _type in types_to_include or 'NamedThing' in types_to_include or _type in str(types_to_include):
+                    if not _all.get(_type):
+                        _all[_type] = {}
+                    original = result['$input']['original']
+                    original_aliases = set()
+                    for prefix in o['_dbIDs']:
+                        original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
+                    original_aliases = [*original_aliases]
+                    was_found = False
+                    for alias in original_aliases:
+                        if _all[_type].get(alias):
+                            was_found = True
+                    if not was_found:
+                        _all[_type][original] = original_aliases
             for o in result['$output']['obj']:
                 _type = o['_leafSemanticType']
-                if not _all.get(_type):
-                    _all[_type] = {}
-                original = result['$output']['original']
-                original_aliases = set()
-                for prefix in o['_dbIDs']:
-                    original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
-                original_aliases = [*original_aliases]
-                was_found = False
-                for alias in original_aliases:
-                    if _all[_type].get(alias):
-                        was_found = True
-                if not was_found:
-                    _all[_type][original] = original_aliases
+                if _type in types_to_include or 'NamedThing' in types_to_include or _type in str(types_to_include):
+                    if not _all.get(_type):
+                        _all[_type] = {}
+                    original = result['$output']['original']
+                    original_aliases = set()
+                    for prefix in o['_dbIDs']:
+                        original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
+                    original_aliases = [*original_aliases]
+                    was_found = False
+                    for alias in original_aliases:
+                        if _all[_type].get(alias):
+                            was_found = True
+                    if not was_found:
+                        _all[_type][original] = original_aliases
         return _all
 
-    def update_node_curies(self, res):
-        curies_by_semantic_type = self.extract_curies_from_response(res)
-        self.process_curies(curies_by_semantic_type)
+    def _combine_curies(self, curies):
+        combined = {}
+        for _type in curies:
+            for original in curies[_type]:
+                combined[original] = curies[_type][original]
+        return combined
 
-    def process_curies(self, curies):
-        for semantic_type in curies:
-            self.find_node_and_add_curie(curies[semantic_type], semantic_type)
+    # def process_curies(self, curies):
+    #     for semantic_type in curies:
+    #         self.find_node_and_add_curie(curies[semantic_type], semantic_type)
+    #
+    # def find_node_and_add_curie(self, curies, semantic_type):
+    #     sub_cat = str(self.q_edge['subject']['category'])
+    #     obj_cat = str(self.q_edge['object']['category'])
+    #     if semantic_type in sub_cat:
+    #         self.q_edge['subject'].update_curies(curies)
+    #     elif semantic_type in obj_cat:
+    #         self.q_edge['object'].update_curies(curies)
+    #     else:
+    #         if 'NamedThing' in sub_cat:
+    #             self.q_edge['subject'].update_curies(curies)
+    #         elif 'NamedThing' in obj_cat:
+    #             self.q_edge['object'].update_curies(curies)
+    #         else:
+    #             pass
 
-    def find_node_and_add_curie(self, curies, semantic_type):
-        sub_cat = str(self.q_edge['subject']['category'])
-        obj_cat = str(self.q_edge['object']['category'])
-        if semantic_type in sub_cat:
-            self.q_edge['subject'].update_curies(curies)
-        elif semantic_type in obj_cat:
-            self.q_edge['object'].update_curies(curies)
+    def update_node_curies(self, res, reverse):
+        curies_by_semantic_type = self.extract_curies_from_response(res, reverse)
+        combined_curies = self._combine_curies(curies_by_semantic_type)
+        if reverse:
+            self.q_edge.subject.update_curies(combined_curies)
         else:
-            if 'NamedThing' in sub_cat:
-                self.q_edge['subject'].update_curies(curies)
-            elif 'NamedThing' in obj_cat:
-                self.q_edge['object'].update_curies(curies)
-            else:
-                pass
+            self.q_edge.object.update_curies(combined_curies)
+
+        curies_by_semantic_type_2 = self.extract_curies_from_response(res, not reverse)
+        combined_curies_2 = self._combine_curies(curies_by_semantic_type_2)
+        if reverse:
+            self.q_edge.subject.update_curies(combined_curies_2)
+        else:
+            self.q_edge.object.update_curies(combined_curies)
 
     # def check_connecting_nodes(self):
     #     self.connecting_nodes.append(self.subject['id'])
@@ -117,9 +139,9 @@ class UpdatedExeEdge:
         else:
             pass
 
-    def store_results(self, res):
+    def store_results(self, res, reverse):
         self.results = res
-        self.update_node_curies(res)
+        self.update_node_curies(res, reverse)
 
     def get_id(self):
         return self.q_edge.get_id()

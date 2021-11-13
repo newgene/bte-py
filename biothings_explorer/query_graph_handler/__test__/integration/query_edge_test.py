@@ -5,7 +5,7 @@ from biothings_explorer.query_graph_handler.query_edge import QEdge
 
 class TestingQueryEdgeModule(unittest.TestCase):
     gene_node1 = QNode('n1', {'categories': 'Gene', 'ids': 'NCBIGene:1017'})
-    type_node = QNode('n2', {'categories': 'ChemicalSubstance'})
+    type_node = QNode('n2', {'categories': 'SmallMolecule'})
     disease1_node = QNode('n1', {'categories': 'Disease', 'ids': 'MONDO:000123'})
     node1_equivalent_ids = {
         'NCBIGene:1017': {
@@ -20,7 +20,7 @@ class TestingQueryEdgeModule(unittest.TestCase):
     gene_node1_with_id_annotated = QNode('n1', {'categories': 'Gene', 'ids': 'NCBIGene:1017'})
     gene_node1_with_id_annotated.set_equivalent_ids(node1_equivalent_ids)
     invalid_node = QNode('n3', {'categories': 'INVALID', 'curie': ["NCBIGene:1017", "NCBIGene:1018"]})
-    chemical_node1 = QNode('n3', {'categories': 'ChemicalSubstance'})
+    chemical_node1 = QNode('n3', {'categories': 'SmallMolecule'})
     edge1 = QEdge('e01', {'subject': gene_node1, 'object': chemical_node1})
     edge2 = QEdge('e02', {'subject': gene_node1_with_id_annotated, 'object': chemical_node1})
     edge3 = QEdge('e04', {'subject': gene_node2, 'object': chemical_node1})
@@ -37,7 +37,7 @@ class TestingQueryEdgeModule(unittest.TestCase):
 
     def test_is_reversed_if_both_subject_and_object_curie_not_defined_should_return_false(self):
         node1 = QNode('n1', {'categories': 'Gene'})
-        node2 = QNode('n2', {'categories': 'ChemicalSubstance'})
+        node2 = QNode('n2', {'categories': 'SmallMolecule'})
         edge = QEdge('e01', {'subject': node1, 'object': node2})
         self.assertFalse(edge.is_reversed())
 
@@ -67,7 +67,7 @@ class TestingQueryEdgeModule(unittest.TestCase):
 
     def test_has_input_return_false_if_both_subject_and_object_has_no_curies_specified(self):
         node1 = QNode('n1', {'categories': 'Gene'})
-        node2 = QNode('n2', {'categories': 'ChemicalSubstance'})
+        node2 = QNode('n2', {'categories': 'SmallMolecule'})
         edge = QEdge('e01', {'subject': node1, 'object': node2})
         self.assertFalse(edge.has_input())
 

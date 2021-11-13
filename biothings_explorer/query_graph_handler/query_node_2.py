@@ -26,27 +26,29 @@ class QNode:
         if len(self.held_curie):
             self.curie = self.held_curie
             self.held_curie = []
-        if self._is_broad_type():
-            self.curie = [*self.curie, *curies.keys()]
+        # if self._is_broad_type():
+        #     self.curie = [*self.curie, *curies.keys()]
+        if not len(self.curie):
+            self.curie = curies.keys()
         else:
             if not len(self.curie):
                 self.curie = curies.keys()
             else:
                 intersection = self.intersect_curies(self.curie, curies)
-                self.curie = intersection if len(intersection) else self.curie
+                self.curie = intersection
         self.entity_count = len(self.curie)
 
     def hold_curie(self):
         self.held_curie = self.curie
         self.curie = None
 
-    def _is_broad_type(self):
-        if 'NamedThing' in str(self.category):
-            return True
-        elif 'Or' in str(self.category):
-            return True
-        else:
-            return False
+    # def _is_broad_type(self):
+    #     if 'NamedThing' in str(self.category):
+    #         return True
+    #     elif 'Or' in str(self.category):
+    #         return True
+    #     else:
+    #         return False
 
     def intersect_curies(self, curies, new_curies):
         keep = set()

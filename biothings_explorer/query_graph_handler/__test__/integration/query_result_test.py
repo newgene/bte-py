@@ -6,7 +6,7 @@ from biothings_explorer.query_graph_handler.query_results import QueryResult
 
 class TestQueryResults(unittest.TestCase):
     gene_node1 = QNode('n1', {'categories': 'Gene', 'ids': 'NCBIGene:NCBIGene'})
-    chemical_node1 = QNode('n2', {'categories': 'ChemicalSubstance'})
+    chemical_node1 = QNode('n2', {'categories': 'SmallMolecule'})
     edge1 = QEdge('e01', {'subject': gene_node1, 'object': chemical_node1})
     record = {
         "$edge_metadata": {

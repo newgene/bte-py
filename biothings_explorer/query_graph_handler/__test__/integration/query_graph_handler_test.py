@@ -21,7 +21,7 @@ class TestQueryGraphHandler(unittest.TestCase):
     }
 
     chemical_class_node = {
-        'categories': 'biolink:ChemicalSubstance'
+        'categories': 'biolink:SmallMolecule'
     }
 
     pathway_class_node = {

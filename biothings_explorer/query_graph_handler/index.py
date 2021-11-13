@@ -117,7 +117,7 @@ class TRAPIQueryHandler:
             self.logs = [*self.logs, *handler.logs]
             if len(res) == 0:
                 return
-            current_edge.store_results(res)
+            current_edge.store_results(res, current_edge['reverse'])
             #manager.update_edges_entity_counts(res, current_edge)
             #manager.refresh_edges()
             current_edge['executed'] = True

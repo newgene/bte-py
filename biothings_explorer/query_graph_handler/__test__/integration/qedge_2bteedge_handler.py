@@ -17,8 +17,8 @@ class TestNodeUpdateHandler(unittest.TestCase):
     gene_node1_with_id_annotated = QNode('n1', {'categories': 'Gene', 'ids': "NCBIGene:1017"})
     gene_node1_with_id_annotated.set_equivalent_ids(node1_equivalent_ids)
     invalid_node = QNode('n3', {'categories': 'INVALID', 'curie': ["NCBIGene:1017", "NCBIGene:1018"]})
-    chemical_node1 = QNode('n3', {'categories': 'ChemicalSubstance'})
-    chemical_node2 = QNode('n4', {'categories': 'ChemicalSubstance', 'curie': 'CHEMBL.COMPUND:CHEMBL744'})
+    chemical_node1 = QNode('n3', {'categories': 'SmallMolecule'})
+    chemical_node2 = QNode('n4', {'categories': 'SmallMolecule', 'curie': 'CHEMBL.COMPUND:CHEMBL744'})
     edge1 = QEdge('e01', {'subject': gene_node1, 'object': chemical_node1})
     edge2 = QEdge('e02', {'subject': gene_node1_with_id_annotated, 'object': chemical_node1})
     edge3 = QEdge('e04', {'subject': gene_node2, 'object': chemical_node1})
@@ -53,7 +53,7 @@ class TestNodeUpdateHandler(unittest.TestCase):
 
     def test_get_equivalent_ids_edge_with_multiple_curie_input_return_an_object_with_multiple_key(self):
         node_updater = NodesUpdateHandler([self.edge1])
-        res = node_updater._get_equivalent_ids({'Gene': ["NCBIGene:1017", "NCBIGene:1018"], 'ChemicalSubstance': ["PUBCHEM:5070"]})
+        res = node_updater._get_equivalent_ids({'Gene': ["NCBIGene:1017", "NCBIGene:1018"], 'SmallMolecule': ["PUBCHEM:5070"]})
         self.assertIn('NCBIGene:1017', res)
         self.assertIn('NCBIGene:1018', res)
         self.assertIn('PUBCHEM:5070', res)
