@@ -42,19 +42,11 @@ class QNode:
         self.held_curie = self.curie
         self.curie = None
 
-    # def _is_broad_type(self):
-    #     if 'NamedThing' in str(self.category):
-    #         return True
-    #     elif 'Or' in str(self.category):
-    #         return True
-    #     else:
-    #         return False
-
     def intersect_curies(self, curies, new_curies):
         keep = set()
         for original in new_curies:
             for alias in new_curies[original]:
-                if alias in curies or original in new_curies:
+                if alias in curies:
                     keep.add(original)
         return list(keep)
 
