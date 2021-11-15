@@ -36,7 +36,18 @@ class UpdatedExeEdge:
                     if o.get('_dbIDs'):
                         original_aliases = set()
                         for prefix in o['_dbIDs']:
-                            original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
+                            #original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
+                            if isinstance(o['_dbIDs'].get(prefix), list):
+                                for single_alias in o['_dbIDs'][prefix]:
+                                    if ':' in single_alias:
+                                        original_aliases.add(single_alias)
+                                    else:
+                                        original_aliases.add(prefix + ':' + single_alias)
+                            else:
+                                if ':' in o['_dbIDs'][prefix]:
+                                    original_aliases.add(o['_dbIDs'][prefix])
+                                else:
+                                    original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
                         original_aliases = [*original_aliases]
                         was_found = False
                         for alias in original_aliases:
@@ -44,6 +55,13 @@ class UpdatedExeEdge:
                                 was_found = True
                         if not was_found:
                             _all[_type][original] = original_aliases
+                    elif o.get('curie'):
+                        if isinstance(o['curie'], list):
+                            _all[_type][original] = o['curie']
+                        else:
+                            _all[_type][original] = [o['curie']]
+                    else:
+                        _all[_type][original] = [original]
             for o in result['$output']['obj']:
                 _type = o['_leafSemanticType']
                 if _type in types_to_include or 'NamedThing' in types_to_include or _type in str(types_to_include):
@@ -53,7 +71,18 @@ class UpdatedExeEdge:
                     if o.get('_dbIDs'):
                         original_aliases = set()
                         for prefix in o['_dbIDs']:
-                            original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
+                            #original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
+                            if isinstance(o['_dbIDs'].get(prefix), list):
+                                for single_alias in o['_dbIDs'][prefix]:
+                                    if ':' in single_alias:
+                                        original_aliases.add(single_alias)
+                                    else:
+                                        original_aliases.add(prefix + ':' + single_alias)
+                            else:
+                                if ':' in o['_dbIDs'][prefix]:
+                                    original_aliases.add(o['_dbIDs'][prefix])
+                                else:
+                                    original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
                         original_aliases = [*original_aliases]
                         was_found = False
                         for alias in original_aliases:
@@ -61,6 +90,13 @@ class UpdatedExeEdge:
                                 was_found = True
                         if not was_found:
                             _all[_type][original] = original_aliases
+                    elif o.get('curie'):
+                        if isinstance(o['curie'], list):
+                            _all[_type][original] = o['curie']
+                        else:
+                            _all[_type][original] = [o['curie']]
+                    else:
+                        _all[_type][original] = [original]
         return _all
 
     def _combine_curies(self, curies):

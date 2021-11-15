@@ -117,12 +117,16 @@ class EdgeManager:
                 if o.get('_dbIDs'):
                     for prefix in o:
                         if isinstance(o['_dbIDs'][prefix], list):
-                            for v in o['_dbIDs'][prefix]:
-                                alias = v if ':' in v else prefix + ':' + v
-                                ids.add(alias)
+                            for single_alias in o['_dbIDs'][prefix]:
+                                if ':' in single_alias:
+                                    ids.add(single_alias)
+                                else:
+                                    ids.add(prefix + ':' + single_alias)
                         else:
-                            alias = o['_dbIDs'][prefix] if ':' in o['_dbIDs'][prefix] else prefix + ':' + o['_dbIDs'][prefix]
-                            ids.add(alias)
+                            if ':' in o['_dbIDs'][prefix]:
+                                ids.add(o['_dbIDs'][prefix])
+                            else:
+                                ids.add(prefix + ':' + o['_dbIDs'][prefix])
                 elif o.get('curie'):
                     ids.add(o['curie'])
                 else:
@@ -133,12 +137,16 @@ class EdgeManager:
                 if o.get('_dbIDs'):
                     for prefix in o['_dbIDs']:
                         if isinstance(o['_dbIDs'][prefix], list):
-                            for v in o['_dbIDs'][prefix]:
-                                alias = v if ':' in v else prefix + ':' + v
-                                o_ids.add(alias)
+                            for single_alias in o['_dbIDs'][prefix]:
+                                if ':' in single_alias:
+                                    o_ids.add(single_alias)
+                                else:
+                                    o_ids.add(prefix + ':' + single_alias)
                         else:
-                            alias = o['_dbIDs'][prefix] if ':' in o['_dbIDs'][prefix] else prefix + ':' + o['_dbIDs'][prefix]
-                            o_ids.add(alias)
+                            if ':' in o['_dbIDs'][prefix]:
+                                o_ids.add(o['_dbIDs'][prefix])
+                            else:
+                                o_ids.add(prefix + ':' + o['_dbIDs'][prefix])
                 elif o.get('curie'):
                     o_ids.add(o['curie'])
                 else:
@@ -155,9 +163,76 @@ class EdgeManager:
             )
         return keep
 
+    def collect_results(self):
+        results = []
+        broken_chain = False
+        broken_edges = []
+        for edge in self.edges:
+            filtered_res = edge['results']
+            if len(filtered_res) == 0:
+                self.logs.append(
+                    LogEntry(
+                        'DEBUG',
+                        None,
+                        f"Warning: Edge '{edge.get_id()}' resulted in (0) results."
+                    ).get_log()
+                )
+                broken_chain = True
+                broken_edges.append(edge.get_id())
+            self.logs = [*self.logs, *edge.logs]
+            results = [*results, *filtered_res]
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    f"'{edge.get_id()}' keeps ({len(filtered_res)}) results!"
+                ).get_log()
+            )
+            if broken_chain:
+                results = []
+                self.logs.append(
+                    LogEntry(
+                        'DEBUG',
+                        None,
+                        f"Edges {json.dumps(broken_edges)} "
+                        f"resulted in (0) results. No complete paths can be formed."
+                    ).get_log()
+                )
+            self.results = results
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    f"Edge manager collected ({len(self.results)}) results!"
+                ).get_log()
+            )
+
+    def update_edge_results(self, current_edge):
+        filtered_res = self._filter_edge_results(current_edge)
+        current_edge.store_results(filtered_res)
+
+    def update_neighbors_edge_results(self, current_edge):
+        not_this_edge = current_edge.get_id()
+        left_connections = current_edge['q_edge']['subject'].get_connections()
+        left_connections = [edge_id for edge_id in left_connections if edge_id != not_this_edge]
+        right_connections = current_edge['q_edge']['object'].get_connections()
+        right_connections = [edge_id for edge_id in right_connections if edge_id != not_this_edge]
+
+        if len(left_connections):
+            for neighbor_id in left_connections:
+                edge = next([edge for edge in self.edges if edge.get_id() == neighbor_id], None)
+                if edge and len(edge):
+                    self.update_edge_results(edge)
+        if len(right_connections):
+            for neighbor_id in right_connections:
+                edge = next([edge for edge in self.edges if edge.get_id() == neighbor_id], None)
+                if edge and len(edge):
+                    self.update_edge_results(edge)
+
     def gather_results(self):
         results = []
         broken_chain = False
+        broken_edges = []
         #self.refresh_edges()
         for edge in self.edges:
             filtered_res = self._filter_edge_results(edge)
@@ -170,6 +245,7 @@ class EdgeManager:
                     ).get_log()
                 )
                 broken_chain = True
+                broken_edges.append(edge.get_id())
             self.logs = [*self.logs, *edge.logs]
             edge.results = filtered_res
             results = [*results, *filtered_res]
@@ -194,7 +270,8 @@ class EdgeManager:
                 LogEntry(
                     'DEBUG',
                     None,
-                    'One or more edges resulted in (0) results. No complete paths can be formed.'
+                    f'Edges ${json.dumps(broken_edges)} ` + '
+                    f'resulted in (0) results. No complete paths can be formed.'
                 ).get_log()
             )
         self.results = results

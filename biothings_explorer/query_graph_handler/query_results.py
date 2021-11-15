@@ -72,22 +72,23 @@ class QueryResult:
         cached_query_result = ChainMap()
 
         for record in query_result:
-            input_node_id = helper._get_input_id(record)
-            output_node_id = helper._get_output_id(record)
+            if record:
+                input_node_id = helper._get_input_id(record)
+                output_node_id = helper._get_output_id(record)
 
-            if len(self.cached_query_results) == 0 or input_node_id in previous_output_node_ids:
-                if output_node_id in cached_query_result:
-                    cached_records_for_output_node_id = cached_query_result.get(output_node_id)
-                else:
-                    cached_records_for_output_node_id = []
-                    cached_query_result[output_node_id] = cached_records_for_output_node_id
-                cached_records_for_output_node_id.append({
-                    'input_query_node_id': helper._get_input_query_node_id(record),
-                    'input_node_id': input_node_id,
-                    'query_edge_id': record['$edge_metadata']['trapi_qEdge_obj'].get_id(),
-                    'kg_edge_id': helper._get_kg_edge_id(record),
-                    'output_query_node_id': helper._get_output_query_node_id(record),
-                    'output_node_id': output_node_id,
-                })
+                if len(self.cached_query_results) == 0 or input_node_id in previous_output_node_ids:
+                    if output_node_id in cached_query_result:
+                        cached_records_for_output_node_id = cached_query_result.get(output_node_id)
+                    else:
+                        cached_records_for_output_node_id = []
+                        cached_query_result[output_node_id] = cached_records_for_output_node_id
+                    cached_records_for_output_node_id.append({
+                        'input_query_node_id': helper._get_input_query_node_id(record),
+                        'input_node_id': input_node_id,
+                        'query_edge_id': record['$edge_metadata']['trapi_qEdge_obj'].get_id(),
+                        'kg_edge_id': helper._get_kg_edge_id(record),
+                        'output_query_node_id': helper._get_output_query_node_id(record),
+                        'output_node_id': output_node_id,
+                    })
         # add items to the start of the array
         self.cached_query_results = [*cached_query_result.maps, *self.cached_query_results]

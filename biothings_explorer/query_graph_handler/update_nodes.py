@@ -20,6 +20,7 @@ class NodesUpdateHandler:
         return curies
 
     def _get_equivalent_ids(self, curies):
+        # Using biomedical-id-resolver-sri on the latest version
         resolver = Resolver('biolink')
         equivalent_ids = resolver.resolve(curies)
         return equivalent_ids

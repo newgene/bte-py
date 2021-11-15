@@ -45,8 +45,15 @@ class QNode:
     def intersect_curies(self, curies, new_curies):
         keep = set()
         for original in new_curies:
-            for alias in new_curies[original]:
-                if alias in curies:
+            if isinstance(new_curies.get(original), list):
+                if original in curies:
+                    keep.add(original)
+                else:
+                    for alias in new_curies[original]:
+                        if alias in curies:
+                            keep.add(original)
+            else:
+                if new_curies[original] in curies:
                     keep.add(original)
         return list(keep)
 
