@@ -7,9 +7,11 @@ class QNode:
     def __init__(self, _id, info):
         self.id = _id
         self.category = info['categories'] or 'NamedThing'
+        self.curie = info['ids']
         self.entity = info['ids']
         self.entity_count = len(info['ids']) if info['ids'] else 0
         self.held_curie = []
+        self.connected_to = set()
 
     # def update_curies(self, curies):
     #     if not self.curie:
@@ -42,20 +44,19 @@ class QNode:
         self.held_curie = self.curie
         self.curie = None
 
-    def intersect_curies(self, curies, new_curies):
-        keep = set()
-        for original in new_curies:
-            if isinstance(new_curies.get(original), list):
-                if original in curies:
-                    keep.add(original)
-                else:
-                    for alias in new_curies[original]:
-                        if alias in curies:
-                            keep.add(original)
+    def _combine_curies_into_list(self, curies):
+        combined = set()
+        for original in curies:
+            if not isinstance(curies[original], list):
+                combined.add(curies[original])
             else:
-                if new_curies[original] in curies:
-                    keep.add(original)
-        return list(keep)
+                for curie in curies[original]:
+                    combined.add(curie)
+        return list(combined)
+
+    def intersect_curies(self, curies, new_curies):
+        all_new_curies = self._combine_curies_into_list(new_curies)
+        return list(set(curies) & set(all_new_curies))
 
     def get_id(self):
         return self.id
@@ -98,6 +99,12 @@ class QNode:
             self.equivalent_ids = equivalent_ids
         else:
             self.equivalent_ids = {**self.equivalent_ids, **equivalent_ids}
+
+    def update_connection(self, edge_id):
+        self.connected_to.add(edge_id)
+
+    def get_connections(self):
+        return list(self.connected_to)
 
     def has_input(self):
         return True if self.curie else False

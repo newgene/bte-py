@@ -23,9 +23,12 @@ class KnowledgeGraph:
             'name': kg_node._label,
             'attributes': [
                 {
-                    'attribute_type_id': 'equivalent_identifiers',
+                    'attribute_type_id': 'biolink:xref',
                     'value': kg_node._curies,
-                    'value_type_id': 'biolink:id'
+                },
+                {
+                    'attribute_type_id': 'biolink:synonym',
+                    'value': kg_node._names,
                 },
                 {
                     'attribute_type_id': 'num_source_nodes',
@@ -60,14 +63,14 @@ class KnowledgeGraph:
     def _create_attributes(self, kg_edge):
         attributes = [
             {
-                'attribute_type_id': 'provided_by',
+                'attribute_type_id': 'biolink:primary_knowledge_source',
                 'value': [item for item in kg_edge.sources],
-                'value_type_id': 'biolink:provided_by'
+                'value_type_id': 'biolink:InformationResource'
             },
             {
-                'attribute_type_id': 'api',
+                'attribute_type_id': 'biolink:aggregator_knowledge_source',
                 'value': [item for item in kg_edge.apis],
-                'value_type_id': 'bts:api'
+                'value_type_id': 'biolink:InformationResource'
             },
             {
                 'attribute_type_id': 'publications',
@@ -75,12 +78,23 @@ class KnowledgeGraph:
                 'value_type_id': 'biolink:publication'
             },
         ]
-        for key in kg_edge.attributes:
-            attributes.append({
-                'attribute_type_id': key,
-                'value': kg_edge.attributes[key],
-                'value_type_id': 'bts:' + key,
-            })
+        if kg_edge.attributes['attributes']:
+            attributes = [
+                {
+                    "attribute_type_id": "biolink:aggregator_knowledge_source",
+                    "value": "infores:translator-biothings-explorer",
+                    "value_type_id": "biolink:InformationResource"
+                },
+                *kg_edge.attributes['attributes']
+            ]
+        else:
+            for key in kg_edge.attributes:
+                attributes.append({
+                    'attribute_type_id': key,
+                    'value': kg_edge.attributes[key],
+                    'value_type_id': 'bts:' + key
+                })
+
         return attributes
 
     def _create_edge(self, kg_edge):

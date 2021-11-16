@@ -133,6 +133,24 @@ class QueryGraphHelper:
             print('_get_input_equivalent_ids', e)
             return None
 
+    def _get_input_names(self, record):
+        try:
+            if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
+                return record['$output']['obj'][0]['dbIDs']['name']
+            else:
+                return record['$input']['obj'][0]['dbIDs']['name']
+        except Exception as e:
+            return None
+
+    def _get_output_names(self, record):
+        try:
+            if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
+                return record['$input']['obj'][0]['dbIDs']['name']
+            else:
+                return record['$output']['obj'][0]['dbIDs']['name']
+        except Exception as e:
+            return None
+
     def _get_input_attributes(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
             if isinstance(record['$output']['obj'][0], dict):

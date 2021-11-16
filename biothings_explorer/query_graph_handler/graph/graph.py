@@ -27,6 +27,7 @@ class Graph:
                         'primary_id': output_primary_id,
                         'qg_id': output_qg_id,
                         'equivalent_ids': self.helper._get_output_equivalent_ids(record),
+                        'names': self.helper._get_output_names(record),
                         'label': self.helper._get_output_label(record),
                         'category': self.helper._get_output_category(record),
                         'node_attributes': self.helper._get_output_attributes(record)
@@ -37,6 +38,7 @@ class Graph:
                         'primary_id': input_primary_id,
                         'qg_id': input_qg_id,
                         'equivalent_ids': self.helper._get_input_equivalent_ids(record),
+                        'names': self.helper._get_input_names(record),
                         'label': self.helper._get_input_label(record),
                         'category': self.helper._get_input_category(record),
                         'node_attributes': self.helper._get_input_attributes(record)

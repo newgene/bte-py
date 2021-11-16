@@ -1,4 +1,5 @@
 from .query_node import QNode
+from .query_node_2 import QNode as QNode2
 from .query_edge import QEdge
 from .query_execution_edge import QExeEdge
 from .log_entry import LogEntry
@@ -52,10 +53,46 @@ class QueryGraphHandler:
                     'object': self.nodes[self.query_graph['edges'][edge_id]['object']]
                 }
             }
+
             edges[edge_id] = QEdge(edge_id, edge_info)
             self.logs.append(
                 LogEntry('DEBUG', None, f"BTE identified {len(edges)} QEdges from your query graph").get_log()
             )
+        return edges
+
+    def _store_nodes_2(self):
+        nodes = {}
+        for node_id in self.query_graph['nodes']:
+            nodes[node_id] = QNode2(node_id, self.query_graph['nodes'][node_id])
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f"BTE identified {len(nodes.keys())} QNodes from your query graph"
+            ).get_log()
+        )
+        return nodes
+
+    def _store_edges_2(self):
+        if not self.nodes:
+            self.nodes = self._store_nodes_2()
+        edges = {}
+        for edge_id in self.query_graph['edges']:
+            edge_info = {
+                **self.query_graph['edges'][edge_id],
+                'subject': self.nodes[self.query_graph['edges'][edge_id]['subject']],
+                'object': self.nodes[self.query_graph['edges'][edge_id]['object']]
+            }
+            self.nodes[self.query_graph['edges']['subject']].update_connection(edge_id)
+            self.nodes[self.query_graph['edges']['object']].update_connection(edge_id)
+            edges[edge_id] = QEdge(edge_id, edge_info)
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f"BTE identified {len(edges.keys())} QEdges from your query graph"
+            ).get_log()
+        )
         return edges
 
     def create_query_paths(self):

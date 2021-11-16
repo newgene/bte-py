@@ -8,6 +8,8 @@ class EdgeManager:
         self.edges = [item for sublist in edges.values() for item in sublist]
         self.logs = []
         self.results = []
+        self.organized_results = {}
+        self.init()
 
     def init(self):
         self.logs.append(
@@ -17,6 +19,12 @@ class EdgeManager:
                 f"Edge manager is managing {len(self.edges)} edges."
             ).get_log()
         )
+
+    def get_results(self):
+        return self.results
+
+    def get_organized_results(self):
+        return self.organized_results
 
     def log_entity_counts(self):
         for edge in self.edges:
@@ -41,6 +49,58 @@ class EdgeManager:
         )
         self.log_entity_counts()
         return _next
+
+    def collect_organized_results(self):
+        results = {}
+        broken_chain = False
+        broken_edges = []
+
+        for edge in self.edges:
+            edge_id = edge.get_id()
+            filtered_res = edge['results']
+            if len(filtered_res) == 0:
+                self.logs.append(
+                    LogEntry(
+                        'DEBUG',
+                        None,
+                        f"Warning: Edge '{edge_id}' resulted in (0) results."
+                    ).get_log()
+                )
+                broken_chain = True
+                broken_edges.append(edge_id)
+            self.logs = [*self.logs, *edge.logs]
+            connections = [*edge['q_edge']['subject'].get_connections(), *edge['q_edge']['object'].get_connections()]
+            connections = [_id for _id in connections if _id != edge_id]
+            connections = set(connections)
+            results[edge_id] = {
+                'records': filtered_res,
+                'connected_to': [*connections]
+            }
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    f"'{edge_id}' keeps ({len(filtered_res)}) results!"
+                ).get_log()
+            )
+        if broken_chain:
+            results = {}
+            self.logs.append(
+                LogEntry(
+                    'DEBUG',
+                    None,
+                    f"Edges {json.dumps(broken_edges)} "
+                    f"resulted in (0) results. No complete paths can be formed."
+                ).get_log()
+            )
+        self.organized_results = results
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f"Edge manager collected ({len(self.results)}) results!"
+            ).get_log()
+        )
 
     def get_next(self):
         available_edges = [edge for edge in self.edges if not edge['executed']]
@@ -228,6 +288,13 @@ class EdgeManager:
                 edge = next([edge for edge in self.edges if edge.get_id() == neighbor_id], None)
                 if edge and len(edge):
                     self.update_edge_results(edge)
+
+    def update_all_other_edges(self, current_edge):
+        not_this_edge = current_edge.get_id()
+        for edge in self.edges:
+            if edge.get_id() != not_this_edge and len(edge.results):
+                self.update_edge_results(edge)
+                self.update_edge_results(current_edge)
 
     def gather_results(self):
         results = []

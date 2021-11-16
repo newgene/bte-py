@@ -4,6 +4,7 @@ class KGNode:
         self._primary_id = info['primary_id']
         self._qg_id = info['qg_id']
         self._curies = info['equivalent_ids']
+        self._names = info['names']
         self._semantic_type = info['category']
         self._node_attributes = info['node_attributes']
         self._label = info['label']

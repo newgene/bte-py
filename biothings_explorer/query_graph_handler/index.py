@@ -118,10 +118,10 @@ class TRAPIQueryHandler:
             if len(res) == 0:
                 return
             current_edge.store_results(res)
-            #manager.update_edges_entity_counts(res, current_edge)
-            #manager.refresh_edges()
+            manager.update_edge_results(current_edge)
+            manager.update_all_other_edges(current_edge)
             current_edge['executed'] = True
-        manager.gather_results()
+        manager.collect_results()
         self.logs = [*self.logs, *manager.logs]
         mock_handler = self._create_batch_edge_query_handlers_for_current([], kg)
-        mock_handler.notify(manager.results)
+        mock_handler.notify(manager.get_results())
