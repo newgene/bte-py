@@ -11,34 +11,45 @@ class QNode:
         self.entity = info['ids']
         self.entity_count = len(info['ids']) if info['ids'] else 0
         self.held_curie = []
+        self.held_expanded = {}
         self.connected_to = set()
+        self.expand_curie()
 
-    # def update_curies(self, curies):
-    #     if not self.curie:
-    #         self.curie = []
-    #     if len(self.curie):
-    #         self.curie = list(set(self.curie) & set(curies))
-    #     else:
-    #         self.curie = curies
-    #     self.entity_count = len(self.curie)
+    def expand_curie(self):
+        if self.curie and len(self.curie):
+            for _id in self.curie:
+                if not _id.get(self.expanded_curie):
+                    self.expanded_curie[_id] = [_id]
 
     def update_curies(self, curies):
         if not self.curie:
             self.curie = []
         if len(self.held_curie):
             self.curie = self.held_curie
+            self.expanded_curie = self.held_expanded
             self.held_curie = []
+            self.held_expanded = {}
         # if self._is_broad_type():
         #     self.curie = [*self.curie, *curies.keys()]
         if not len(self.curie):
             self.curie = curies.keys()
+            self.expanded_curie = curies
         else:
-            if not len(self.curie):
-                self.curie = curies.keys()
-            else:
-                intersection = self.intersect_curies(self.curie, curies)
-                self.curie = intersection
+            self.intersect_with_expanded_curies(curies)
         self.entity_count = len(self.curie)
+
+    def intersect_with_expanded_curies(self, new_curies):
+        keep = {}
+        for main_id in new_curies:
+            current_list_of_aliases = new_curies[main_id]
+            for existing_main_id in self.expanded_curie:
+                existing_list_of_aliases = self.expanded_curie[existing_main_id]
+                ids_match_found = list(set(current_list_of_aliases) & set(existing_list_of_aliases))
+                if len(ids_match_found):
+                    if not keep.get(main_id):
+                        keep[main_id] = current_list_of_aliases
+        self.expanded_curie = keep
+        self.curie = keep.keys()
 
     def hold_curie(self):
         self.held_curie = self.curie

@@ -85,8 +85,8 @@ class TRAPIQueryHandler:
     def _create_batch_edge_query_handlers_for_current(self, current_edge, kg):
         handler = BatchEdgeQueryHandler(kg, self.resolve_output_ids)
         handler.set_edges(current_edge)
-        handler.subscribe(self.query_results)
-        handler.subscribe(self.bte_graph)
+        # handler.subscribe(self.query_results)
+        # handler.subscribe(self.bte_graph)
         return handler
 
     def query(self):
@@ -122,6 +122,9 @@ class TRAPIQueryHandler:
             manager.update_all_other_edges(current_edge)
             current_edge['executed'] = True
         manager.collect_results()
+        manager.collect_organized_results()
         self.logs = [*self.logs, *manager.logs]
-        mock_handler = self._create_batch_edge_query_handlers_for_current([], kg)
-        mock_handler.notify(manager.get_results())
+        # mock_handler = self._create_batch_edge_query_handlers_for_current([], kg)
+        # mock_handler.notify(manager.get_results())
+        self.bte_graph.update(manager.get_results())
+        self.query_results.update(manager.get_organized_results())
