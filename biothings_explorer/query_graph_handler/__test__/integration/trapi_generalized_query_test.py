@@ -7,7 +7,7 @@ class TestTRAPIQueryHandlerGeneralizedQuery(unittest.TestCase):
         'nodes': {
             'n0': {
                 "ids": ["PUBCHEM.COMPOUND:2662"],
-                "categories": ["biolink:ChemicalSubstance"]
+                "categories": ["biolink:SmallMolecule"]
             },
             'n1': {
                 "categories": ["biolink:Gene"],
@@ -26,7 +26,7 @@ class TestTRAPIQueryHandlerGeneralizedQuery(unittest.TestCase):
         "nodes": {
             "n0": {
                 "ids": ["PUBCHEM.COMPOUND:2662"],
-                "categories": ["biolink:ChemicalSubstance"]
+                "categories": ["biolink:SmallMolecule"]
             },
             "n1": {
                 "categories": ["biolink:Disease"]
@@ -54,7 +54,7 @@ class TestTRAPIQueryHandlerGeneralizedQuery(unittest.TestCase):
                 "nodes": {
                     "n0": {
                         "ids": ["PUBCHEM.COMPOUND:2662"],
-                        "categories": ["biolink:ChemicalSubstance"]
+                        "categories": ["biolink:SmallMolecule"]
                     },
                     "n1": {
                         "categories": ["biolink:Disease"]
@@ -90,15 +90,11 @@ class TestTRAPIQueryHandlerGeneralizedQuery(unittest.TestCase):
             "query_graph": {
                 "nodes": {
                     "n0": {
-                        "categories": [
-                            "biolink:DiseaseOrPhenotypicFeature"
-                        ]
+                         "categories": ["biolink:DiseaseOrPhenotypicFeature"]
                     },
                     "n1": {
-                        "ids": [
-                            "HGNC:6284"
-                        ],
-                        "categories": ["biolink:Gene"]
+                        "ids": ["HGNC:6284"],
+                        "categories":["biolink:Gene"]
                     }
                 },
                 "edges": {
@@ -116,11 +112,15 @@ class TestTRAPIQueryHandlerGeneralizedQuery(unittest.TestCase):
             "query_graph": {
                 "nodes": {
                     "n0": {
-                        "categories": ["biolink:Disease"],
-                        "ids": ["MONDO:0009287"]
+                        "ids": ["NCBIGene:3778"],
+                        "categories": ["biolink:Gene"]
                     },
                     "n1": {
-                        "categories": ["biolink:ChemicalSubstance"]
+                        "categories": [
+                            "biolink:Disease",
+                            "biolink:BiologicalProcess",
+                            "biolink:Pathway"
+                        ]
                     }
                 },
                 "edges": {
@@ -172,19 +172,18 @@ class TestTRAPIQueryHandlerGeneralizedQuery(unittest.TestCase):
         query_handler.set_query_graph(self.BroadCategoryQuery)
         query_handler.query_2()
         res = query_handler.get_response()
-        self.assertGreater(len(res['message']['knowledge_graph']['nodes'].keys()), 4)
         self.assertIn('NCBIGene:3778', res['message']['knowledge_graph']['nodes'])
         self.assertIn('MONDO:0005247', res['message']['knowledge_graph']['nodes'])
-        self.assertIn('UMLS:C0443147', res['message']['knowledge_graph']['nodes'])
+        self.assertIn('HP:0002465', res['message']['knowledge_graph']['nodes'])
         self.assertIn('MONDO:0005247-biolink:related_to-NCBIGene:3778', res['message']['knowledge_graph']['nodes'])
-        self.assertIn('UMLS:C0443147-biolink:related_to-NCBIGene:3778', res['message']['knowledge_graph']['nodes'])
+        self.assertIn('HP:0002465-biolink:related_to-NCBIGene:3778', res['message']['knowledge_graph']['nodes'])
 
-    def test_query_function_predict_known_entity_to_open_category(self):
+    def test_query_function_predict_known_entity_to_general_category_to_have_all_nodes_expected(self):
         query_handler = TRAPIQueryHandler()
         query_handler.set_query_graph(self.PredictQuery)
         query_handler.query_2()
         res = query_handler.get_response()
-        self.assertGreater(len(res['message']['knowledge_graph']['nodes'].keys()), 2)
-        self.assertIn('MONDO:0009287', res['message']['knowledge_graph']['nodes'])
-        self.assertIn('CHEBI:15903', res['message']['knowledge_graph']['nodes'])
-        self.assertIn('MONDO:0009287-biolink:affected_by-CHEBI:15903', res['message']['knowledge_graph']['nodes'])
+        self.assertIn('MONDO:0005030', res['message']['knowledge_graph']['nodes'])
+        self.assertIn('NCBIGene:3778', res['message']['knowledge_graph']['nodes'])
+        self.assertIn('GO:0001666', res['message']['knowledge_graph']['nodes'])
+        self.assertIn('REACT:R-HSA-109582', res['message']['knowledge_graph']['nodes'])
