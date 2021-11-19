@@ -4,9 +4,9 @@ from biothings_explorer.query_graph_handler.query_edge import QEdge
 
 
 class TestingQueryEdgeModule(unittest.TestCase):
-    gene_node1 = QNode('n1', {'categories': 'Gene', 'ids': 'NCBIGene:1017'})
-    type_node = QNode('n2', {'categories': 'SmallMolecule'})
-    disease1_node = QNode('n1', {'categories': 'Disease', 'ids': 'MONDO:000123'})
+    gene_node1 = QNode('n1', {'categories': ['Gene'], 'ids': ['NCBIGene:1017']})
+    type_node = QNode('n2', {'categories': ['SmallMolecule']})
+    disease1_node = QNode('n1', {'categories': ['Disease'], 'ids': ['MONDO:000123']})
     node1_equivalent_ids = {
         'NCBIGene:1017': {
             'db_ids': {
@@ -17,9 +17,8 @@ class TestingQueryEdgeModule(unittest.TestCase):
     }
 
     gene_node2 = QNode('n2', {'categories': 'Gene', 'ids': ["NCBIGene:1017", "NCBIGene:1018"]})
-    gene_node1_with_id_annotated = QNode('n1', {'categories': 'Gene', 'ids': 'NCBIGene:1017'})
+    gene_node1_with_id_annotated = QNode('n1', {'categories': ['Gene'], 'ids': ['NCBIGene:1017']})
     gene_node1_with_id_annotated.set_equivalent_ids(node1_equivalent_ids)
-    invalid_node = QNode('n3', {'categories': 'INVALID', 'curie': ["NCBIGene:1017", "NCBIGene:1018"]})
     chemical_node1 = QNode('n3', {'categories': 'SmallMolecule'})
     edge1 = QEdge('e01', {'subject': gene_node1, 'object': chemical_node1})
     edge2 = QEdge('e02', {'subject': gene_node1_with_id_annotated, 'object': chemical_node1})
@@ -36,8 +35,8 @@ class TestingQueryEdgeModule(unittest.TestCase):
         self.assertFalse(res)
 
     def test_is_reversed_if_both_subject_and_object_curie_not_defined_should_return_false(self):
-        node1 = QNode('n1', {'categories': 'Gene'})
-        node2 = QNode('n2', {'categories': 'SmallMolecule'})
+        node1 = QNode('n1', {'categories': ['Gene']})
+        node2 = QNode('n2', {'categories': ['SmallMolecule']})
         edge = QEdge('e01', {'subject': node1, 'object': node2})
         self.assertFalse(edge.is_reversed())
 
@@ -66,8 +65,8 @@ class TestingQueryEdgeModule(unittest.TestCase):
         self.assertTrue(res)
 
     def test_has_input_return_false_if_both_subject_and_object_has_no_curies_specified(self):
-        node1 = QNode('n1', {'categories': 'Gene'})
-        node2 = QNode('n2', {'categories': 'SmallMolecule'})
+        node1 = QNode('n1', {'categories': ['Gene']})
+        node2 = QNode('n2', {'categories': ['SmallMolecule']})
         edge = QEdge('e01', {'subject': node1, 'object': node2})
         self.assertFalse(edge.has_input())
 
@@ -84,24 +83,24 @@ class TestingQueryEdgeModule(unittest.TestCase):
         self.assertTrue(res)
 
     def test_get_predicate_get_reverse_predicate_if_query_is_reversed(self):
-        edge = QEdge('e01', {'subject': self.type_node, 'object': self.disease1_node, 'predicates': 'biolink:treats'})
+        edge = QEdge('e01', {'subject': self.type_node, 'object': self.disease1_node, 'predicates': ['biolink:treats']})
         res = edge.get_predicate()
         self.assertIn('treated_by', res)
 
     def test_get_predicate_get_reverse_if_query_is_reversed_and_expanded(self):
-        edge = QEdge('e01', {'subject': self.type_node, 'object': self.disease1_node, 'predicates': 'biolink:affects'})
+        edge = QEdge('e01', {'subject': self.type_node, 'object': self.disease1_node, 'predicates': ['biolink:affects']})
         res = edge.get_predicate()
         self.assertIn('affected_by', res)
         self.assertIn('disrupted_by', res)
 
     def test_expand_predicates_all_predicates_are_correctly_expanded_if_in_biolink_model(self):
-        edge = QEdge('e01', {'subject': self.type_node, 'object': self.disease1_node, 'predicates': 'biolink:contributes_to'})
+        edge = QEdge('e01', {'subject': self.type_node, 'object': self.disease1_node, 'predicates': ['biolink:contributes_to']})
         res = edge.expand_predicates(['contributes_to'])
         self.assertIn('contributes_to', res)
         self.assertIn('causes', res)
 
     def test_expand_predicates_multiple_predicates_can_be_resolved(self):
-        edge = QEdge('e01', {'subject': self.type_node, 'object': self.disease1_node, 'predicates': 'biolink:contributes_to'})
+        edge = QEdge('e01', {'subject': self.type_node, 'object': self.disease1_node, 'predicates': ['biolink:contributes_to']})
         res = edge.expand_predicates(["contributes_to", "ameliorates"])
         self.assertIn('contributes_to', res)
         self.assertIn('causes', res)

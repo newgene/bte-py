@@ -13,17 +13,17 @@ class TestQueryNodeModule(unittest.TestCase):
     }
 
     def test_has_input_function_node_without_curies_specified_should_return_false(self):
-        gene_node = QNode('n1', {'categories': 'Gene'})
+        gene_node = QNode('n1', {'categories': ['Gene']})
         res = gene_node.has_input()
         self.assertFalse(res)
 
     def test_has_input_function_node_with_curies_specified_should_return_true(self):
-        gene_node = QNode('n1', {'categories': 'Gene', 'ids': 'NCBIGene:1017'})
+        gene_node = QNode('n1', {'categories': ['Gene'], 'ids': ['NCBIGene:1017']})
         res = gene_node.has_input()
         self.assertTrue(res)
 
     def test_has_equivalent_ids_node_with_equivalent_identifiers_set_should_return_true(self):
-        gene_node = QNode('n1', {'categories': 'Gene'})
+        gene_node = QNode('n1', {'categories': ['Gene']})
         gene_node.set_equivalent_ids(self.node1_equivalent_ids)
         res = gene_node.has_equivalent_ids()
         self.assertTrue(res)

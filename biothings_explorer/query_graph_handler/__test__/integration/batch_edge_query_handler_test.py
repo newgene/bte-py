@@ -1,7 +1,4 @@
 import unittest
-from biothings_explorer.query_graph_handler.query_node import QNode
-from biothings_explorer.query_graph_handler.query_edge import QEdge
-from biothings_explorer.query_graph_handler.query_execution_edge import QExeEdge
 from biothings_explorer.query_graph_handler.batch_edge_query import BatchEdgeQueryHandler
 from biothings_explorer.smartapi_kg.metakg import MetaKG
 

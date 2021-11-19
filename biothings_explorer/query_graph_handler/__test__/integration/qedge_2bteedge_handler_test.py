@@ -5,7 +5,7 @@ from biothings_explorer.query_graph_handler.update_nodes import NodesUpdateHandl
 
 
 class TestNodeUpdateHandler(unittest.TestCase):
-    gene_node1 = QNode('n1', {'categories': 'Gene', 'ids': 'NCBIGene:1017'})
+    gene_node1 = QNode('n1', {'categories': ['Gene'], 'ids': ['NCBIGene:1017']})
     node1_equivalent_ids = {
         'db_ids': {
             'NCBIGene': ["1017"],
@@ -13,17 +13,14 @@ class TestNodeUpdateHandler(unittest.TestCase):
         }
     }
 
-    gene_node2 = QNode('n2', {'categories': 'Gene', 'ids': ["NCBIGene:1017", "NCBIGene:1018"]})
-    gene_node1_with_id_annotated = QNode('n1', {'categories': 'Gene', 'ids': "NCBIGene:1017"})
+    gene_node2 = QNode('n2', {'categories': ['Gene'], 'ids': ["NCBIGene:1017", "NCBIGene:1018"]})
+    gene_node1_with_id_annotated = QNode('n1', {'categories': ['Gene'], 'ids': ["NCBIGene:1017"]})
     gene_node1_with_id_annotated.set_equivalent_ids(node1_equivalent_ids)
-    invalid_node = QNode('n3', {'categories': 'INVALID', 'curie': ["NCBIGene:1017", "NCBIGene:1018"]})
-    chemical_node1 = QNode('n3', {'categories': 'SmallMolecule'})
-    chemical_node2 = QNode('n4', {'categories': 'SmallMolecule', 'curie': 'CHEMBL.COMPUND:CHEMBL744'})
+    chemical_node1 = QNode('n3', {'categories': ['SmallMolecule']})
     edge1 = QEdge('e01', {'subject': gene_node1, 'object': chemical_node1})
     edge2 = QEdge('e02', {'subject': gene_node1_with_id_annotated, 'object': chemical_node1})
     edge3 = QEdge('e04', {'subject': gene_node2, 'object': chemical_node1})
     edge4 = QEdge('e05', {'subject': gene_node2, 'object': chemical_node1})
-    invalid_edge = QEdge('e03', {'subject': invalid_node, 'object': chemical_node1})
 
     def test_get_curies_edge_with_one_curie_input_return_an_array_of_one(self):
         node_updater = NodesUpdateHandler([self.edge1])
