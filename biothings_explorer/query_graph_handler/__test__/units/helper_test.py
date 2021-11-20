@@ -234,7 +234,7 @@ class TestHelperModuler(unittest.TestCase):
         res = helper._get_source(record)
         self.assertIsNone(res)
 
-    def test_create_unique_edge_id(self):
+    def test_get_kg_edge_id(self):
         class Edge:
             def is_reversed(self):
                 return False
@@ -256,8 +256,8 @@ class TestHelperModuler(unittest.TestCase):
                 }]
             }
         }
-        res = helper._create_unique_edge_id(record)
-        self.assertEqual(res, 'input-output-MyGene.info API-CPDB')
+        res = helper._get_kg_edge_id(record)
+        self.assertEqual(res, '6b49bd17fb00886e05ec1f16def3c0da')
 
     def test_get_input_category_if_edge_is_reversed_should_return_the_category_of_the_object(self):
         class Edge:

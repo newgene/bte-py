@@ -33,22 +33,18 @@ class KnowledgeGraph:
                 {
                     'attribute_type_id': 'num_source_nodes',
                     'value': len(kg_node._source_nodes),
-                    'value_type_id': 'bts:num_source_nodes'
                 },
                 {
                     'attribute_type_id': 'num_target_nodes',
                     'value': len(kg_node._target_nodes),
-                    'value_type_id': 'bts:num_target_nodes'
                 },
                 {
                     'attribute_type_id': 'source_qg_nodes',
                     'value': [item for item in kg_node._source_qg_nodes],
-                    'value_type_id': 'bts:source_qg_nodes'
                 },
                 {
                     'attribute_type_id': 'target_qg_nodes',
                     'value': [item for item in kg_node._target_qg_nodes],
-                    'value_type_id': 'bts:target_qg_nodes'
                 },
             ]
         }
@@ -56,45 +52,93 @@ class KnowledgeGraph:
             res['attributes'].append({
                 'attribute_type_id': key,
                 'value': kg_node._node_attributes[key],
-                'value_type_id': 'bts:' + key
             })
         return res
 
     def _create_attributes(self, kg_edge):
         attributes = [
             {
-                'attribute_type_id': 'biolink:primary_knowledge_source',
-                'value': [item for item in kg_edge.sources],
-                'value_type_id': 'biolink:InformationResource'
-            },
-            {
                 'attribute_type_id': 'biolink:aggregator_knowledge_source',
-                'value': [item for item in kg_edge.apis],
+                'value': ['infores:translator-biothings-explorer'],
                 'value_type_id': 'biolink:InformationResource'
-            },
-            {
-                'attribute_type_id': 'publications',
-                'value': [item for item in kg_edge.publications],
-                'value_type_id': 'biolink:publication'
             },
         ]
-        if kg_edge.attributes['attributes']:
-            attributes = [
-                {
-                    "attribute_type_id": "biolink:aggregator_knowledge_source",
-                    "value": "infores:translator-biothings-explorer",
-                    "value_type_id": "biolink:InformationResource"
-                },
-                *kg_edge.attributes['attributes']
-            ]
-        else:
-            for key in kg_edge.attributes:
+        items = [
+            'Clinical Risk KP API',
+            'Text Mining Targeted Association API',
+            'Multiomics Wellness KP API',
+            'Drug Response KP API',
+            'Text Mining Co-occurrence API',
+            'TCGA Mutation Frequency API',
+          ]
+        if kg_edge['attributes'].get('edge-attributes'):
+            attributes = [*attributes, *kg_edge['attributes']['edge-attributes']]
+        elif any(api_name for api_name in items if api_name in kg_edge['apis']):
+            attributes = [*attributes]
+            if len(list(kg_edge['sources'])):
+                attributes = [
+                    *attributes,
+                    {
+                        'attribute_type_id': 'biolink:primary_knowledge_source',
+                        'value': list(kg_edge['sources']),
+                        'value_type_id': 'biolink:InformationResource'
+                    }
+                ]
+            if len(list(kg_edge['infores_curies'])):
+                attributes = [
+                    *attributes,
+                    {
+                        'attribute_type_id': 'biolink:primary_knowledge_source',
+                        'value': list(kg_edge['infores_curies']),
+                        'value_type_id': 'biolink:InformationResource'
+                    }
+                ]
+            if len(list(kg_edge['publications'])):
+                attributes = [
+                    *attributes,
+                    {
+                        'attribute_type_id': 'biolink:publications',
+                        'value': list(kg_edge['publications']),
+                    }
+                ]
+            for key in kg_edge['attributes']:
                 attributes.append({
                     'attribute_type_id': key,
-                    'value': kg_edge.attributes[key],
-                    'value_type_id': 'bts:' + key
+                    'value': kg_edge['attributes'][key]
                 })
-
+        else:
+            attributes = [*attributes]
+            if len(list(kg_edge['sources'])):
+                attributes = [
+                    *attributes,
+                    {
+                        'attribute_type_id': 'biolink:primary_knowledge_source',
+                        'value': list(kg_edge['sources']),
+                        'value_type_id': 'biolink:InformationResource'
+                    }
+                ]
+            if len(list(kg_edge['infores_curies'])):
+                attributes = [
+                    *attributes,
+                    {
+                        'attribute_type_id': 'biolink:aggregator_knowledge_source',
+                        'value': list(kg_edge['infores_curies']),
+                        'value_type_id': 'biolink:InformationResource'
+                    }
+                ]
+            if len(list(kg_edge['publications'])):
+                attributes = [
+                    *attributes,
+                    {
+                        'attribute_type_id': 'biolink:publications',
+                        'value': list(kg_edge['publications']),
+                    }
+                ]
+            for key in kg_edge['attributes']:
+                attributes.append({
+                    'attribute_type_id': key,
+                    'value': kg_edge['attributes'][key]
+                })
         return attributes
 
     def _create_edge(self, kg_edge):

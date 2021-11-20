@@ -1,5 +1,7 @@
 from .batch_edge_query import BatchEdgeQueryHandler
+from .exceptions.bte_error import BTEError
 from .log_entry import LogEntry
+from .config import ENTITY_MAX
 import json
 
 
@@ -31,6 +33,7 @@ class EdgeManager:
             pass
 
     def pre_send_off_check(self, _next):
+        self.check_entity_max(_next)
         if _next['object']['entity_count'] and _next['subject']['entity_count']:
             _next.choose_lower_entity_value()
             self.logs.append(
@@ -40,6 +43,9 @@ class EdgeManager:
                     'Next edge will pick lower entity value to use for query.'
                 ).get_log()
             )
+        elif _next['object']['entity_count'] and not _next['subject']['entity_count'] or \
+                not _next['object']['entity_count'] and not _next['subject']['entity_count']:
+            _next['reverse'] = False if _next['subject_entity_count'] else True
         self.logs.append(
             LogEntry(
                 'DEBUG',
@@ -49,58 +55,6 @@ class EdgeManager:
         )
         self.log_entity_counts()
         return _next
-
-    def collect_organized_results(self):
-        results = {}
-        broken_chain = False
-        broken_edges = []
-
-        for edge in self.edges:
-            edge_id = edge.get_id()
-            filtered_res = edge['results']
-            if len(filtered_res) == 0:
-                self.logs.append(
-                    LogEntry(
-                        'DEBUG',
-                        None,
-                        f"Warning: Edge '{edge_id}' resulted in (0) results."
-                    ).get_log()
-                )
-                broken_chain = True
-                broken_edges.append(edge_id)
-            self.logs = [*self.logs, *edge.logs]
-            connections = [*edge['q_edge']['subject'].get_connections(), *edge['q_edge']['object'].get_connections()]
-            connections = [_id for _id in connections if _id != edge_id]
-            connections = set(connections)
-            results[edge_id] = {
-                'records': filtered_res,
-                'connected_to': [*connections]
-            }
-            self.logs.append(
-                LogEntry(
-                    'DEBUG',
-                    None,
-                    f"'{edge_id}' keeps ({len(filtered_res)}) results!"
-                ).get_log()
-            )
-        if broken_chain:
-            results = {}
-            self.logs.append(
-                LogEntry(
-                    'DEBUG',
-                    None,
-                    f"Edges {json.dumps(broken_edges)} "
-                    f"resulted in (0) results. No complete paths can be formed."
-                ).get_log()
-            )
-        self.organized_results = results
-        self.logs.append(
-            LogEntry(
-                'DEBUG',
-                None,
-                f"Edge manager collected ({len(self.results)}) results!"
-            ).get_log()
-        )
 
     def get_next(self):
         available_edges = [edge for edge in self.edges if not edge['executed']]
@@ -140,21 +94,17 @@ class EdgeManager:
                         "Cannot get next edge, No available edges found."
                     ).get_log()
                 )
-            return all_empty[0]
-        return _next
+            return self.pre_send_off_check(all_empty[0])
+        return self.pre_send_off_check(_next)
 
-    # def update_edges_entity_counts(self, results, current_edge):
-    #     entities = set()
-    #     for res in results:
-    #         if not isinstance(res['$output'], list) and 'original' in res['$output']:
-    #             if not isinstance(res['$output']['original'], list):
-    #                 entities.add(res['$output']['original'])
-    #     entities = [*entities]
-    #     current_node_ids = [current_edge['object']['id'], current_edge['subject']['id']]
-    #     for node_id in current_node_ids:
-    #         for edge in self.edges:
-    #             if node_id in edge['connecting_nodes'] and edge.get_id() != current_edge.get_id():
-    #                 edge.update_entity_count_by_id(node_id, entities)
+    def check_entity_max(self, _next):
+        _max = ENTITY_MAX
+        sub_count = _next['object'].get_entity_count()
+        obj_count = _next['subject'].get_entity_count()
+
+        if obj_count == 0 and sub_count > _max or obj_count > _max and \
+            sub_count == 0 or obj_count > _max and sub_count > _max:
+            raise BTEError(f"Max number of entities exceeded ({_max}) in '{_next.get_id()}'")
 
     def get_edges_not_executed(self):
         found = [edge for edge in self.edges if not edge['executed']]
@@ -164,10 +114,10 @@ class EdgeManager:
     def _filter_edge_results(self, edge):
         keep = []
         results = edge['results']
-        sub_curies = edge['subject']['curie']
-        obj_curies = edge['object']['curie']
-        object_node_ids = sub_curies if edge['reverse'] else obj_curies
-        subject_node_ids = obj_curies if edge['reverse'] else sub_curies
+        sub_count = edge['subject']['curie']
+        obj_count = edge['object']['curie']
+        object_node_ids = sub_count if edge['reverse'] else obj_count
+        subject_node_ids = obj_count if edge['reverse'] else sub_count
 
         for res in results:
             ids = set()
@@ -224,10 +174,12 @@ class EdgeManager:
         return keep
 
     def collect_results(self):
-        results = []
+        results = {}
+        combined_results = []
         broken_chain = False
         broken_edges = []
         for edge in self.edges:
+            edge_id = edge.get_id()
             filtered_res = edge['results']
             if len(filtered_res) == 0:
                 self.logs.append(
@@ -240,7 +192,14 @@ class EdgeManager:
                 broken_chain = True
                 broken_edges.append(edge.get_id())
             self.logs = [*self.logs, *edge.logs]
-            results = [*results, *filtered_res]
+            combined_results = [*combined_results, *filtered_res]
+            connections = [*edge['q_edge']['subject'].get_connections(), edge['q_edge']['object'].get_connections()]
+            connections = [_id for _id in connections if _id != edge_id]
+            connections = set(connections)
+            results[edge_id] = {
+                'records': filtered_res,
+                'connected_to': [*connections]
+            }
             self.logs.append(
                 LogEntry(
                     'DEBUG',
@@ -248,24 +207,25 @@ class EdgeManager:
                     f"'{edge.get_id()}' keeps ({len(filtered_res)}) results!"
                 ).get_log()
             )
-            if broken_chain:
-                results = []
-                self.logs.append(
-                    LogEntry(
-                        'DEBUG',
-                        None,
-                        f"Edges {json.dumps(broken_edges)} "
-                        f"resulted in (0) results. No complete paths can be formed."
-                    ).get_log()
-                )
-            self.results = results
+        if broken_chain:
+            results = {}
             self.logs.append(
                 LogEntry(
                     'DEBUG',
                     None,
-                    f"Edge manager collected ({len(self.results)}) results!"
+                    f"Edges {json.dumps(broken_edges)} "
+                    f"resulted in (0) results. No complete paths can be formed."
                 ).get_log()
             )
+        self.organized_results = results
+        self.results = combined_results
+        self.logs.append(
+            LogEntry(
+                'DEBUG',
+                None,
+                f"Edge manager collected ({len(self.results)}) results!"
+            ).get_log()
+        )
 
     def update_edge_results(self, current_edge):
         filtered_res = self._filter_edge_results(current_edge)
