@@ -41,6 +41,12 @@ class TRAPIQueryHandler:
         }
 
     def set_query_graph(self, query_graph):
+        for node_id in query_graph['nodes']:
+            if query_graph['nodes'].get(node_id):
+                current_node = query_graph['nodes'][node_id]
+                if current_node.get('categories'):
+                    if 'biolink:Protein' in current_node['categories'] and 'biolink:Gene' not in current_node['categories']:
+                        current_node['categories'].append('biolink:Gene')
         self.query_graph = query_graph
 
     def _initialize_response(self):
@@ -50,18 +56,6 @@ class TRAPIQueryHandler:
         self.bte_graph.subscribe(self.knowledge_graph)
 
     def _process_query_graph(self, query_graph):
-        try:
-            query_graph_handler = QueryGraphHandler(query_graph)
-            res = query_graph_handler.create_query_paths()
-            self.logs = [*self.logs, *query_graph_handler.logs]
-            return res
-        except Exception as e:
-            if isinstance(e, InvalidQueryGraphError):
-                raise e
-            else:
-                raise InvalidQueryGraphError()
-
-    def _process_query_graph_2(self, query_graph):
         try:
             query_graph_handler = QueryGraphHandler(query_graph)
             res = query_graph_handler.calculate_edges()
@@ -83,7 +77,7 @@ class TRAPIQueryHandler:
         return handlers
 
     def _create_batch_edge_query_handlers_for_current(self, current_edge, kg):
-        handler = BatchEdgeQueryHandler(kg, self.resolve_output_ids)
+        handler = BatchEdgeQueryHandler(kg, self.resolve_output_ids, {'caching': self.options['caching']})
         handler.set_edges(current_edge)
         # handler.subscribe(self.query_results)
         # handler.subscribe(self.bte_graph)
@@ -91,40 +85,12 @@ class TRAPIQueryHandler:
 
     def query(self):
         self._initialize_response()
-        kg = self._load_meta_kg()
-        query_paths = self._process_query_graph(self.query_graph)
-        handlers = self._create_batch_edge_query_handlers_for_current(query_paths, kg)
-        for handler in handlers.values():
-            res = handler.query(handler.q_edges)
-            self.logs = [*self.logs, *handler.logs]
-            if len(res) == 0:
-                return None
-            else:
-                handler.q_edges[0].output_equivalent_identifiers = res[0]['$edge_metadata']['trapi_qEdge_obj'].output_equivalent_identifiers
-            handler.notify(res)
-
-    def query_2(self):
-        self._initialize_response()
         kg = self._load_meta_kg(self.smartapi_id, self.team)
-        query_edges = self._process_query_graph_2(self.query_graph)
+        query_edges = self._process_query_graph(self.query_graph)
+        if not self._edges_supported(query_edges, kg):
+            return
         manager = EdgeManager(query_edges)
         while manager.get_edges_not_executed():
             current_edge = manager.get_next()
-            # if current_edge['requires_intersection']:
-            #     current_edge.choose_lower_entity_value()
             handler = self._create_batch_edge_query_handlers_for_current(current_edge, kg)
-            res = handler.query_2(handler.q_edges)
-            self.logs = [*self.logs, *handler.logs]
-            if len(res) == 0:
-                return
-            current_edge.store_results(res)
-            manager.update_edge_results(current_edge)
-            manager.update_all_other_edges(current_edge)
-            current_edge['executed'] = True
-        manager.collect_results()
-        manager.collect_organized_results()
-        self.logs = [*self.logs, *manager.logs]
-        # mock_handler = self._create_batch_edge_query_handlers_for_current([], kg)
-        # mock_handler.notify(manager.get_results())
-        self.bte_graph.update(manager.get_results())
-        self.query_results.update(manager.get_organized_results())
+            res = handler.query(handler.q_edges)

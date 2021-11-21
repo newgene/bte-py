@@ -51,6 +51,11 @@ class QueryGraphHelper:
     def _get_api(self, record):
         return record['$edge_metadata'].get('api_name') or None
 
+    def _get_infores_curie(self, record):
+        if record['$edge_metadata'].get('x-translator'):
+            return record['$edge_metadata'].get('x-translator').get('infores')
+        return None
+
     def _get_source(self, record):
         return record['$edge_metadata'].get('source') or None
 
@@ -58,16 +63,13 @@ class QueryGraphHelper:
         return record.get('publications') or None
 
     def _get_kg_edge_id(self, record):
-        return '-'.join([self._get_input_id(record), self._get_predicate(record), self._get_output_id(record)])
-
-    def _create_unique_edge_id(self, record):
         edge_meta_data = [
             self._get_input_id(record),
             self._get_output_id(record),
             self._get_api(record),
             self._get_source(record)
         ]
-        return '-'.join(edge_meta_data)
+        return self._generate_hash('-'.join(edge_meta_data))
 
     def _get_input_category(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
@@ -152,32 +154,22 @@ class QueryGraphHelper:
             return None
 
     def _get_input_attributes(self, record):
-        if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-            if isinstance(record['$output']['obj'][0], dict):
+        try:
+            if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
                 return record['$output']['obj'][0].get('attributes')
             else:
-                return record['$output']['obj'][0].attributes
-        else:
-            if isinstance(record['$input']['obj'][0], dict):
                 return record['$input']['obj'][0].get('attributes')
-            else:
-                return record['$input']['obj'][0].attributes
+        except Exception as e:
+            return None
 
     def _get_output_equivalent_ids(self, record):
         try:
             if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
-                if isinstance(record['$input']['obj'][0], dict):
-                    return record['$input']['obj'][0].get('curies')
-                else:
-                    return record['$input']['obj'][0].curies
+                return record['$input']['obj'][0]['curies']
             else:
-                if isinstance(record['$output']['obj'][0], dict):
-                    return record['$output']['obj'][0].get('curies')
-                else:
-                    return record['$output']['obj'][0].curies
+                return record['$output']['obj'][0]['curies']
         except Exception as e:
-            print('_get_output_equivalent_ids', e)
-            return None
+            pass
 
     def _get_output_attributes(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
