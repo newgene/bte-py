@@ -1,3 +1,4 @@
+import copy
 from biothings_explorer.smartapi_kg.metakg import MetaKG
 from .batch_edge_query import BatchEdgeQueryHandler
 from .query_graph import QueryGraphHandler
@@ -6,6 +7,7 @@ from .query_results import QueryResult
 from .exceptions.invalid_query_graph_error import InvalidQueryGraphError
 from .graph.graph import Graph
 from .edge_manager import EdgeManager
+from .qedge2bteedge import QEdge2BTEEdgeHandler
 from .log_entry import LogEntry
 import json
 import os
@@ -83,6 +85,33 @@ class TRAPIQueryHandler:
         # handler.subscribe(self.bte_graph)
         return handler
 
+    def _edges_supported(self, q_edges, kg):
+        q_edges = copy.deepcopy(q_edges)
+        manager = EdgeManager(q_edges)
+        edges_missing_ops = {}
+        while manager.get_edges_not_executed():
+            current_edge = manager.get_next()
+            edge_converter = QEdge2BTEEdgeHandler([current_edge], kg)
+            s_api_edges = edge_converter.get_smart_api_edges(current_edge)
+            if not len(s_api_edges):
+                edges_missing_ops[current_edge['q_edge']['id']] = current_edge['reverse']
+            current_edge['executed'] = True
+            current_edge['object']['entity_count'] = 1
+            current_edge['subject']['entity_count'] = 1
+        length = len(edges_missing_ops.keys())
+        edges_to_log = [f"(reversed {edge})" if _reversed else f"({edge})" for edge, _reversed in edges_missing_ops.items()]
+        if len(edges_to_log) > 1:
+            edges_to_log = f"[{','.join(edges_to_log)}]"
+        else:
+            edges_to_log = f"{','.join(edges_to_log)}"
+        if length > 0:
+            terminate_log = f"Query Edges{'s' if length > 1 else ''} {edges_to_log} {'have' if length > 1 else 'has'}" \
+                            f" no SmartAPI edges. Your query terminates."
+            self.logs.append(LogEntry('WARNING', None, terminate_log))
+            return False
+        else:
+            return True
+
     def query(self):
         self._initialize_response()
         kg = self._load_meta_kg(self.smartapi_id, self.team)
@@ -94,3 +123,14 @@ class TRAPIQueryHandler:
             current_edge = manager.get_next()
             handler = self._create_batch_edge_query_handlers_for_current(current_edge, kg)
             res = handler.query(handler.q_edges)
+            self.logs = [*self.logs, *handler.logs]
+            if len(res) == 0:
+                return
+            current_edge.store_results(res)
+            manager.update_edge_results(current_edge)
+            manager.update_all_other_edges(current_edge)
+            current_edge['executed'] = True
+        manager.collect_results()
+        self.logs = [*self.logs, *manager.logs]
+        self.bte_graph.update(manager.get_results())
+        self.query_results.update(manager.get_organized_results())
