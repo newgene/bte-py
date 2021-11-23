@@ -1,6 +1,7 @@
 import functools
 from .utils import to_array, remove_biolink_prefix, get_unique
 from .biolink import BioLinkModelInstance
+from .exceptions.invalid_query_graph_error import InvalidQueryGraphError
 
 
 class QNode:
@@ -8,12 +9,22 @@ class QNode:
         self.id = _id
         self.category = info['categories'] or 'NamedThing'
         self.curie = info['ids']
-        self.entity = info['ids']
         self.entity_count = len(info['ids']) if info['ids'] else 0
         self.held_curie = []
         self.held_expanded = {}
+        self.constraints = info['constraints']
         self.connected_to = set()
         self.expand_curie()
+        self.validate_constraints()
+
+    def validate_constraints(self):
+        required = ['id', 'operator', 'value']
+        if self.constraints and len(self.constraints):
+            for constraint in self.constraints:
+                constraint_keys = constraint.keys()
+                intersection = list(set(constraint_keys) & set(required))
+                if len(intersection) < 3:
+                    raise InvalidQueryGraphError(f"Invalid constraint specification must include ({required})")
 
     def expand_curie(self):
         if self.curie and len(self.curie):

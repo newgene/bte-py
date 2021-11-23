@@ -1,9 +1,12 @@
+import json
+from biothings_explorer.biomedical_id_resolver.resolver import resolve_sri
 from .query_node import QNode
 from .query_node_2 import QNode as QNode2
 from .query_edge import QEdge
 from .query_execution_edge import QExeEdge
 from .log_entry import LogEntry
 from .exceptions.invalid_query_graph_error import InvalidQueryGraphError
+
 MAX_DEPTH = 3
 
 
@@ -32,12 +35,45 @@ class QueryGraphHandler:
         self._validate_empty_nodes(query_graph)
         self._validate_node_edge_correspondence(query_graph)
 
+    def _find_node_categories(self, ids):
+        if len(ids):
+            category = resolve_sri({
+                'unknown': ids
+            })
+            if category.get(ids[0]):
+                category = category[ids[0]][0]['semantic_type']
+                return ['biolink' + category]
+            else:
+                return []
+        else:
+            return []
+
     def _store_nodes(self):
         nodes = {}
         for node_id in self.query_graph['nodes']:
-            nodes[node_id] = QNode(node_id, self.query_graph['nodes'][node_id])
+            if not self.query_graph['nodes'][node_id].get('categories') and \
+                    self.query_graph['nodes'][node_id].get('ids') or \
+                    self.query_graph['nodes'][node_id].get('categories') and \
+                    len(self.query_graph['nodes'][node_id]['categories']) == 0 and \
+                    self.query_graph['nodes'][node_id].get('ids'):
+                category = self._find_node_categories(self.query_graph['nodes'][node_id]['ids'])
+                self.query_graph['nodes'][node_id]['categories'] = category
+                self.logs.append(
+                    LogEntry(
+                        'DEBUG',
+                        None,
+                        f"Assigned missing node ID category: {json.dumps(self.query_graph['nodes'][node_id])}"
+                    ).get_log()
+                )
+                nodes[node_id] = QNode(node_id, self.query_graph['nodes'][node_id])
+            else:
+                nodes[node_id] = QNode(node_id, self.query_graph['nodes'][node_id])
         self.logs.append(
-            LogEntry('DEBUG', None, f"BTE identified {len(nodes)} QNodes from your query graph").get_log()
+            LogEntry(
+                'DEBUG',
+                None,
+                f"BTE identified {len(nodes)} QNodes from your query graph"
+            ).get_log()
         )
         return nodes
 
@@ -55,44 +91,23 @@ class QueryGraphHandler:
             }
 
             edges[edge_id] = QEdge(edge_id, edge_info)
-            self.logs.append(
-                LogEntry('DEBUG', None, f"BTE identified {len(edges)} QEdges from your query graph").get_log()
-            )
+        self.logs.append(
+            LogEntry('DEBUG', None, f"BTE identified {len(edges)} QEdges from your query graph").get_log()
+        )
         return edges
 
-    def _store_nodes_2(self):
-        nodes = {}
-        for node_id in self.query_graph['nodes']:
-            nodes[node_id] = QNode2(node_id, self.query_graph['nodes'][node_id])
-        self.logs.append(
-            LogEntry(
-                'DEBUG',
-                None,
-                f"BTE identified {len(nodes.keys())} QNodes from your query graph"
-            ).get_log()
-        )
-        return nodes
-
-    def _store_edges_2(self):
-        if not self.nodes:
-            self.nodes = self._store_nodes_2()
+    def calculate_edges(self):
+        self._validate(self.query_graph)
+        if not self.edges:
+            self.edges = self._store_edges()
         edges = {}
-        for edge_id in self.query_graph['edges']:
-            edge_info = {
-                **self.query_graph['edges'][edge_id],
-                'subject': self.nodes[self.query_graph['edges'][edge_id]['subject']],
-                'object': self.nodes[self.query_graph['edges'][edge_id]['object']]
-            }
-            self.nodes[self.query_graph['edges']['subject']].update_connection(edge_id)
-            self.nodes[self.query_graph['edges']['object']].update_connection(edge_id)
-            edges[edge_id] = QEdge(edge_id, edge_info)
-        self.logs.append(
-            LogEntry(
-                'DEBUG',
-                None,
-                f"BTE identified {len(edges.keys())} QEdges from your query graph"
-            ).get_log()
-        )
+        edge_index = 0
+        for edge_id in self.edges:
+            edges[edge_index] = [
+                QExeEdge(self.edges[edge_id], True, None) if self.edges[edge_id].object['curie'] else
+                QExeEdge(self.edges[edge_id], False, None)
+            ]
+            edge_index = edge_index + 1
         return edges
 
     def create_query_paths(self):
@@ -103,7 +118,8 @@ class QueryGraphHandler:
         for i in range(1, MAX_DEPTH + 1):
             current_graph = self._find_next_level_edges(current_graph)
             if len(current_graph) > 0 and i == MAX_DEPTH:
-                raise InvalidQueryGraphError(f"Your Query Graph exceeds the maximum query depth set in bte, which is {MAX_DEPTH}")
+                raise InvalidQueryGraphError(
+                    f"Your Query Graph exceeds the maximum query depth set in bte, which is {MAX_DEPTH}")
             if len(current_graph) == 0:
                 break
             paths[i] = [item['edge'] for item in current_graph]

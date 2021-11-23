@@ -76,6 +76,7 @@ class QEdge2BTEEdgeHandler:
                         bte_edges.append(edge_to_be_pushed)
         return bte_edges
 
+    # TODO implement chunked loop
     def _create_batch_support_bte_edges(self, smart_api_edge):
         id_mapping = {}
         inputs = []
@@ -197,17 +198,24 @@ class QEdge2BTEEdgeHandler:
                 support_batch = edge['query_operation'].support_batch
             elif hasattr(edge['query_operation'], '_support_batch'):
                 support_batch = edge['query_operation']._support_batch
+        use_templating = edge['query_operation']['use_templating']
         if not support_batch:
-            bte_edges = self._create_non_batch_support_bte_edges(edge)
+            if use_templating:
+                bte_edges = self._create_templated_non_batch_support_bte_edges(edge)
+            else:
+                bte_edges = self._create_non_batch_support_bte_edges(edge)
         else:
-            bte_edges = self._create_batch_support_bte_edges(edge)
+            if use_templating:
+                bte_edges = self._create_templated_batch_support_bte_edges(edge)
+            else:
+                bte_edges = self._create_batch_support_bte_edges(edge)
         return bte_edges
 
     # TODO returns wrong bte_edges number on second iteration
     def convert(self, q_edges):
         bte_edges = []
         for edge in q_edges:
-            smartapi_edges = self._get_smartapi_edges(edge)
+            smartapi_edges = self.get_smartapi_edges(edge)
             apis = [api['association']['api_name'] for api in smartapi_edges]
             for item in smartapi_edges:
                 # TODO self._create_bte_edges returns wrong amount

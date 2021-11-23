@@ -1,4 +1,5 @@
 import functools
+import math
 from .utils import remove_biolink_prefix, to_array
 from .helper import QueryGraphHelper
 from .biolink import BioLinkModelInstance
@@ -8,19 +9,17 @@ from .log_entry import LogEntry
 class UpdatedExeEdge:
     def __init__(self, q_edge, reverse=False, prev_edge=None):
         self.q_edge = q_edge
-        self.connecting_nodes = []
         self.reverse = reverse
         self.prev_edge = prev_edge
         self.input_equivalent_identifiers = {}
         self.output_equivalent_identifiers = {}
         self.object = q_edge['object']
         self.subject = q_edge['subject']
-        #self.object_entity_count = self.object['entity_count']
-        #self.subject_entity_count = self.subject['entity_count']
+        # self.object_entity_count = self.object['entity_count']
+        # self.subject_entity_count = self.subject['entity_count']
         self.executed = False
         self.logs = []
         self.results = []
-        self.requires_intersection = False
 
     def extract_curies_from_response(self, res, is_reversed):
         _all = {}
@@ -36,7 +35,7 @@ class UpdatedExeEdge:
                     if o.get('_dbIDs'):
                         original_aliases = set()
                         for prefix in o['_dbIDs']:
-                            #original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
+                            # original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
                             if isinstance(o['_dbIDs'].get(prefix), list):
                                 for single_alias in o['_dbIDs'][prefix]:
                                     if ':' in single_alias:
@@ -71,7 +70,7 @@ class UpdatedExeEdge:
                     if o.get('_dbIDs'):
                         original_aliases = set()
                         for prefix in o['_dbIDs']:
-                            #original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
+                            # original_aliases.add(prefix + ':' + o['_dbIDs'][prefix])
                             if isinstance(o['_dbIDs'].get(prefix), list):
                                 for single_alias in o['_dbIDs'][prefix]:
                                     if ':' in single_alias:
@@ -106,7 +105,7 @@ class UpdatedExeEdge:
                 combined[original] = curies[_type][original]
         return combined
 
-    def update_node_curies(self, res):
+    def update_nodes_curies(self, res):
         curies_by_semantic_type = self.extract_curies_from_response(res, self.reverse)
         combined_curies = self._combine_curies(curies_by_semantic_type)
         if self.reverse:
@@ -120,6 +119,119 @@ class UpdatedExeEdge:
             self.q_edge.subject.update_curies(combined_curies_2)
         else:
             self.q_edge.object.update_curies(combined_curies_2)
+
+    def apply_node_constraints(self):
+        kept = []
+        save_kept = False
+        sub_constraints = self.subject['constraints']
+        if sub_constraints and len(sub_constraints):
+            _from = '$output' if self.reverse else '$input'
+            save_kept = True
+            for i in range(len(self.results)):
+                res = self.results[i]
+                keep = True
+                for x in range(len(sub_constraints)):
+                    constraint = sub_constraints[x]
+                    keep = self.meets_constraint(constraint, res, _from)
+                if keep:
+                    kept.append(res)
+        obj_constraints = self.object['constraints']
+        if obj_constraints and len(obj_constraints):
+            _from = '$input' if self.reverse else '$output'
+            save_kept = True
+            for i in range(len(self.results)):
+                res = self.results[i]
+                keep = True
+                for x in range(len(obj_constraints)):
+                    constraint = obj_constraints[x]
+                    keep = self.meets_constraint(constraint, res, _from)
+                if keep:
+                    kept.append(res)
+        if save_kept:
+            self.results = kept
+        else:
+            pass
+
+    def meets_constraint(self, constraint, result, _from):
+        available_attributes = set()
+        for key in result[_from]['obj'][0]['attributes']:
+            available_attributes.add(key)
+        available_attributes = [*available_attributes]
+        filters_found = [attr for attr in available_attributes if attr == constraint['id']]
+        if not len(filters_found):
+            return False
+        else:
+            node_attributes = []
+            for _filter in filters_found:
+                node_attributes[_filter] = result[_from]['obj'][0]['attributes'][_filter]
+            if constraint['operator'] == '==':
+                for key in node_attributes:
+                    if not math.isnan(constraint['value']):
+                        if isinstance(node_attributes[key], list):
+                            if constraint['value'] in node_attributes[key] or \
+                                    str(constraint['value']) in node_attributes[key]:
+                                return True
+                        else:
+                            if node_attributes[key] == constraint['value'] or \
+                                    node_attributes[key] == str(constraint['value']) or \
+                                    node_attributes[key] == int(constraint['value']):
+                                return True
+                    else:
+                        if isinstance(node_attributes[key], list):
+                            if constraint['value'] in node_attributes[key]:
+                                return True
+                        else:
+                            if node_attributes[key] == constraint['value'] or \
+                                    node_attributes[key] == str(constraint['value']) or \
+                                    node_attributes[key] == int(constraint['value']):
+                                return True
+                return False
+            elif constraint['operator'] == '>':
+                for key in node_attributes:
+                    if isinstance(node_attributes[key], list):
+                        for index in range(len(node_attributes[key])):
+                            element = node_attributes[key][index]
+                            if int(element) > int(constraint['value']):
+                                return True
+                    else:
+                        if int(node_attributes[key]) > int(constraint['value']):
+                            return True
+                return False
+            elif constraint['operator'] == '>=':
+                for key in node_attributes:
+                    if isinstance(node_attributes[key], list):
+                        for index in range(len(node_attributes[key])):
+                            element = node_attributes[key][index]
+                            if int(element) >= int(constraint['value']):
+                                return True
+                    else:
+                        if int(node_attributes[key]) >= int(constraint['value']):
+                            return True
+                return False
+            elif constraint['operator'] == '<':
+                for key in node_attributes:
+                    if isinstance(node_attributes[key], list):
+                        for index in range(len(node_attributes[key])):
+                            element = node_attributes[key][index]
+                            if int(element) > int(constraint['value']):
+                                return True
+                    else:
+                        if int(node_attributes[key]) < int(constraint['value']):
+                            return True
+                return False
+            elif constraint['operator'] == '<=':
+                for key in node_attributes:
+                    if isinstance(node_attributes[key], list):
+                        for index in range(len(node_attributes[key])):
+                            element = node_attributes[key][index]
+                            if int(element) <= int(constraint['value']):
+                                return True
+                    else:
+                        if int(node_attributes[key]) <= int(constraint['value']):
+                            return True
+                return False
+            else:
+                return False
 
     # def check_connecting_nodes(self):
     #     self.connecting_nodes.append(self.subject['id'])
@@ -139,17 +251,15 @@ class UpdatedExeEdge:
     #     self.check_if_results_need_intersection()
 
     def check_if_results_need_intersection(self):
-        self.requires_entity_count_choice = True if self.object['entity_count'] and self.subject['entity_count'] else False
+        self.requires_entity_count_choice = True if self.object['entity_count'] and self.subject[
+            'entity_count'] else False
 
     def choose_lower_entity_value(self):
-        if self.object['entity_count'] and self.subject['entity_count']:
-            if self.object['entity_count'] == self.subject['entity_count']:
+        if self.q_edge['object']['entity_count'] and self.q_edge['subject']['entity_count']:
+            if self.q_edge['object']['entity_count'] == self.q_edge['subject']['entity_count']:
                 self.reverse = False
-                self.held_subject_curies = self.q_edge['subject']['curie']
-                #TODO delete this?
-                self.q_edge['subject'].hold_curie()
-
-            elif self.object['entity_count'] > self.subject['entity_count']:
+                self.q_edge['object'].hold_curie()
+            elif self.q_edge['object']['entity_count'] > self.q_edge['subject']['entity_count']:
                 self.reverse = False
                 self.q_edge['object'].hold_curie()
             else:
@@ -160,7 +270,8 @@ class UpdatedExeEdge:
 
     def store_results(self, res):
         self.results = res
-        self.update_node_curies(res)
+        self.apply_node_constraints()
+        self.update_nodes_curies(res)
 
     def get_id(self):
         return self.q_edge.get_id()
@@ -176,11 +287,12 @@ class UpdatedExeEdge:
         return list(set(reduced))
 
     def get_predicate(self):
-        if not self.predicate:
+        if not self.q_edge.predicate:
             return None
-        predicates = [remove_biolink_prefix(item) for item in to_array(self.predicate)]
+        predicates = [remove_biolink_prefix(item) for item in to_array(self.q_edge.predicate)]
         expanded_predicates = self.expand_predicates(predicates)
-        mapped = [BioLinkModelInstance.reverse(predicate) if self.is_reversed() else predicate for predicate in expanded_predicates]
+        mapped = [BioLinkModelInstance.reverse(predicate) if self.is_reversed() else predicate for predicate in
+                  expanded_predicates]
         return [item for item in mapped if item]
 
     def get_subject(self):
