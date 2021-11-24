@@ -133,18 +133,19 @@ class TestingKnowledgeGraph(unittest.TestCase):
         res = kg._create_node(self.node_input)
         self.assertIn('name', res)
         self.assertEqual(res['name'], 'Celecoxib')
-        self.assertIn(res, 'categories')
+        self.assertIn('categories', res)
         self.assertEqual(res['categories'][0], 'biolink:SmallMolecule')
         self.assertIn('attributes', res)
 
     def test_create_attributes_function_edge_attributes(self):
         kg = KnowledgeGraph()
         res = kg._create_attributes(self.trapi_edge_input)
-        self.assertEqual(len(res), 0)
+        self.assertGreater(len(res), 0)
         for res_obj in res:
             self.assertIn('attribute_type_id', res_obj)
             self.assertIn('value', res_obj)
-            self.assertIn('value_type_id', res_obj)
+            if 'biolink:' in res_obj['attribute_type_id']:
+                self.assertIn('value_type_id', res_obj)
 
     def test_create_edge_function_creating_edge(self):
         kg = KnowledgeGraph()
@@ -159,4 +160,5 @@ class TestingKnowledgeGraph(unittest.TestCase):
         for res_obj in res['attributes']:
             self.assertIn('attribute_type_id', res_obj)
             self.assertIn('value', res_obj)
-            self.assertIn('value_type_id', res_obj)
+            if 'biolink:' in res_obj['attribute_type_id']:
+                self.assertIn('value_type_id', res_obj)

@@ -1,5 +1,5 @@
 import functools
-from biothings_explorer.biomedical_id_resolver.resolver import Resolver
+from biothings_explorer.biomedical_id_resolver.resolver import Resolver, resolve_sri
 
 
 class NodesUpdateHandler:
@@ -10,7 +10,7 @@ class NodesUpdateHandler:
         curies = {}
         for edge in q_edges:
             if edge.has_input_resolved():
-                return {}
+                return
             if edge.has_input():
                 input_categories = edge.get_subject().get_categories()
                 for category in input_categories:
@@ -21,23 +21,18 @@ class NodesUpdateHandler:
 
     def _get_equivalent_ids(self, curies):
         # Using biomedical-id-resolver-sri on the latest version
-        resolver = Resolver('biolink')
-        equivalent_ids = resolver.resolve(curies)
+        equivalent_ids = resolve_sri(curies)
         return equivalent_ids
 
     def set_equivalent_ids(self, q_edges):
         curies = self._get_curies(self.q_edges)
-        if len(curies) == 0:
-            for count, edge in enumerate(q_edges):
-                # TODO output_equivalent_identifiers should not be empty on second iteration
-                q_edges[count].input_equivalent_identifiers = q_edges[count].prev_edge.output_equivalent_identifiers
-            return
         equivalent_ids = self._get_equivalent_ids(curies)
-        for count, edge in enumerate(q_edges):
-            edge_equivalent_ids = functools.reduce(lambda res, key: {**res, key: equivalent_ids[key]}, [key for key in equivalent_ids if key in q_edges[count].get_input_curie()], {})
+        for edge in q_edges:
+            filtered = [key for key in equivalent_ids.keys() if key in edge.get_input_curie()]
+            edge_equivalent_ids = functools.reduce(lambda prev, current: {**prev, **equivalent_ids[current]},
+                             filtered, {})
             if len(edge_equivalent_ids) > 0:
-                q_edges[count].input_equivalent_identifiers = edge_equivalent_ids
-        return
+                edge['input_equivalent_identifiers'] = edge_equivalent_ids
 
     def _create_equivalent_ids_object(self, record):
         if record['$output']['obj']:

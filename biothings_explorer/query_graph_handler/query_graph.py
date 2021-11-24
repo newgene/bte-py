@@ -1,7 +1,7 @@
 import json
 from biothings_explorer.biomedical_id_resolver.resolver import resolve_sri
 from .query_node import QNode
-from .query_node_2 import QNode as QNode2
+from .query_node import QNode as QNode2
 from .query_edge import QEdge
 from .query_execution_edge import QExeEdge
 from .log_entry import LogEntry

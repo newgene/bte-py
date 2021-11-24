@@ -19,39 +19,39 @@ class KnowledgeGraph:
 
     def _create_node(self, kg_node):
         res = {
-            'categories': ['biolink:' + kg_node._semantic_type],
-            'name': kg_node._label,
+            'categories': ['biolink:' + kg_node['_semanticType']],
+            'name': kg_node['_label'],
             'attributes': [
                 {
                     'attribute_type_id': 'biolink:xref',
-                    'value': kg_node._curies,
+                    'value': kg_node['_curies'],
                 },
                 {
                     'attribute_type_id': 'biolink:synonym',
-                    'value': kg_node._names,
+                    'value': kg_node['_names'],
                 },
                 {
                     'attribute_type_id': 'num_source_nodes',
-                    'value': len(kg_node._source_nodes),
+                    'value': len(kg_node['_sourceNodes']),
                 },
                 {
                     'attribute_type_id': 'num_target_nodes',
-                    'value': len(kg_node._target_nodes),
+                    'value': len(kg_node['_targetNodes']),
                 },
                 {
                     'attribute_type_id': 'source_qg_nodes',
-                    'value': [item for item in kg_node._source_qg_nodes],
+                    'value': [item for item in kg_node['_sourceQGNodes']],
                 },
                 {
                     'attribute_type_id': 'target_qg_nodes',
-                    'value': [item for item in kg_node._target_qg_nodes],
+                    'value': [item for item in kg_node['_targetQGNodes']],
                 },
             ]
         }
-        for key in kg_node._node_attributes:
+        for key in kg_node['_nodeAttributes']:
             res['attributes'].append({
                 'attribute_type_id': key,
-                'value': kg_node._node_attributes[key],
+                'value': kg_node['_nodeAttributes'][key],
             })
         return res
 
@@ -117,7 +117,7 @@ class KnowledgeGraph:
                         'value_type_id': 'biolink:InformationResource'
                     }
                 ]
-            if len(list(kg_edge['infores_curies'])):
+            if len(list(kg_edge['inforesCuries'])):
                 attributes = [
                     *attributes,
                     {
@@ -143,9 +143,9 @@ class KnowledgeGraph:
 
     def _create_edge(self, kg_edge):
         return {
-            'predicate': kg_edge.predicate,
-            'subject': kg_edge.subject,
-            'object': kg_edge.object,
+            'predicate': kg_edge['predicate'],
+            'subject': kg_edge['subject'],
+            'object': kg_edge['object'],
             'attributes': self._create_attributes(kg_edge)
         }
 
