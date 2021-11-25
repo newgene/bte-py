@@ -1,6 +1,4 @@
 import unittest
-from biothings_explorer.query_graph_handler.query_node import QNode
-from biothings_explorer.query_graph_handler.query_edge import QEdge
 from biothings_explorer.query_graph_handler.graph.knowledge_graph import KnowledgeGraph
 
 

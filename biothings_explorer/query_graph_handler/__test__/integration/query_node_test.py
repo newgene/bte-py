@@ -138,5 +138,3 @@ class TestQueryNodeModule(unittest.TestCase):
             ]
         }
         self.assertEqual(node.get_categories(), ["m", "n", "p", "q", "x", "y"])
-
-    

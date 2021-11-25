@@ -33,7 +33,10 @@ class QueryResult:
             input_query_node_id = helper._get_input_query_node_id(records[0])
             output_query_node_id = helper._get_output_query_node_id(records[0])
             input_primary_ids = []
-            for record in set(records):
+
+            # TODO better to use set(records) but dicts are unhashable
+            for record in records:
+                # TODO records '$input' and '$output' are different from the js version
                 input_primary_ids.append(helper._get_input_id(record))
 
             if not common_primary_ids_by_query_node_id.get(input_query_node_id):
@@ -43,7 +46,9 @@ class QueryResult:
                     list(set(common_primary_ids_by_query_node_id[input_query_node_id]) & set(input_primary_ids))
 
             output_primary_ids = []
-            for record in set(records):
+
+            # TODO better to use set(records) but dicts are unhashable
+            for record in records:
                 output_primary_ids.append(helper._get_output_id(record))
 
             if not common_primary_ids_by_query_node_id.get(output_query_node_id):
@@ -87,9 +92,9 @@ class QueryResult:
         def _reduce_2(acc, curr, primary_id_by_query_node_id):
             compatible_brief_records = [brief_record
                                         for brief_record in curr[1] if
-                                        primary_id_by_query_node_id[input_query_node_id] == brief_record[
+                                        primary_id_by_query_node_id.get(brief_record['input_query_node_id']) == brief_record[
                                             'input_primary_id'] and
-                                        primary_id_by_query_node_id[output_query_node_id] == brief_record[
+                                        primary_id_by_query_node_id.get(brief_record['output_query_node_id']) == brief_record[
                                             'output_primary_id']
                                         ]
             if len(compatible_brief_records) == 0:

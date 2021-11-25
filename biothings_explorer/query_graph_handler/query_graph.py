@@ -98,13 +98,13 @@ class QueryGraphHandler:
 
     def calculate_edges(self):
         self._validate(self.query_graph)
-        if not self.edges:
+        if not hasattr(self, 'edges'):
             self.edges = self._store_edges()
         edges = {}
         edge_index = 0
         for edge_id in self.edges:
             edges[edge_index] = [
-                QExeEdge(self.edges[edge_id], True, None) if self.edges[edge_id].object['curie'] else
+                QExeEdge(self.edges[edge_id], True, None) if self.edges[edge_id].object.curie else
                 QExeEdge(self.edges[edge_id], False, None)
             ]
             edge_index = edge_index + 1
