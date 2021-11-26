@@ -143,7 +143,7 @@ class TestGraph(unittest.TestCase):
         self.assertCountEqual([item for item in g.edges['0719696e40f7ef74a5899eaf308f5067'].sources], ['source1'])
         self.assertCountEqual([item for item in g.edges['0719696e40f7ef74a5899eaf308f5067'].publications], ['PMID:1', 'PMID:2'])
         self.assertIn('relation', g.edges['0719696e40f7ef74a5899eaf308f5067'].attributes)
-        self.assertEqual(g.edges['0719696e40f7ef74a5899eaf308f5067'].attributes['relation'], 'relation2')
+        self.assertEqual(g.edges['0719696e40f7ef74a5899eaf308f5067'].attributes['relation'], 'relation1')
 
         self.assertIn('00cc8c4fe1a391c243c3c3e762d1ea73', g.edges)
         self.assertCountEqual([item for item in g.edges['00cc8c4fe1a391c243c3c3e762d1ea73'].apis], ['API2'])
@@ -171,7 +171,7 @@ class TestGraph(unittest.TestCase):
         self.assertCountEqual([item for item in g.edges['0719696e40f7ef74a5899eaf308f5067'].sources], ['source1'])
         self.assertCountEqual([item for item in g.edges['0719696e40f7ef74a5899eaf308f5067'].publications], ['PMID:1', 'PMID:2'])
         self.assertIn('relation', g.edges['0719696e40f7ef74a5899eaf308f5067'].attributes)
-        self.assertEqual(g.edges['0719696e40f7ef74a5899eaf308f5067'].attributes['relation'], 'relation2')
+        self.assertEqual(g.edges['0719696e40f7ef74a5899eaf308f5067'].attributes['relation'], 'relation1')
 
         self.assertIn('00cc8c4fe1a391c243c3c3e762d1ea73', g.edges)
         self.assertCountEqual([item for item in g.edges['00cc8c4fe1a391c243c3c3e762d1ea73'].apis], ['API2'])
