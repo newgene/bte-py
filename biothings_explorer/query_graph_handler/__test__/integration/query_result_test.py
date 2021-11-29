@@ -1,5 +1,6 @@
 import copy
 import unittest
+import json
 from biothings_explorer.query_graph_handler.query_node import QNode
 from biothings_explorer.query_graph_handler.query_edge import QEdge
 from biothings_explorer.query_graph_handler.query_results import QueryResult
@@ -823,3 +824,381 @@ class TestQueryResults(unittest.TestCase):
         record0_n0a_n1a_pred1_api1['$edge_metadata']['predicate'] = 'biolink:record0_pred1'
         record0_n0a_n1a_pred1_api1['$edge_metadata']['source'] = 'source1'
         record0_n0a_n1a_pred1_api1['$edge_metadata']['api_name'] = 'api1'
+
+        record0_n0a_n1b = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e0,
+                'predicate': 'biolink:record0_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n0
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n0a',
+                    },
+                ],
+            },
+            # n1
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n1b',
+                    },
+                ],
+            },
+        }
+
+        record0_n0b_n1a = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e0,
+                'predicate': 'biolink:record0_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n0
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n0b',
+                    },
+                ],
+            },
+            # n1
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n1a',
+                    },
+                ],
+            },
+        }
+
+        record0_n0b_n1b = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e0,
+                'predicate': 'biolink:record0_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n0
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n0b',
+                    },
+                ],
+            },
+            # n1
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n1b',
+                    },
+                ],
+            },
+        }
+
+        record1_n1a_n2a = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e1,
+                'predicate': 'biolink:record1_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n1
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n1a',
+                    },
+                ],
+            },
+            # n2
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n2a',
+                    },
+                ],
+            },
+        }
+
+        e1_reversed = QEdge('e1Reversed', {'subject': n2, 'object': n1})
+        record1_n2a_n1a = copy.deepcopy(record1_n1a_n2a)
+        record1_n2a_n1a['$edge_metadata']['trapi_qEdge_obj'] = e1_reversed
+        record1_n2a_n1a['$input'] = copy.deepcopy(record1_n1a_n2a['$output'])
+        record1_n2a_n1a['$output'] = copy.deepcopy(record1_n1a_n2a['$input'])
+
+        record1_n1a_n2b = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e1,
+                'predicate': 'biolink:record1_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n1
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n1a',
+                    },
+                ],
+            },
+            # n2
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n2b',
+                    },
+                ],
+            },
+        }
+
+        record1_n2b_n1a = copy.deepcopy(record1_n1a_n2b)
+        record1_n2b_n1a['$edge_metadata']['trapi_qEdge_obj'] = e1_reversed
+        record1_n2b_n1a['$input'] = copy.deepcopy(record1_n1a_n2a['$output'])
+        record1_n2b_n1a['$output'] = copy.deepcopy(record1_n1a_n2b['$input'])
+
+        record1_n1b_n2a = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e1,
+                'predicate': 'biolink:record1_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n1
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n1b',
+                    },
+                ],
+            },
+            # n2
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n2a',
+                    },
+                ],
+            },
+        }
+
+        record1_n1b_n2b = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e1,
+                'predicate': 'biolink:record1_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n1
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n1b',
+                    },
+                ],
+            },
+            # n2
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n2b',
+                    },
+                ],
+            },
+        }
+
+        record2_n1a_n3a = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e2,
+                'predicate': 'biolink:record2_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n1
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n1a',
+                    },
+                ],
+            },
+            # n3
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n3a',
+                    },
+                ],
+            },
+        }
+
+        record2_n1b_n3a = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e2,
+                'predicate': 'biolink:record2_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n1
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n1b',
+                    },
+                ],
+            },
+            # n3
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n3a',
+                    },
+                ],
+            },
+        }
+
+        record3_n1a_n4a = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e3,
+                'predicate': 'biolink:record3_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n1
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n1a',
+                    },
+                ],
+            },
+            # n4
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n4a',
+                    },
+                ],
+            },
+        }
+
+        record3_n1b_n4a = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e3,
+                'predicate': 'biolink:record3_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n1
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n1b',
+                    },
+                ],
+            },
+            # n4
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n4a',
+                    },
+                ],
+            },
+        }
+
+        record4_n2a_n5a = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e4,
+                'predicate': 'biolink:record4_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n1
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n2a',
+                    },
+                ],
+            },
+            # n5
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n5a',
+                    },
+                ],
+            },
+        }
+
+        record5_n3a_n5a = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e5,
+                'predicate': 'biolink:record5_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n3
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n3a',
+                    },
+                ],
+            },
+            # n5
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n5a',
+                    },
+                ],
+            },
+        }
+
+        record6_n4a_n5a = {
+            '$edge_metadata': {
+                'trapi_qEdge_obj': e6,
+                'predicate': 'biolink:record6_pred',
+                'source': 'source0',
+                'api_name': 'api0',
+            },
+            # n4
+            '$input': {
+                'obj': [
+                    {
+                        'primaryID': 'n4a',
+                    },
+                ],
+            },
+            # n5
+            '$output': {
+                'obj': [
+                    {
+                        'primaryID': 'n5a',
+                    },
+                ],
+            },
+        }
+
+        # should get 0 results for update (0) & getResults (1)
+        query_result_inner = QueryResult()
+        results_inner = query_result_inner.get_results()
+        self.assertEqual(json.dumps(results_inner), json.dumps([]))
+
+        query_result_outer = QueryResult()
+        query_result_outer.update({
+            'e0': {
+                'connected_to': ['e1'],
+                'records': [record0_n0b_n1a]
+            },
+            'e1': {
+                'connected_to': ['e0'],
+                'records': [record1_n1a_n2a]
+            }
+        })
