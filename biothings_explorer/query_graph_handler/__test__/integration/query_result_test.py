@@ -1413,3 +1413,55 @@ class TestQueryResults(unittest.TestCase):
             'e0', 'e1'
         ])
         self.assertIn('score', results[1])
+
+        # should get 4 results with records: ><
+        query_result = QueryResult()
+        query_result.update({
+            'e0': {
+                'connected_to': ['e1'],
+                'records': [record0_n0a_n1a, record0_n0b_n1a]
+            },
+            'e1': {
+                'connected_to': ['e0'],
+                'records': [record1_n1a_n2a, record1_n1a_n2b]
+            }
+        })
+        results = query_result.get_results()
+        self.assertEqual(len(results), 4)
+        self.assertEqual(results[0]['node_bindings'], ['n0', 'n1', 'n2'])
+        self.assertEqual(results[0]['edge_bindings'], ['e0', 'e1'])
+        self.assertIn('score', results[0])
+
+        self.assertEqual(results[1]['node_bindings'], ['n0', 'n1', 'n2'])
+        self.assertEqual(results[1]['edge_bindings'], ['e0', 'e1'])
+        self.assertIn('score', results[1])
+
+        self.assertEqual(results[2]['node_bindings'], ['n0', 'n1', 'n2'])
+        self.assertEqual(results[2]['edge_bindings'], ['e0', 'e1'])
+        self.assertIn('score', results[2])
+
+        self.assertEqual(results[3]['node_bindings'], ['n0', 'n1', 'n2'])
+        self.assertEqual(results[3]['edge_bindings'], ['e0', 'e1'])
+        self.assertIn('score', results[3])
+
+        # should get 2 results with records: ⇉⇉
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1"],
+            "records": [record0_n0a_n1a, record0_n0a_n1b]
+          },
+          "e1": {
+            "connected_to": ["e0"],
+            "records": [record1_n1a_n2a, record1_n1b_n2a]
+          }
+        })
+        results = query_result.get_results()
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[0]['node_bindings'], ['n0', 'n1', 'n2'])
+        self.assertEqual(results[0]['edge_bindings'], ['e0', 'e1'])
+        self.assertIn('score', results[0])
+
+        self.assertEqual(results[1]['node_bindings'], ['n0', 'n1', 'n2'])
+        self.assertEqual(results[1]['edge_bindings'], ['e0', 'e1'])
+        self.assertIn('score', results[1])

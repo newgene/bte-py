@@ -36,7 +36,6 @@ class QueryResult:
 
             # TODO better to use set(records) but dicts are unhashable
             for record in records:
-                # TODO records '$input' and '$output' are different from the js version
                 input_primary_ids.append(helper._get_input_id(record))
 
             if not common_primary_ids_by_query_node_id.get(input_query_node_id):
@@ -84,12 +83,20 @@ class QueryResult:
         self._results = [list(v) for v in cartesian(common_primary_ids_by_query_node_id.values())]
 
         # zipping
-        self._results = [zip(query_node_ids, common_primary_id_combo) for common_primary_id_combo in self._results]
+        self._results = [list(zip(query_node_ids, common_primary_id_combo)) for common_primary_id_combo in self._results]
         # self._results looks like this now [('Candice', 2), ('Ava', 9), ('Andrew', 18), ('Lucas', 28)]
         # but we need dicts instead of tuples
-        self._results = [{key: value} for key, value in self._results]
+
+        zipped_lists = []
+        for item in self._results:
+            new_list = []
+            for zipped_item in item:
+                new_list.append({zipped_item[0]: zipped_item[1]})
+            zipped_lists.append(new_list)
+        self._results = zipped_lists
 
         def _reduce_2(acc, curr, primary_id_by_query_node_id):
+            # FIXME primary_id_by_query_node_id doesn't contain "n2"
             compatible_brief_records = [brief_record
                                         for brief_record in curr[1] if
                                         primary_id_by_query_node_id.get(brief_record['input_query_node_id']) == brief_record[
@@ -112,6 +119,7 @@ class QueryResult:
             }
 
             return acc
+        # Bug seems to happen here
         self._results = [functools.reduce(lambda prev, curr: _reduce_2(prev, curr, primary_id_by_query_node_id),
                                           to_pairs(brief_records_by_edge), {})
                          for primary_id_by_query_node_id in self._results]
