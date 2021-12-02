@@ -71,7 +71,7 @@ class QueryResult:
                 'input_query_node_id': helper._get_input_query_node_id(_record),
                 'output_query_node_id': helper._get_output_query_node_id(_record),
                 'input_primary_id': helper._get_input_id(_record),
-                'output_primary_id': helper._get_output_query_node_id(_record),
+                'output_primary_id': helper._get_output_id(_record),
                 'kg_edge_id': helper._get_kg_edge_id(_record),
             } for _record in curr[1]['records']]
             return acc
@@ -89,25 +89,30 @@ class QueryResult:
 
         zipped_lists = []
         for item in self._results:
-            new_list = []
+            node_id = {}
             for zipped_item in item:
-                new_list.append({zipped_item[0]: zipped_item[1]})
-            zipped_lists.append(new_list)
+                node_id[zipped_item[0]] = zipped_item[1]
+                #new_list.append({zipped_item[0]: zipped_item[1]})
+            zipped_lists.append(node_id)
         self._results = zipped_lists
 
         def _reduce_2(acc, curr, primary_id_by_query_node_id):
-            # FIXME primary_id_by_query_node_id doesn't contain "n2"
             compatible_brief_records = [brief_record
                                         for brief_record in curr[1] if
                                         primary_id_by_query_node_id.get(brief_record['input_query_node_id']) == brief_record[
                                             'input_primary_id'] and
+
                                         primary_id_by_query_node_id.get(brief_record['output_query_node_id']) == brief_record[
                                             'output_primary_id']
                                         ]
             if len(compatible_brief_records) == 0:
                 return acc
 
-            kg_edge_ids = functools.reduce(lambda prev, current: prev.add(current['kg_edge_id']),
+            def recuce_kg_edge_ids(prev, current):
+                prev.add(current['kg_edge_id'])
+                return prev
+
+            kg_edge_ids = functools.reduce(lambda prev, current: recuce_kg_edge_ids(prev, current),
                                            compatible_brief_records, set())
 
             acc[query_edge_id] = {
@@ -115,11 +120,10 @@ class QueryResult:
                 'output_query_node_id': compatible_brief_records[0]['output_query_node_id'],
                 'input_primary_id': compatible_brief_records[0]['input_primary_id'],
                 'output_primary_id': compatible_brief_records[0]['output_primary_id'],
-                **kg_edge_ids
+                'kg_edge_ids': kg_edge_ids
             }
 
             return acc
-        # Bug seems to happen here
         self._results = [functools.reduce(lambda prev, curr: _reduce_2(prev, curr, primary_id_by_query_node_id),
                                           to_pairs(brief_records_by_edge), {})
                          for primary_id_by_query_node_id in self._results]
@@ -129,7 +133,7 @@ class QueryResult:
         new_results = []
         for info_by_edge_for_one_combo in self._results:
             result = {'node_bindings': {}, 'edge_bindings': {}, 'score': '1.0'}
-            for item in info_by_edge_for_one_combo:
+            for item in to_pairs(info_by_edge_for_one_combo):
                 query_edge_id = item[0]
                 input_query_node_id = item[1]['input_query_node_id']
                 output_query_node_id = item[1]['output_query_node_id']
@@ -151,7 +155,8 @@ class QueryResult:
                         }
                     ]
 
-                edge_bindings = result['edge_bindings'][query_edge_id]
+                edge_bindings = result['edge_bindings'].get(query_edge_id) if \
+                    result['edge_bindings'].get(query_edge_id) else []
                 for kg_edge_id in kg_edge_ids:
                     edge_bindings.append({'id': kg_edge_id})
             new_results.append(result)
