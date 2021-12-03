@@ -155,8 +155,9 @@ class QueryResult:
                         }
                     ]
 
-                edge_bindings = result['edge_bindings'].get(query_edge_id) if \
-                    result['edge_bindings'].get(query_edge_id) else []
+                result['edge_bindings'][query_edge_id] = result['edge_bindings'].get(query_edge_id) \
+                    if result['edge_bindings'].get(query_edge_id) else []
+                edge_bindings = result['edge_bindings'][query_edge_id]
                 for kg_edge_id in kg_edge_ids:
                     edge_bindings.append({'id': kg_edge_id})
             new_results.append(result)

@@ -1557,3 +1557,285 @@ class TestQueryResults(unittest.TestCase):
         })
         results = query_result.get_results()
         self.assertEqual(len(results), 0)
+
+        # should get 1 result with records: →←
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1Reversed"],
+            "records": [record0_n0a_n1a]
+          },
+          "e1Reversed": {
+            "connected_to": ["e0"],
+            "records": [record1_n2a_n1a]
+          }
+        })
+        results = query_result.get_results()
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1', 'n2'])
+        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0', 'e1Reversed'])
+        self.assertIn('score', results[0])
+
+        # should get 1 result with records: →→ (directionality does not match query graph)
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1"],
+            "records": [record0_n0a_n1a]
+          },
+          "e1": {
+            "connected_to": ["e0"],
+            "records": [record1_n1a_n2a]
+          }
+        })
+        results = query_result.get_results()
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1', 'n2'])
+        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0', 'e1'])
+        self.assertIn('score', results[0])
+
+        # should get 0 results when 0 records for edge: ⇢̊←
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1Reversed"],
+            "records": []
+          },
+          "e1Reversed": {
+            "connected_to": ["e0"],
+            "records": [record1_n2a_n1a]
+          }
+        })
+        results = query_result.get_results()
+        self.assertEqual(len(results), 0)
+
+        # should get 0 results when 0 records for edge: →⇠̊
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1"],
+            "records": [record0_n0a_n1a]
+          },
+          "e1": {
+            "connected_to": ["e0"],
+            "records": []
+          }
+        })
+        results = query_result.get_results()
+        self.assertEqual(len(results), 0)
+
+        # should get 1 result for 1 record per edge: ←→
+        query_result = QueryResult()
+        query_result.update({
+          "e1Reversed": {
+            "connected_to": ["e4"],
+            "records": [record1_n2a_n1a]
+          },
+          "e4": {
+            "connected_to": ["e1Reversed"],
+            "records": [record4_n2a_n5a]
+          }
+        })
+        results = query_result.get_results()
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['node_bindings'], ['n1', 'n2', 'n5'])
+        self.assertEqual(results[0]['edge_bindings'], ['e1Reversed', 'e4'])
+        self.assertIn('score', results[0])
+
+        # should get 0 results due to unconnected record: ←̽→
+        query_result = QueryResult()
+        query_result.update({
+          "e1Reversed": {
+            "connected_to": ["e4"],
+            "records": [record1_n2b_n1a]
+          },
+          "e4": {
+            "connected_to": ["e1Reversed"],
+            "records": [record4_n2a_n5a]
+          }
+        })
+
+        results = query_result.get_results()
+        self.assertEqual(len(results), 0)
+
+        # should get 0 results when 0 records for edge: ⇠̊→
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1"],
+            "records": []
+          },
+          "e1": {
+            "connected_to": ["e0"],
+            "records": [record1_n1a_n2a]
+          }
+        })
+        results = query_result.get_results()
+        self.assertEqual(len(results), 0)
+
+        # should get 1 result for 1 record per edge: -<
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1", "e2"],
+            "records": [record0_n0a_n1a]
+          },
+          "e1": {
+            "connected_to": ["e0", "e2"],
+            "records": [record1_n1a_n2a]
+          },
+          "e2": {
+            "connected_to": ["e0", "e1"],
+            "records": [record2_n1a_n3a]
+          },
+        })
+        results = query_result.get_results()
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1', 'n2', 'n3'])
+        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0', 'e1', 'e2'])
+        self.assertIn('score', results[0])
+
+        # should get 0 results due to unconnected record: -<̽
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1", "e2"],
+            "records": [record0_n0a_n1a]
+          },
+          "e1": {
+            "connected_to": ["e0", "e2"],
+            "records": [record1_n1b_n2a]
+          },
+          "e2": {
+            "connected_to": ["e0", "e1"],
+            "records": [record2_n1a_n3a]
+          },
+        })
+        results = query_result.get_results()
+        self.assertEqual(len(results), 0)
+
+        # should get 1 result for 1 record per edge
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1", "e2", "e3"],
+            "records": [record0_n0a_n1a]
+          },
+          "e1": {
+            "connected_to": ["e0", "e2", "e3", "e4"],
+            "records": [record1_n1a_n2a]
+          },
+          "e2": {
+            "connected_to": ["e0", "e1", "e3", "e5"],
+            "records": [record2_n1a_n3a]
+          },
+          "e3": {
+            "connected_to": ["e0", "e1",  "e2", "e6"],
+            "records": [record3_n1a_n4a]
+          },
+          "e4": {
+            "connected_to": ["e1", "e5", "e6"],
+            "records": [record4_n2a_n5a]
+          },
+          "e5": {
+            "connected_to": ["e2", "e4", "e6"],
+            "records": [record5_n3a_n5a]
+          },
+          "e6": {
+            "connected_to": ["e3", "e4", "e5"],
+            "records": [record6_n4a_n5a]
+          }
+        })
+
+        results = query_result.get_results()
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
+        self.assertIn('score', results[0])
+
+        # should get 2 results for 2 records per edge at n0
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1", "e2", "e3"],
+            "records": [record0_n0a_n1a, record0_n0b_n1a]
+          },
+          "e1": {
+            "connected_to": ["e0", "e2", "e3", "e4"],
+            "records": [record1_n1a_n2a]
+          },
+          "e2": {
+            "connected_to": ["e0", "e1", "e3", "e5"],
+            "records": [record2_n1a_n3a]
+          },
+          "e3": {
+            "connected_to": ["e0", "e1",  "e2", "e6"],
+            "records": [record3_n1a_n4a]
+          },
+          "e4": {
+            "connected_to": ["e1", "e5", "e6"],
+            "records": [record4_n2a_n5a]
+          },
+          "e5": {
+            "connected_to": ["e2", "e4", "e6"],
+            "records": [record5_n3a_n5a]
+          },
+          "e6": {
+            "connected_to": ["e3", "e4", "e5"],
+            "records": [record6_n4a_n5a]
+          }
+        })
+
+        results = query_result.get_results()
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[0]['node_bindings'], ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(results[0]['edge_bindings'], ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
+        self.assertIn('score', results[0])
+
+        self.assertEqual(results[1]['node_bindings'], ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(results[1]['edge_bindings'], ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
+        self.assertIn('score', results[1])
+
+        # should get 2 results for 2 records per edge at n1
+        query_result = QueryResult()
+        query_result.update({
+          "e0": {
+            "connected_to": ["e1", "e2", "e3"],
+            "records": [record0_n0a_n1a, record0_n0a_n1b]
+          },
+          "e1": {
+            "connected_to": ["e0", "e2", "e3", "e4"],
+            "records": [record1_n1a_n2a, record1_n1b_n2a]
+          },
+          "e2": {
+            "connected_to": ["e0", "e1", "e3", "e5"],
+            "records": [record2_n1a_n3a, record2_n1b_n3a]
+          },
+          "e3": {
+            "connected_to": ["e0", "e1",  "e2", "e6"],
+            "records": [record3_n1a_n4a, record3_n1b_n4a]
+          },
+          "e4": {
+            "connected_to": ["e1", "e5", "e6"],
+            "records": [record4_n2a_n5a]
+          },
+          "e5": {
+            "connected_to": ["e2", "e4", "e6"],
+            "records": [record5_n3a_n5a]
+          },
+          "e6": {
+            "connected_to": ["e3", "e4", "e5"],
+            "records": [record6_n4a_n5a]
+          }
+        })
+
+        results = query_result.get_results()
+        self.assertEqual(len(results), 2)
+
+        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
+        self.assertIn('score', results[0])
+
+        self.assertEqual(results[1]['node_bindings'].keys(), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(results[1]['edge_bindings'].keys(), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
+        self.assertIn('score', results[1])

@@ -69,7 +69,7 @@ class QueryGraphHelper:
             self._get_api(record),
             self._get_source(record)
         ]
-        return self._generate_hash('-'.join(edge_meta_data))
+        return self._generate_hash('-'.join([item if item else '' for item in edge_meta_data]))
 
     def _get_input_category(self, record):
         if record['$edge_metadata']['trapi_qEdge_obj'].is_reversed():
