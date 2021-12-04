@@ -114,8 +114,8 @@ class QueryResult:
 
             kg_edge_ids = functools.reduce(lambda prev, current: recuce_kg_edge_ids(prev, current),
                                            compatible_brief_records, set())
-
-            acc[query_edge_id] = {
+            # query_edge_id should be a curr instance
+            acc[curr[0]] = {
                 'input_query_node_id': compatible_brief_records[0]['input_query_node_id'],
                 'output_query_node_id': compatible_brief_records[0]['output_query_node_id'],
                 'input_primary_id': compatible_brief_records[0]['input_primary_id'],
@@ -128,6 +128,7 @@ class QueryResult:
                                           to_pairs(brief_records_by_edge), {})
                          for primary_id_by_query_node_id in self._results]
 
+        # e01 is missing
         self._results = [info_by_edge_for_one_combo for info_by_edge_for_one_combo in self._results if
                          len(intersection(edges, set(info_by_edge_for_one_combo.keys()))) == edge_count]
         new_results = []
