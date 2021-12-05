@@ -1296,22 +1296,21 @@ class TestQueryResults(unittest.TestCase):
             }
         })
         results = query_result.get_results()
-        # TODO Fails here
         self.assertEqual(len(results), 4)
-        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1'])
-        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0'])
+        self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0'])
         self.assertIn('score', results[0])
 
-        self.assertEqual(results[1]['node_bindings'].keys(), ['n0', 'n1'])
-        self.assertEqual(results[1]['edge_bindings'].keys(), ['e0'])
+        self.assertEqual(list(results[1]['node_bindings'].keys()), ['n0', 'n1'])
+        self.assertEqual(list(results[1]['edge_bindings'].keys()), ['e0'])
         self.assertIn('score', results[1])
 
-        self.assertEqual(results[2]['node_bindings'].keys(), ['n0', 'n1'])
-        self.assertEqual(results[2]['edge_bindings'].keys(), ['e0'])
+        self.assertEqual(list(results[2]['node_bindings'].keys()), ['n0', 'n1'])
+        self.assertEqual(list(results[2]['edge_bindings'].keys()), ['e0'])
         self.assertIn('score', results[2])
 
-        self.assertEqual(results[3]['node_bindings'].keys(), ['n0', 'n1'])
-        self.assertEqual(results[3]['edge_bindings'].keys(), ['e0'])
+        self.assertEqual(list(results[3]['node_bindings'].keys()), ['n0', 'n1'])
+        self.assertEqual(list(results[3]['edge_bindings'].keys()), ['e0'])
         self.assertIn('score', results[3])
 
         # should get 1 result for the same record repeated 4 times: 𝍬
@@ -1324,8 +1323,8 @@ class TestQueryResults(unittest.TestCase):
         })
         results = query_result.get_results()
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['node_bindings'], ['n0', 'n1'])
-        self.assertEqual(results[0]['edge_bindings'], ['e0'])
+        self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0'])
         self.assertIn('score', results[0])
 
         # should get 1 result for the same record repeated twice and reversed twice: 𝍬
@@ -1342,8 +1341,8 @@ class TestQueryResults(unittest.TestCase):
         })
         results = query_result.get_results()
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['node_bindings'].keys(), ['n1', 'n2'])
-        self.assertEqual(results[0]['edge_bindings'].keys(), ['e1', 'e1Reversed'])
+        self.assertEqual(list(results[0]['node_bindings'].keys()), ['n1', 'n2'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e1', 'e1Reversed'])
         self.assertIn('score', results[0])
 
         # should get 1 result with 2 edge mappings when predicates differ: ⇉'
@@ -1357,8 +1356,9 @@ class TestQueryResults(unittest.TestCase):
         results = query_result.get_results()
 
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1'])
-        self.assertEqual(results[0]['edge_bindings'], ['e0'])
+        self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0'])
+        # TODO Fails here
         self.assertEqual(len(results[0]['edge_bindings']['e0']), 2)
         self.assertIn('score', results[0])
 

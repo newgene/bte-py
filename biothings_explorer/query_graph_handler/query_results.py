@@ -34,9 +34,9 @@ class QueryResult:
             output_query_node_id = helper._get_output_query_node_id(records[0])
             input_primary_ids = []
 
-            # TODO better to use set(records) but dicts are unhashable
             for record in records:
                 input_primary_ids.append(helper._get_input_id(record))
+            input_primary_ids = list(set(input_primary_ids))
 
             if not common_primary_ids_by_query_node_id.get(input_query_node_id):
                 common_primary_ids_by_query_node_id[input_query_node_id] = input_primary_ids
@@ -46,9 +46,9 @@ class QueryResult:
 
             output_primary_ids = []
 
-            # TODO better to use set(records) but dicts are unhashable
             for record in records:
                 output_primary_ids.append(helper._get_output_id(record))
+            output_primary_ids = list(set(output_primary_ids))
 
             if not common_primary_ids_by_query_node_id.get(output_query_node_id):
                 common_primary_ids_by_query_node_id[output_query_node_id] = output_primary_ids
@@ -76,6 +76,7 @@ class QueryResult:
             } for _record in curr[1]['records']]
             return acc
 
+        # TODO returns 1 edge less here
         brief_records_by_edge = functools.reduce(
             lambda prev, current: _reduce(prev, current), pairs_brief_records_by_edge, {})
 
