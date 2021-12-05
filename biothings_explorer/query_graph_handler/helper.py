@@ -69,6 +69,7 @@ class QueryGraphHelper:
             self._get_api(record),
             self._get_source(record)
         ]
+        # TODO self._get_source(record) should be 'source0' instead of 'source1' in the second edge
         return self._generate_hash('-'.join([item if item else '' for item in edge_meta_data]))
 
     def _get_input_category(self, record):
