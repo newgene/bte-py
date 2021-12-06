@@ -29,7 +29,7 @@ class QueryResult:
             records = item[1]['records']
             if not records or len(records) == 0:
                 empty_query_node_found = True
-                return True
+                break
             input_query_node_id = helper._get_input_query_node_id(records[0])
             output_query_node_id = helper._get_output_query_node_id(records[0])
             input_primary_ids = []
@@ -43,6 +43,7 @@ class QueryResult:
             else:
                 common_primary_ids_by_query_node_id[input_query_node_id] = \
                     list(set(common_primary_ids_by_query_node_id[input_query_node_id]) & set(input_primary_ids))
+                    # common_primary_ids_by_query_node_id[input_query_node_id] should be n2b instead of n2a
 
             output_primary_ids = []
 
@@ -56,10 +57,11 @@ class QueryResult:
                 common_primary_ids_by_query_node_id[output_query_node_id] = \
                     list(set(common_primary_ids_by_query_node_id[output_query_node_id]) & set(output_primary_ids))
 
+            # TODO common_primary_ids_by_query_node_id[input_query_node_id] should be empty
             if len(common_primary_ids_by_query_node_id[input_query_node_id]) == 0 or len(
                     common_primary_ids_by_query_node_id[output_query_node_id]) == 0:
                 empty_query_node_found = True
-                return True
+                break
 
         if empty_query_node_found:
             return
@@ -76,7 +78,6 @@ class QueryResult:
             } for _record in curr[1]['records']]
             return acc
 
-        # TODO returns 1 edge less here
         brief_records_by_edge = functools.reduce(
             lambda prev, current: _reduce(prev, current), pairs_brief_records_by_edge, {})
 

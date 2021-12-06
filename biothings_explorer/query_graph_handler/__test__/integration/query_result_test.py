@@ -958,7 +958,7 @@ class TestQueryResults(unittest.TestCase):
 
         record1_n2b_n1a = copy.deepcopy(record1_n1a_n2b)
         record1_n2b_n1a['$edge_metadata']['trapi_qEdge_obj'] = e1_reversed
-        record1_n2b_n1a['$input'] = copy.deepcopy(record1_n1a_n2a['$output'])
+        record1_n2b_n1a['$input'] = copy.deepcopy(record1_n1a_n2b['$output'])
         record1_n2b_n1a['$output'] = copy.deepcopy(record1_n1a_n2b['$input'])
 
         record1_n1b_n2a = {
@@ -1336,7 +1336,7 @@ class TestQueryResults(unittest.TestCase):
             },
             'e1Reversed': {
                 'connected_to': ['e1'],
-                'records': [record1_n2b_n1a]
+                'records': [record1_n2a_n1a]
             }
         })
         results = query_result.get_results()
@@ -1358,7 +1358,6 @@ class TestQueryResults(unittest.TestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1'])
         self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0'])
-        # TODO Fails here
         self.assertEqual(len(results[0]['edge_bindings']['e0']), 2)
         self.assertIn('score', results[0])
 
@@ -1526,7 +1525,7 @@ class TestQueryResults(unittest.TestCase):
         self.assertEqual(len(results), 1)
 
         self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1', 'n2'])
-        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0', 'e1'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0', 'e1Reversed'])
         self.assertIn('score', results[0])
 
         # should get 0 results when 0 records for edge: ⇢̊→
@@ -1573,8 +1572,8 @@ class TestQueryResults(unittest.TestCase):
         })
         results = query_result.get_results()
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1', 'n2'])
-        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0', 'e1Reversed'])
+        self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1', 'n2'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0', 'e1Reversed'])
         self.assertIn('score', results[0])
 
         # should get 1 result with records: →→ (directionality does not match query graph)
@@ -1591,8 +1590,8 @@ class TestQueryResults(unittest.TestCase):
         })
         results = query_result.get_results()
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1', 'n2'])
-        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0', 'e1'])
+        self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1', 'n2'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0', 'e1'])
         self.assertIn('score', results[0])
 
         # should get 0 results when 0 records for edge: ⇢̊←
@@ -1639,8 +1638,8 @@ class TestQueryResults(unittest.TestCase):
         })
         results = query_result.get_results()
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['node_bindings'], ['n1', 'n2', 'n5'])
-        self.assertEqual(results[0]['edge_bindings'], ['e1Reversed', 'e4'])
+        self.assertEqual(sorted(list(results[0]['node_bindings'].keys())), ['n1', 'n2', 'n5'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e1Reversed', 'e4'])
         self.assertIn('score', results[0])
 
         # should get 0 results due to unconnected record: ←̽→
@@ -1692,8 +1691,8 @@ class TestQueryResults(unittest.TestCase):
         })
         results = query_result.get_results()
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1', 'n2', 'n3'])
-        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0', 'e1', 'e2'])
+        self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1', 'n2', 'n3'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0', 'e1', 'e2'])
         self.assertIn('score', results[0])
 
         # should get 0 results due to unconnected record: -<̽
@@ -1750,8 +1749,8 @@ class TestQueryResults(unittest.TestCase):
 
         results = query_result.get_results()
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
-        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
+        self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
         self.assertIn('score', results[0])
 
         # should get 2 results for 2 records per edge at n0
@@ -1789,12 +1788,12 @@ class TestQueryResults(unittest.TestCase):
 
         results = query_result.get_results()
         self.assertEqual(len(results), 2)
-        self.assertEqual(results[0]['node_bindings'], ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
-        self.assertEqual(results[0]['edge_bindings'], ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
+        self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
         self.assertIn('score', results[0])
 
-        self.assertEqual(results[1]['node_bindings'], ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
-        self.assertEqual(results[1]['edge_bindings'], ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
+        self.assertEqual(list(results[1]['node_bindings'].keys()), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(list(results[1]['edge_bindings'].keys()), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
         self.assertIn('score', results[1])
 
         # should get 2 results for 2 records per edge at n1
@@ -1833,12 +1832,12 @@ class TestQueryResults(unittest.TestCase):
         results = query_result.get_results()
         self.assertEqual(len(results), 2)
 
-        self.assertEqual(results[0]['node_bindings'].keys(), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
-        self.assertEqual(results[0]['edge_bindings'].keys(), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
+        self.assertEqual(list(results[0]['node_bindings'].keys()), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
         self.assertIn('score', results[0])
 
-        self.assertEqual(results[1]['node_bindings'].keys(), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
-        self.assertEqual(results[1]['edge_bindings'].keys(), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
+        self.assertEqual(list(results[1]['node_bindings'].keys()), ['n0', 'n1', 'n2', 'n3', 'n4', 'n5'])
+        self.assertEqual(list(results[1]['edge_bindings'].keys()), ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'])
         self.assertIn('score', results[1])
 
         # should get 3 results for n0a→n1a, n0a→n1b, n0b→n1a
@@ -1875,23 +1874,23 @@ class TestQueryResults(unittest.TestCase):
         })
         results = query_result.get_results()
         self.assertEqual(len(results), 3)
-        self.assertEqual(results[0]['edge_bindings'].keys(), [
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), [
           'e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'
         ])
         self.assertIn('score', results[0])
 
-        self.assertEqual(results[1]['node_bindings'].keys(), [
+        self.assertEqual(list(results[1]['node_bindings'].keys()), [
           'n0', 'n1', 'n2', 'n3', 'n4', 'n5'
         ])
-        self.assertEqual(results[1]['edge_bindings'].keys(), [
+        self.assertEqual(list(results[1]['edge_bindings'].keys()), [
           'e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'
         ])
         self.assertIn('score', results[1])
 
-        self.assertEqual(results[2]['node_bindings'].keys(), [
+        self.assertEqual(list(results[2]['node_bindings'].keys()), [
           'n0', 'n1', 'n2', 'n3', 'n4', 'n5'
         ])
-        self.assertEqual(results[2]['edge_bindings'].keys(), [
+        self.assertEqual(list(results[2]['edge_bindings'].keys()), [
           'e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'
         ])
         self.assertIn('score', results[2])
@@ -1930,32 +1929,32 @@ class TestQueryResults(unittest.TestCase):
         })
         results = query_result.get_results()
         self.assertEqual(len(results), 4)
-        self.assertEqual(results[0]['node_bindings'].keys(), [
+        self.assertEqual(list(results[0]['node_bindings'].keys()), [
           'n0', 'n1', 'n2', 'n3', 'n4', 'n5'
         ])
-        self.assertEqual(results[0]['edge_bindings'].keys(), [
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), [
           'e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'
         ])
         self.assertIn('score', results[0])
 
-        self.assertEqual(results[1]['node_bindings'].keys(), [
+        self.assertEqual(list(results[1]['node_bindings'].keys()), [
           'n0', 'n1', 'n2', 'n3', 'n4', 'n5'
         ])
-        self.assertEqual(results[1]['edge_bindings'].keys(), [
+        self.assertEqual(list(results[1]['edge_bindings'].keys()), [
           'e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'
         ])
         self.assertIn('score', results[1])
 
-        self.assertEqual(results[2]['node_bindings'].keys(), [
+        self.assertEqual(list(results[2]['node_bindings'].keys()), [
           'n0', 'n1', 'n2', 'n3', 'n4', 'n5'
         ])
-        self.assertEqual(results[2]['edge_bindings'].keys(), [
+        self.assertEqual(list(results[2]['edge_bindings'].keys()), [
           'e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'
         ])
         self.assertIn('score', results[2])
 
-        self.assertEqual(results[3]['node_bindings'].keys(), [
-          'e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'
+        self.assertEqual(list(results[3]['node_bindings'].keys()), [
+          'n0', 'n1', 'n2', 'n3', 'n4', 'n5'
         ])
         self.assertIn('score', results[3])
 
@@ -2029,10 +2028,10 @@ class TestQueryResults(unittest.TestCase):
 
         results = query_result.get_results()
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['node_bindings'].keys(), [
+        self.assertEqual(list(results[0]['node_bindings'].keys()), [
           'n0', 'n1', 'n2', 'n3', 'n4', 'n5'
         ])
-        self.assertEqual(results[0]['edge_bindings'].keys(), [
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), [
           'e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'
         ])
         self.assertIn('score', results[0])
@@ -2072,10 +2071,10 @@ class TestQueryResults(unittest.TestCase):
 
         results = query_result.get_results()
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['node_bindings'], [
+        self.assertEqual(list(results[0]['node_bindings'].keys()), [
           'n0', 'n1', 'n2', 'n3', 'n4', 'n5'
         ])
-        self.assertEqual(results[0]['edge_bindings'], [
+        self.assertEqual(list(results[0]['edge_bindings'].keys()), [
           'e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6'
         ])
         self.assertIn('score', results[0])
