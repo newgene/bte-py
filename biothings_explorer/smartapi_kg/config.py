@@ -6,7 +6,7 @@ FILTER_FIELDS = [
     "source",
 ]
 
-SMARTAPI_URL = "https://smart-api.info/api/query?q=tags.name:translator&size=150&fields=paths,servers,tags,components.x-bte*,info,_meta"
+SMARTAPI_URL = "https://smart-api.info/api/query?q=tags.name:translator&size=500&fields=paths,servers,tags,components.x-bte*,info,_meta&meta=1"
 
 SINGLE_API_SMARTAPI_QUERY_TEMPLATE = "https://smart-api.info/api/metadata/{smartapi_id}"
 
