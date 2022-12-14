@@ -14,7 +14,8 @@ class BaseOperationsBuilder(ABC):
             #try:
             parser = API(spec)
             ops = parser.metadata['operations']
-            all_ops = [*all_ops, *ops]
+            # all_ops = [*all_ops, *ops]
+            all_ops.extend(ops)
             #except Exception as e:
             #    print(e)
         return all_ops

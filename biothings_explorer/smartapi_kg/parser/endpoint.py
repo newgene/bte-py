@@ -7,6 +7,7 @@ class Endpoint:
     path_item_object = {}
     api_meta_data = {}
     path = ''
+    remove_biolink = False      # flag to remove biolink prefix from semantic types
 
     def __init__(self, path_item_object, api_meta_data, path):
         self.path_item_object = path_item_object
@@ -48,11 +49,11 @@ class Endpoint:
 
     def construct_association(self, input, output, op):
         return {
-            'input_id': self.remove_bio_link_prefix(input['id']),
-            'input_type': self.remove_bio_link_prefix(input['semantic']),
-            'output_id': self.remove_bio_link_prefix(output['id']),
-            'output_type': self.remove_bio_link_prefix(output['semantic']),
-            'predicate': self.remove_bio_link_prefix(op['predicate']),
+            'input_id': self.remove_bio_link_prefix(input['id']) if self.remove_biolink else input['id'],
+            'input_type': self.remove_bio_link_prefix(input['semantic']) if self.remove_biolink else input['semantic'],
+            'output_id': self.remove_bio_link_prefix(output['id']) if self.remove_biolink else output['id'],
+            'output_type': self.remove_bio_link_prefix(output['semantic']) if self.remove_biolink else output['semantic'],
+            'predicate': self.remove_bio_link_prefix(op['predicate']) if self.remove_biolink else op['predicate'],
             'source': op.get('source'),
             'api_name': self.api_meta_data.get('title'),
             'smartapi': self.api_meta_data.get('smartapi'),
@@ -75,7 +76,7 @@ class Endpoint:
             for output in op['outputs']:
                 association = self.construct_association(input, output, op)
                 update_info = {
-                    'query_operation': query_operation,
+                    'query_operation': query_operation.to_dict(),
                     'association': association,
                     'response_mapping': response_mapping,
                     'tags': query_operation.tags

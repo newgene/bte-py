@@ -35,6 +35,10 @@ class QueryOperationObject:
         return self._request_body
 
     @property
+    def support_batch(self):
+        return self._support_batch
+
+    @property
     def input_separator(self):
         return self._input_separator
 
@@ -77,3 +81,14 @@ class QueryOperationObject:
     @path_params.setter
     def path_params(self, new_path_params):
         self._path_params = new_path_params
+
+    def to_dict(self):
+        d = {}
+        for attr in [
+            "params", "request_body", "path_params", "path",
+            "method", "server", "tags", "support_batch", "input_separator"
+        ]:
+            val = getattr(self, attr, None)
+            if val:
+                d[attr] = val
+        return d

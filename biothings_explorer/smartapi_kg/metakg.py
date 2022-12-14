@@ -1,5 +1,4 @@
 import os
-from os.path import abspath
 from .operations_builder.async_builder_factory import async_builder_factory
 from .operations_builder.sync_builder_factory import sync_builder_factory
 from .filter import ft
