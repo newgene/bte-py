@@ -1,0 +1,928 @@
+[
+  {
+    "subject": "Pathway",
+    "object": "Gene",
+    "predicate": "has_participant",
+    "provided_by": "infores:reactome",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "entrezgene",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "pathway.reactome.id"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "has_participant": {
+          "NCBIGene": "entrezgene"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Pathway",
+    "object": "Gene",
+    "predicate": "has_participant",
+    "provided_by": "infores:cpdb",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "entrezgene,pathway.kegg.name",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "pathway.kegg.id"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "has_participant": {
+          "NCBIGene": "entrezgene",
+          "input_name": "pathway.kegg.name"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Pathway",
+    "object": "Gene",
+    "predicate": "has_participant",
+    "provided_by": "infores:cpdb",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "entrezgene,pathway.wikipathways.name",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "pathway.wikipathways.id"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "has_participant": {
+          "NCBIGene": "entrezgene",
+          "input_name": "pathway.wikipathways.name"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Pathway",
+    "object": "Gene",
+    "predicate": "has_participant",
+    "provided_by": "infores:cpdb",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "entrezgene,pathway.biocarta.name",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "pathway.biocarta.id"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "has_participant": {
+          "NCBIGene": "entrezgene",
+          "input_name": "pathway.biocarta.name"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Gene",
+    "object": "Pathway",
+    "predicate": "participates_in",
+    "provided_by": "infores:reactome",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "pathway.reactome.id",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "entrezgene"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "participates_in": {
+          "REACT": "pathway.reactome.id"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Gene",
+    "object": "Pathway",
+    "predicate": "participates_in",
+    "provided_by": "infores:cpdb",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "pathway.kegg.id,pathway.kegg.name",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "entrezgene"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "participates_in": {
+          "KEGG.PATHWAY": "pathway.kegg.id",
+          "output_name": "pathway.kegg.name"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Gene",
+    "object": "Pathway",
+    "predicate": "participates_in",
+    "provided_by": "infores:cpdb",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "pathway.wikipathways.id,pathway.wikipathways.name",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "entrezgene"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "participates_in": {
+          "WIKIPATHWAYS": "pathway.wikipathways.id",
+          "output_name": "pathway.wikipathways.name"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Gene",
+    "object": "Pathway",
+    "predicate": "participates_in",
+    "provided_by": "infores:cpdb",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "pathway.biocarta.id,pathway.biocarta.name",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "entrezgene"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "participates_in": {
+          "BIOCARTA": "pathway.biocarta.id",
+          "output_name": "pathway.biocarta.name"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Gene",
+    "object": "BiologicalProcess",
+    "predicate": "participates_in",
+    "provided_by": "infores:ncbi-gene",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "go.BP.id,go.BP.pubmed",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "entrezgene"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "participates_in": {
+          "GO": "go.BP.id",
+          "ref_pmid": "go.BP.pubmed"
+        }
+      }
+    }
+  },
+  {
+    "subject": "BiologicalProcess",
+    "object": "Gene",
+    "predicate": "has_participant",
+    "provided_by": "infores:ncbi-gene",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "entrezgene",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs | replPrefix(\'GO\') }}",
+            "scopes": "go.BP.id"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "has_participant": {
+          "NCBIGene": "entrezgene"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Gene",
+    "object": "MolecularActivity",
+    "predicate": "enables",
+    "provided_by": "infores:ncbi-gene",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "go.MF.id,go.MF.pubmed",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "entrezgene"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "enables": {
+          "GO": "go.MF.id",
+          "ref_pmid": "go.MF.pubmed"
+        }
+      }
+    }
+  },
+  {
+    "subject": "MolecularActivity",
+    "object": "Gene",
+    "predicate": "enabled_by",
+    "provided_by": "infores:ncbi-gene",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "entrezgene",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs | replPrefix(\'GO\') }}",
+            "scopes": "go.MF.id"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "enabled_by": {
+          "NCBIGene": "entrezgene"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Gene",
+    "object": "CellularComponent",
+    "predicate": "active_in",
+    "provided_by": "infores:ncbi-gene",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "go.CC.id,go.CC.pubmed",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "entrezgene"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "active_in": {
+          "GO": "go.CC.id",
+          "ref_pmid": "go.CC.pubmed"
+        }
+      }
+    }
+  },
+  {
+    "subject": "CellularComponent",
+    "object": "Gene",
+    "predicate": "has_active_component",
+    "provided_by": "infores:ncbi-gene",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "entrezgene",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs | replPrefix(\'GO\') }}",
+            "scopes": "go.CC.id"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "has_active_component": {
+          "NCBIGene": "entrezgene"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Gene",
+    "object": "Disease",
+    "predicate": "related_to",
+    "provided_by": "infores:clingen",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "clingen.clinical_validity.mondo,clingen.clinical_validity.online_report",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "entrezgene"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "related_to": {
+          "MONDO": "clingen.clinical_validity.mondo",
+          "ref_url": "clingen.clinical_validity.online_report"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Disease",
+    "object": "Gene",
+    "predicate": "related_to",
+    "provided_by": "infores:clingen",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "entrezgene",
+          "species": "human",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs | replPrefix(\'MONDO\') }}",
+            "scopes": "clingen.clinical_validity.mondo"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "related_to": {
+          "NCBIGene": "entrezgene"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Gene",
+    "object": "Gene",
+    "predicate": "homologous_to",
+    "provided_by": "infores:panther",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "pantherdb.ortholog.MGI",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs }}",
+            "scopes": "pantherdb.HGNC"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "homologous_to": {
+          "MGI": "pantherdb.ortholog.MGI"
+        }
+      }
+    }
+  },
+  {
+    "subject": "Gene",
+    "object": "Gene",
+    "predicate": "homologous_to",
+    "provided_by": "infores:panther",
+    "api": {
+      "name": "MyGene.info API",
+      "smartapi": {
+        "metadata": "https://raw.githubusercontent.com/NCATS-Tangerine/translator-api-registry/master/mygene.info/openapi_full.yml",
+        "id": "59dce17363dce279d389100834e43648",
+        "ui": "https://smart-api.info/ui/59dce17363dce279d389100834e43648"
+      },
+      "tags": [
+        "gene",
+        "annotation",
+        "query",
+        "translator",
+        "biothings"
+      ],
+      "x-translator": {
+        "component": "KP",
+        "team": [
+          "Service Provider"
+        ]
+      }
+    },
+    "bte": {
+      "query_operation": {
+        "params": {
+          "fields": "pantherdb.HGNC",
+          "size": 1000
+        },
+        "request_body": {
+          "body": {
+            "q": "{{ queryInputs | rmPrefix | join(\',\') }}",
+            "scopes": "pantherdb.ortholog.MGI"
+          }
+        },
+        "path": "/query",
+        "method": "post",
+        "server": "https://mygene.info/v3",
+        "support_batch": true
+      },
+      "response_mapping": {
+        "homologous_to": {
+          "HGNC": "pantherdb.HGNC"
+        }
+      }
+    }
+  }
+]
