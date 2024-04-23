@@ -1,5 +1,5 @@
-from .endpoint import Endpoint
 from .component import Components
+from .endpoint import Endpoint
 
 
 class API:
@@ -7,6 +7,24 @@ class API:
 
     def __init__(self, smartapi_doc):
         self._smartapi_doc = smartapi_doc
+
+    @classmethod
+    def get_default_server_url(cls, servers):
+        """Get the default server from the servers list."""
+        # return the first server with production maturity
+        for server in servers:
+            if server.get("x-maturity", None) == "production":
+                return server.get("url")
+        # then check for description for word "production"
+        for server in servers:
+            if server.get("description", "").lower().find("production") != -1:
+                return server.get("url")
+        # then use https URL first
+        for server in servers:
+            if server.get("url", "").startswith("https"):
+                return server.get("url")
+        # finally, just return the first available one
+        return servers[0].get("url")
 
     @property
     def smartapi_doc(self):
@@ -45,7 +63,7 @@ class API:
     def fetch_server_url(self):
         if "servers" not in self.smartapi_doc:
             return None
-        return self.smartapi_doc["servers"][0]["url"]
+        return self.get_default_server_url(self.smartapi_doc["servers"])
 
     def fetch_components(self):
         if "components" not in self.smartapi_doc:

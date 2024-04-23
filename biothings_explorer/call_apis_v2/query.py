@@ -5,8 +5,9 @@ from .metakg.parser import MetaKGParser
 
 
 class SmartAPI:
-    def __init__(self, url):
+    def __init__(self, url, id=None):
         self.url = url
+        self._id = id
 
     @property
     def metadata(self):
@@ -20,11 +21,14 @@ class SmartAPI:
     def metakg(self):
         if not hasattr(self, "_metakg"):
             mkg_parser = MetaKGParser()
+            extra_data = {"id": self._id, "url": self.url}
             self.metakg_errors = None  # reset metakg_errors
             if self.is_trapi:
-                self._metakg = mkg_parser.get_TRAPI_metadatas(self.metadata)
+                self._metakg = mkg_parser.get_TRAPI_metadatas(self.metadata, extra_data)
             else:
-                self._metakg = mkg_parser.get_non_TRAPI_metadatas(self.metadata)
+                self._metakg = mkg_parser.get_non_TRAPI_metadatas(
+                    self.metadata, extra_data
+                )
             if mkg_parser.metakg_errors:
                 # hold metakg_errors for later use
                 self.metakg_errors = mkg_parser.metakg_errors

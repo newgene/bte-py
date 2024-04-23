@@ -22,3 +22,6 @@ six==1.16.0
 toml==0.10.2
 tornado==6.1
 urllib3==1.26.4
+
+# Biolink Model Toolkit, used in /api/metakg endpoint
+bmt-lite-v3.1.0==2.2.2
