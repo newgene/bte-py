@@ -1,7 +1,12 @@
+import logging
+
 import requests
 
 from .helpers import yaml_2_json
 from .metakg.parser import MetaKGParser
+
+
+logger = logging.getLogger(__name__)
 
 
 class SmartAPI:
@@ -51,12 +56,67 @@ class SmartAPI:
                 "subject": record["subject"],
                 "predicate": record["predicate"],
                 "object": record["object"],
+                "bte": record["bte"],
             }
             for record in self.metakg
         ]
 
-    def get_edge(self, one_metakg_edge, input_id):
-        """<call API with the input_id, based on one_metakg_edge, process response, then return response edge(s)>"""
+    def get_edge(self, metakg_edge, input_id):
+        query_operation = metakg_edge["bte"]["query_operation"]
+
+        request_method = getattr(requests, query_operation["method"])
+        url = query_operation["server"] + query_operation["path"]
+        params = query_operation["params"]
+        body = query_operation["request_body"]["body"]
+        body["q"] = input_id
+
+        resp = request_method(url, params=params, data=body)
+        resp.raise_for_status()
+
+        resp_data = resp.json()
+        if isinstance(resp_data, list):
+            resp_data = resp_data[0]
+
+        if resp_data.get("notfound"):
+            return
+
+        predicate = metakg_edge["predicate"]
+        fields = params["fields"].split(".")
+        if len(fields) == 1:
+            subject_field = fields[0]
+        elif fields[-1] == "_id":
+            subject_field = fields[-2]
+        else:
+            subject_field = fields[-1]
+
+        field_data = resp_data
+        for field in fields[:-1]:
+            if isinstance(field_data, list):
+                field_data = field_data[0]
+            field_data = field_data.get(field) or {}
+
+        if isinstance(field_data, list):
+            field_data = field_data[0]
+
+        if not field_data:
+            return
+
+        object_field = list(field_data.keys())[0]
+        subject_value = field_data[object_field]
+
+        edge_data = {
+            "subject": {
+                "type": metakg_edge["subject"].title(),
+                subject_field.title(): subject_value,
+            },
+            "predictate": predicate,
+            "object": {
+                "type": metakg_edge["object"].title(),
+                object_field: input_id,
+            },
+        }
+
+        return edge_data
 
     def get_edges(self, one_metakg_edge, a_list_of_input_ids):
         """<batch of the get_edge>"""
