@@ -80,43 +80,99 @@ class SmartAPI:
         if resp_data.get("notfound"):
             return
 
+        return resp_data
+
+    def get_edges(self, metakg_edge, input_ids):
+        """<batch of the get_edge>"""
+
+    def format_response(self, metakg_edge, resp_data):
+        output = []
+        subject_type = metakg_edge["subject"]
+        object_type = metakg_edge["object"]
         predicate = metakg_edge["predicate"]
-        fields = params["fields"].split(".")
-        if len(fields) == 1:
-            subject_field = fields[0]
-        elif fields[-1] == "_id":
-            subject_field = fields[-2]
-        else:
-            subject_field = fields[-1]
+        response_mapping = metakg_edge["bte"]["response_mapping"][predicate]
 
-        field_data = resp_data
-        for field in fields[:-1]:
-            if isinstance(field_data, list):
-                field_data = field_data[0]
-            field_data = field_data.get(field) or {}
-
-        if isinstance(field_data, list):
-            field_data = field_data[0]
-
-        if not field_data:
-            return
-
-        object_field = list(field_data.keys())[0]
-        subject_value = field_data[object_field]
-
-        edge_data = {
-            "subject": {
-                "type": metakg_edge["subject"].title(),
-                subject_field.title(): subject_value,
-            },
-            "predictate": predicate,
-            "object": {
-                "type": metakg_edge["object"].title(),
-                object_field: input_id,
-            },
+        # Determine object fields using mapping and prepare to extract values
+        object_fields = {
+            key: value.split(".") for key, value in response_mapping.items()
         }
 
-        return edge_data
+        for item in resp_data:
+            # Dynamically determine the subject ID
+            subject_id = self.determine_subject_id(item, ["_id", "entrezgene", "query"])
+            if not subject_id:
+                logger.warning("Cannot found subject_id")
+                return []
 
-    def get_edges(self, one_metakg_edge, a_list_of_input_ids):
-        """<batch of the get_edge>"""
+            for field_name, path in object_fields.items():
+                current_data = item
+                # Navigate through nested structures
+                for part in path:
+                    if isinstance(current_data, dict) and part in current_data:
+                        current_data = current_data[part]
+                    elif isinstance(current_data, list):
+                        current_data = [
+                            obj.get(part) for obj in current_data if part in obj
+                        ]
+                    else:
+                        current_data = None
+                        break
+
+                # Process multiple objects or single object scenarios
+                if isinstance(current_data, list):
+                    for obj in current_data:
+                        formatted_item = self.create_formatted_item(
+                            subject_type,
+                            subject_id,
+                            object_type,
+                            predicate,
+                            field_name,
+                            obj,
+                        )
+                        output.append(formatted_item)
+                elif current_data:
+                    formatted_item = self.create_formatted_item(
+                        subject_type,
+                        subject_id,
+                        object_type,
+                        predicate,
+                        field_name,
+                        current_data,
+                    )
+                    output.append(formatted_item)
+
+        return output
+
+    def determine_subject_id(self, item, possible_keys):
+        """Attempts to determine the subject ID from a list of possible keys"""
+
+        if isinstance(item, str):
+            for key in possible_keys:
+                if key == item:
+                    return key
+        else:
+            for key in possible_keys:
+                if key in item:
+                    return item[key]
+            # If no key directly found, guess based on the first key that looks like an identifier
+            for key in item.keys():
+                if "id" in key or "ID" in key:
+                    return item[key]
+            return  # If nothing suitable is found, return None
+
+    def create_formatted_item(
+        self,
+        subject_type,
+        subject_field,
+        subject_id,
+        object_type,
+        predicate,
+        field_name,
+        object_id,
+    ):
+        """Helper function to create a formatted dictionary item"""
+        return {
+            "subject": {"type": subject_type, subject_field: subject_id},
+            "predicate": predicate,
+            "object": {"type": object_type, field_name: object_id},
+        }
