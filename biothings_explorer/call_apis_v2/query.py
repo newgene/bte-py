@@ -4,6 +4,7 @@ import requests
 
 from .helpers import yaml_2_json
 from .metakg.parser import MetaKGParser
+from .parser import format_response
 
 
 logger = logging.getLogger(__name__)
@@ -80,99 +81,15 @@ class SmartAPI:
         if resp_data.get("notfound"):
             return
 
-        return resp_data
+        return format_response(resp_data, metakg_edge)
 
     def get_edges(self, metakg_edge, input_ids):
-        """<batch of the get_edge>"""
+        query_operation = metakg_edge["bte"]["query_operation"]
+        if query_operation["support_batch"]:
+            combined_ids = ",".join(input_ids)
+            return self.get_edge(metakg_edge, combined_ids)
 
-    def format_response(self, metakg_edge, resp_data):
-        output = []
-        subject_type = metakg_edge["subject"]
-        object_type = metakg_edge["object"]
-        predicate = metakg_edge["predicate"]
-        response_mapping = metakg_edge["bte"]["response_mapping"][predicate]
-
-        # Determine object fields using mapping and prepare to extract values
-        object_fields = {
-            key: value.split(".") for key, value in response_mapping.items()
-        }
-
-        for item in resp_data:
-            # Dynamically determine the subject ID
-            subject_id = self.determine_subject_id(item, ["_id", "entrezgene", "query"])
-            if not subject_id:
-                logger.warning("Cannot found subject_id")
-                return []
-
-            for field_name, path in object_fields.items():
-                current_data = item
-                # Navigate through nested structures
-                for part in path:
-                    if isinstance(current_data, dict) and part in current_data:
-                        current_data = current_data[part]
-                    elif isinstance(current_data, list):
-                        current_data = [
-                            obj.get(part) for obj in current_data if part in obj
-                        ]
-                    else:
-                        current_data = None
-                        break
-
-                # Process multiple objects or single object scenarios
-                if isinstance(current_data, list):
-                    for obj in current_data:
-                        formatted_item = self.create_formatted_item(
-                            subject_type,
-                            subject_id,
-                            object_type,
-                            predicate,
-                            field_name,
-                            obj,
-                        )
-                        output.append(formatted_item)
-                elif current_data:
-                    formatted_item = self.create_formatted_item(
-                        subject_type,
-                        subject_id,
-                        object_type,
-                        predicate,
-                        field_name,
-                        current_data,
-                    )
-                    output.append(formatted_item)
-
-        return output
-
-    def determine_subject_id(self, item, possible_keys):
-        """Attempts to determine the subject ID from a list of possible keys"""
-
-        if isinstance(item, str):
-            for key in possible_keys:
-                if key == item:
-                    return key
-        else:
-            for key in possible_keys:
-                if key in item:
-                    return item[key]
-            # If no key directly found, guess based on the first key that looks like an identifier
-            for key in item.keys():
-                if "id" in key or "ID" in key:
-                    return item[key]
-            return  # If nothing suitable is found, return None
-
-    def create_formatted_item(
-        self,
-        subject_type,
-        subject_field,
-        subject_id,
-        object_type,
-        predicate,
-        field_name,
-        object_id,
-    ):
-        """Helper function to create a formatted dictionary item"""
-        return {
-            "subject": {"type": subject_type, subject_field: subject_id},
-            "predicate": predicate,
-            "object": {"type": object_type, field_name: object_id},
-        }
+        results = []
+        for input_id in input_ids:
+            results += self.get_edge(metakg_edge, input_id)
+        return results

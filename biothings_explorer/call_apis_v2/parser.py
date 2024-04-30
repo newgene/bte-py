@@ -7,62 +7,32 @@ def format_response(response_data, config):
     output = []
     subject_type = config["subject"]
     object_type = config["object"]
-    predicate = config["predicate"]
-    response_mapping = config["bte"]["response_mapping"][predicate]
+    predicate_type = config["predicate"]
+    response_mapping = config["bte"]["response_mapping"][predicate_type]
 
-    # Determining the fields for objects using response mapping and configuration
-    object_fields = {key: value.split(".") for key, value in response_mapping.items()}
+    if isinstance(response_data, dict):
+        response_data = [response_data]
 
-    item = response_data
-    # Dynamically determine the subject ID field from config or infer from item keys
-    subject_id_field = determine_subject_id_field(
-        item, config["bte"]["query_operation"]["request_body"]["body"]["scopes"]
-    )
-    subject_id = item.get(subject_id_field, None)
-    if not subject_id:
-        logger.warning("Found no subject id")
-        return []
+    for item in response_data:
+        # Fetch subject ID based on the provided 'scopes' or fallback to '_id'
+        subject_field = determine_subject_id_field(
+            item, config["bte"]["query_operation"]["request_body"]["body"]["scopes"]
+        )
+        subject_id = item.get(subject_field, item.get("_id"))
 
-    for field_name, path in object_fields.items():
-        current_data = navigate_path(item, path)
+        # Initialize object info with keys from response_mapping, default to None if not present
+        object_info = {
+            key: navigate_path(item, value.split("."))
+            for key, value in response_mapping.items()
+        }
 
-        # Process multiple objects or a single object scenario
-        if isinstance(current_data, list):
-            for obj in current_data:
-                if isinstance(obj, dict):
-                    for sub_field in obj:
-                        formatted_item = create_formatted_item(
-                            subject_type,
-                            subject_id_field,
-                            subject_id,
-                            object_type,
-                            predicate,
-                            sub_field,
-                            obj[sub_field],
-                        )
-                        output.append(formatted_item)
-                else:
-                    formatted_item = create_formatted_item(
-                        subject_type,
-                        subject_id_field,
-                        subject_id,
-                        object_type,
-                        predicate,
-                        field_name,
-                        obj,
-                    )
-                    output.append(formatted_item)
-        elif current_data:
-            formatted_item = create_formatted_item(
-                subject_type,
-                subject_id_field,
-                subject_id,
-                object_type,
-                predicate,
-                field_name,
-                current_data,
-            )
-            output.append(formatted_item)
+        # Format the complete item
+        formatted_item = {
+            "subject": {"type": subject_type, subject_field: subject_id},
+            "predicate": {"type": predicate_type},
+            "object": {"type": object_type, **object_info},
+        }
+        output.append(formatted_item)
 
     return output
 
@@ -81,29 +51,9 @@ def determine_subject_id_field(item, scope):
 
 def navigate_path(data, path):
     """Navigate through the nested structures based on the path"""
-    current_data = data
     for part in path:
-        if isinstance(current_data, dict) and part in current_data:
-            current_data = current_data[part]
-        elif isinstance(current_data, list):
-            current_data = [obj.get(part) for obj in current_data if part in obj]
+        if isinstance(data, dict) and part in data:
+            data = data[part]
         else:
             return
-    return current_data
-
-
-def create_formatted_item(
-    subject_type,
-    subject_id_field,
-    subject_id,
-    object_type,
-    predicate,
-    field_name,
-    object_id,
-):
-    """Helper function to create a formatted dictionary item"""
-    return {
-        "subject": {"type": subject_type, subject_id_field: subject_id},
-        "predicate": predicate,
-        "object": {"type": object_type, field_name: object_id},
-    }
+    return data
