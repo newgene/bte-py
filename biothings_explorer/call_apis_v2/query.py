@@ -1,6 +1,7 @@
+import json
 import logging
 
-import requests
+import httpx
 
 from .helpers import yaml_2_json
 from .metakg.parser import MetaKGParser
@@ -18,9 +19,17 @@ class SmartAPI:
     @property
     def metadata(self):
         if not hasattr(self, "_metadata"):
-            resp = requests.get(self.url)
+            resp = httpx.get(self.url)
             resp.raise_for_status()
-            self._metadata = yaml_2_json(resp.text)
+
+            try:
+                self._metadata = yaml_2_json(resp.text)
+            except Exception:
+                try:
+                    self._metadata = json.loads(resp.text)
+                except Exception:
+                    raise Exception("Cannot parse the metadata from the URL")
+
         return self._metadata
 
     @property
@@ -65,7 +74,7 @@ class SmartAPI:
     def get_edge(self, metakg_edge, input_id):
         query_operation = metakg_edge["bte"]["query_operation"]
 
-        request_method = getattr(requests, query_operation["method"])
+        request_method = getattr(httpx, query_operation["method"])
         url = query_operation["server"] + query_operation["path"]
         params = query_operation["params"]
         body = query_operation["request_body"]["body"]
@@ -83,13 +92,19 @@ class SmartAPI:
 
         return format_response(resp_data, metakg_edge)
 
-    def get_edges(self, metakg_edge, input_ids):
+    def get_edges(self, metakg_edge, input_ids, batch_size=1000):
         query_operation = metakg_edge["bte"]["query_operation"]
-        if query_operation["support_batch"]:
-            combined_ids = ",".join(input_ids)
-            return self.get_edge(metakg_edge, combined_ids)
 
-        results = []
-        for input_id in input_ids:
-            results += self.get_edge(metakg_edge, input_id)
-        return results
+        for i in range(0, len(input_ids), batch_size):
+            start_index = batch_size * i
+            end_index = batch_size * (i + 1)
+            sub_input_ids = input_ids[start_index:end_index]
+
+            if query_operation["support_batch"]:
+                combined_ids = ",".join(sub_input_ids)
+                yield self.get_edge(metakg_edge, combined_ids)
+
+            results = []
+            for input_id in sub_input_ids:
+                results += self.get_edge(metakg_edge, input_id)
+            yield results
