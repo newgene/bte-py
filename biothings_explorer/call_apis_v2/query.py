@@ -88,9 +88,9 @@ class SmartAPI:
             resp_data = resp_data[0]
 
         if resp_data.get("notfound"):
-            return
+            yield
 
-        return format_response(resp_data, metakg_edge)
+        yield format_response(resp_data, metakg_edge)
 
     def get_edges(self, metakg_edge, input_ids, batch_size=1000):
         query_operation = metakg_edge["bte"]["query_operation"]
