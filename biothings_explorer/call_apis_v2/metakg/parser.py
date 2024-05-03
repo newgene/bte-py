@@ -39,7 +39,6 @@ class MetaKGParser:
             logger.error(
                 f"Found {cnt_metakg_errors} TRAPI metakg errors:\n {json.dumps(self.metakg_errors, indent=2)}"
             )
-        breakpoint()
         return self.extract_metakgedges(ops, extra_data=extra_data)
 
     def get_TRAPI_with_metakg_endpoint(self, data):

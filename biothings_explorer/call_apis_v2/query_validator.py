@@ -3,8 +3,8 @@ from typing import List, Dict, Tuple
 
 class InvalidQuery(Exception):
     def __init__(self, errors, *args):
-        super().__init__(*args)
         self.errors = errors
+        super().__init__(errors, *args)
 
 
 class QueryValidator:
@@ -24,14 +24,17 @@ class QueryValidator:
         return self.metadata["components"]
 
     def get_field_config_by_ref(self, ref: str) -> Dict:
-        fields = ref.replace("#", "").split("/")
+        fields = ref.replace("#/", "").split("/")
 
         field_config = self.metadata
         for field in fields:
-            field_config = getattr(field_config, field, None)
+            field_config = field_config.get(field)
+            if not field_config:
+                return
+        return field_config
 
     def get_parameters(self, path: str, method: str) -> Tuple[List[Dict], List[str]]:
-        raw_params = self.paths[path][method]
+        raw_params = self.paths[path][method]["parameters"]
         params = []
         missing_fields = []
         for param in raw_params:
@@ -121,24 +124,30 @@ class QueryValidator:
                 f"for path: {path} with method: {method}"
             )
 
-        errors = {}
+        try:
+            self.ensure_query_fields_in_spec(spec_param_configs, query_params)
+        except InvalidQuery as ex:
+            raise InvalidQuery(
+                f"Invalid field for path: {path} with method: {method}"
+            ) from ex
+
         for spec_param_config in spec_param_configs:
             param_name = spec_param_config["name"]
             _in = spec_param_config["in"]
 
-            # Check if param appears in right place.
-            # NOTE: only support query atm. Will support more places when have samples.
-            if _in != "query":
-                raise InvalidQuery(
-                    f"Unsupported param: {param_name} in {_in} "
-                    f"for path: {path} with method: {method}"
-                )
-
-            query_param_value = query_params.get(param_name)
-            if spec_param_config.get("required") and not query_param_value:
-                errors[param_name] = f"Missing param: {param_name}"
-
             try:
+                # Check if param appears in right place.
+                # NOTE: only support query atm. Will support more places when have samples.
+                if _in != "query":
+                    raise InvalidQuery(f"Unsupported param: {param_name} in {_in}")
+
+                query_param_value = query_params.get(param_name)
+                if not query_param_value:
+                    if spec_param_config.get("required"):
+                        raise InvalidQuery(f"Missing param: {param_name}")
+                    else:
+                        continue
+
                 self.validate_param_schema(
                     spec_param_config["schema"], query_param_value
                 )
@@ -147,13 +156,23 @@ class QueryValidator:
                     f"Invalid schema for param: {param_name}, path: {path}, method: {method}"
                 ) from ex
 
+    def ensure_query_fields_in_spec(self, spec_param_configs, query_params):
+        if isinstance(spec_param_configs, list):
+            spec_fields = [field_config["name"] for field_config in spec_param_configs]
+        else:
+            spec_fields = list(spec_param_configs.keys())
+
+        unknown_fields = [field for field in query_params if field not in spec_fields]
+        if unknown_fields:
+            raise InvalidQuery(f"Unknown fields: {', '.join(unknown_fields)}")
+
     def validate_param_schema(self, spec_schema, value):
         spec_type = spec_schema["type"]
 
         primitive_types_mapping = {
             "string": str,
             "boolean": bool,
-            "integer": float,
+            "integer": (float, int),
         }
         if spec_type in primitive_types_mapping:
             if not isinstance(value, primitive_types_mapping[spec_type]):
@@ -162,9 +181,28 @@ class QueryValidator:
                     f"receive type {type(value)} instead."
                 )
         if spec_type == "object":
-            pass
+            if not isinstance(value, dict):
+                raise InvalidQuery(
+                    f"Expect type {spec_type} but "
+                    f"receive type {type(value)} instead."
+                )
+
+            for field, field_config in spec_schema["properties"].items():
+                self.ensure_query_fields_in_spec(field_config, value[field])
+                self.validate_param_schema(field_config, value[field])
         if spec_type == "array":
-            pass
+            try:
+                _value = value.split(",")
+            except Exception:
+                raise InvalidQuery(
+                    f"Expect type {spec_type} but "
+                    f"receive type {type(value)} instead."
+                )
+
+            for item in _value:
+                if spec_schema["items"]["type"] == "object":
+                    self.ensure_query_fields_in_spec(spec_schema["items"], item)
+                self.validate_param_schema(spec_schema["items"], item)
 
     def validate_request_body(self, query):
         """

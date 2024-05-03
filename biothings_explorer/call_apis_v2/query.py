@@ -6,6 +6,7 @@ import httpx
 from .helpers import yaml_2_json
 from .metakg.parser import MetaKGParser
 from .parser import format_response
+from .query_validator import QueryValidator
 
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,10 @@ class SmartAPI:
 
         return self._metakg
 
+    @property
+    def query_validator(self):
+        return QueryValidator(self.metadata)
+
     def has_tags(self, *tags):
         """return True if an SmartAPI contains all given tags"""
         _tag_set = set([_tag.get("name") for _tag in self.metadata["tags"]])
@@ -71,8 +76,10 @@ class SmartAPI:
             for record in self.metakg
         ]
 
-    def get_edge(self, metakg_edge, input_id):
+    def get_edge(self, metakg_edge, input_id, validate_edge=True):
         query_operation = metakg_edge["bte"]["query_operation"]
+        if validate_edge:
+            self.query_validator.validate_query(query_operation)
 
         request_method = getattr(httpx, query_operation["method"])
         url = query_operation["server"] + query_operation["path"]
@@ -94,6 +101,7 @@ class SmartAPI:
 
     def get_edges(self, metakg_edge, input_ids, batch_size=1000):
         query_operation = metakg_edge["bte"]["query_operation"]
+        self.query_validator.validate_query(query_operation)
 
         for i in range(0, len(input_ids), batch_size):
             start_index = batch_size * i
@@ -102,7 +110,7 @@ class SmartAPI:
 
             if query_operation["support_batch"]:
                 combined_ids = ",".join(sub_input_ids)
-                yield self.get_edge(metakg_edge, combined_ids)
+                yield self.get_edge(metakg_edge, combined_ids, validate_edge=False)
             else:
                 for input_id in sub_input_ids:
-                    yield self.get_edge(metakg_edge, input_id)
+                    yield self.get_edge(metakg_edge, input_id, validate_edge=False)
