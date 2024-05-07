@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 
 
 class InvalidQuery(Exception):
@@ -33,7 +33,9 @@ class QueryValidator:
                 return
         return field_config
 
-    def get_parameters(self, path: str, method: str) -> Tuple[List[Dict], List[str]]:
+    def get_spec_parameters(
+        self, path: str, method: str
+    ) -> Tuple[List[Dict], List[str]]:
         raw_params = self.paths[path][method]["parameters"]
         params = []
         missing_fields = []
@@ -80,7 +82,6 @@ class QueryValidator:
         self.validate_method(query)
         self.validate_params(query)
         self.validate_request_body(query)
-        self.validate_support_batch(query)
 
     def validate_server(self, query):
         server = query.get("server")
@@ -116,7 +117,7 @@ class QueryValidator:
         method = query["method"]
         query_params = query["params"]
 
-        spec_param_configs, missing_fields = self.get_parameters(path, method)
+        spec_param_configs, missing_fields = self.get_spec_parameters(path, method)
 
         if missing_fields:
             raise InvalidQuery(
@@ -125,7 +126,7 @@ class QueryValidator:
             )
 
         try:
-            self.ensure_query_fields_in_spec(spec_param_configs, query_params)
+            self.ensure_fields_in_spec_params(spec_param_configs, query_params)
         except InvalidQuery as ex:
             raise InvalidQuery(
                 f"Invalid field for path: {path} with method: {method}"
@@ -148,15 +149,13 @@ class QueryValidator:
                     else:
                         continue
 
-                self.validate_param_schema(
-                    spec_param_config["schema"], query_param_value
-                )
+                self.validate_schema(spec_param_config["schema"], query_param_value)
             except InvalidQuery as ex:
                 raise InvalidQuery(
                     f"Invalid schema for param: {param_name}, path: {path}, method: {method}"
                 ) from ex
 
-    def ensure_query_fields_in_spec(self, spec_param_configs, query_params):
+    def ensure_fields_in_spec_params(self, spec_param_configs, query_params):
         if isinstance(spec_param_configs, list):
             spec_fields = [field_config["name"] for field_config in spec_param_configs]
         else:
@@ -166,7 +165,7 @@ class QueryValidator:
         if unknown_fields:
             raise InvalidQuery(f"Unknown fields: {', '.join(unknown_fields)}")
 
-    def validate_param_schema(self, spec_schema, value):
+    def validate_schema(self, spec_schema: Dict, value: Any):
         spec_type = spec_schema["type"]
 
         primitive_types_mapping = {
@@ -188,33 +187,52 @@ class QueryValidator:
                 )
 
             for field, field_config in spec_schema["properties"].items():
-                self.ensure_query_fields_in_spec(field_config, value[field])
-                self.validate_param_schema(field_config, value[field])
+                self.ensure_fields_in_spec_params(field_config, value[field])
+                self.validate_schema(field_config, value[field])
+
         if spec_type == "array":
-            try:
-                _value = value.split(",")
-            except Exception:
-                raise InvalidQuery(
-                    f"Expect type {spec_type} but "
-                    f"receive type {type(value)} instead."
-                )
+            if isinstance(value, list):
+                _value = value
+            else:
+                try:
+                    _value = value.split(",")
+                except Exception:
+                    raise InvalidQuery(
+                        f"Expect type {spec_type} but "
+                        f"receive type {type(value)} instead. value: {value}"
+                    )
 
             for item in _value:
                 if spec_schema["items"]["type"] == "object":
-                    self.ensure_query_fields_in_spec(spec_schema["items"], item)
-                self.validate_param_schema(spec_schema["items"], item)
+                    self.ensure_fields_in_spec_params(spec_schema["items"], item)
+                self.validate_schema(spec_schema["items"], item)
+
+    def get_spec_body(self, path: str, method: str) -> Dict:
+        request_body = self.paths[path][method]["requestBody"]
+        schema = request_body["content"]["application/json"]["schema"]
+        return schema["properties"]
+
+    def ensure_fields_in_spec_body(self, spec_body_config: Dict, query_body: Dict):
+        spec_fields = list(spec_body_config.keys())
+
+        unknown_fields = [field for field in query_body if field not in spec_fields]
+        if unknown_fields:
+            raise InvalidQuery(f"Unknown fields: {', '.join(unknown_fields)}")
 
     def validate_request_body(self, query):
-        """
-        "request_body": {
-            "body": {
-                "q": "{{ queryInputs }}",
-                "scopes": "pathway.kegg.id"
-            }
-        }
-        """
+        path = query["path"]
+        method = query["method"]
+        query_body = query["request_body"]["body"]
 
-    def validate_support_batch(self, query):
-        """
-        "support_batch": true
-        """
+        spec_body_config = self.get_spec_body(path, method)
+
+        self.ensure_fields_in_spec_body(spec_body_config, query_body)
+
+        for field, field_config in spec_body_config.items():
+            try:
+                query_value = query_body.get(field)
+                self.validate_schema(field_config, query_value)
+            except InvalidQuery as ex:
+                raise InvalidQuery(
+                    f"Invalid request body for path: {path}, method: {method}"
+                ) from ex

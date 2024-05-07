@@ -91,26 +91,31 @@ class SmartAPI:
         resp.raise_for_status()
 
         resp_data = resp.json()
-        if isinstance(resp_data, list):
-            resp_data = resp_data[0]
+        if not isinstance(resp_data, list):
+            resp_data = [resp_data]
 
-        if resp_data.get("notfound"):
-            yield
-
-        yield format_response(resp_data, metakg_edge)
+        edges = [edge for edge in resp_data if not edge.get("notfound")]
+        return (result for result in format_response(edges, metakg_edge))
 
     def get_edges(self, metakg_edge, input_ids, batch_size=1000):
         query_operation = metakg_edge["bte"]["query_operation"]
         self.query_validator.validate_query(query_operation)
 
+        results = []
         for i in range(0, len(input_ids), batch_size):
-            start_index = batch_size * i
-            end_index = batch_size * (i + 1)
+            start_index = i
+            end_index = i + batch_size
             sub_input_ids = input_ids[start_index:end_index]
 
             if query_operation["support_batch"]:
                 combined_ids = ",".join(sub_input_ids)
-                yield self.get_edge(metakg_edge, combined_ids, validate_edge=False)
+                results.append(
+                    self.get_edge(metakg_edge, combined_ids, validate_edge=False)
+                )
             else:
-                for input_id in sub_input_ids:
-                    yield self.get_edge(metakg_edge, input_id, validate_edge=False)
+                results += [
+                    self.get_edge(metakg_edge, input_id, validate_edge=False)
+                    for input_id in sub_input_ids
+                ]
+
+        return results
