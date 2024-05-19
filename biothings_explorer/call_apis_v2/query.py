@@ -101,7 +101,6 @@ class SmartAPI:
         query_operation = metakg_edge["bte"]["query_operation"]
         self.query_validator.validate_query(query_operation)
 
-        results = []
         for i in range(0, len(input_ids), batch_size):
             start_index = i
             end_index = i + batch_size
@@ -109,13 +108,13 @@ class SmartAPI:
 
             if query_operation["support_batch"]:
                 combined_ids = ",".join(sub_input_ids)
-                results.append(
-                    self.get_edge(metakg_edge, combined_ids, validate_edge=False)
-                )
+                for edge in self.get_edge(
+                    metakg_edge, combined_ids, validate_edge=False
+                ):
+                    yield edge
             else:
-                results += [
-                    self.get_edge(metakg_edge, input_id, validate_edge=False)
-                    for input_id in sub_input_ids
-                ]
-
-        return results
+                for input_id in sub_input_ids:
+                    for edge in self.get_edge(
+                        metakg_edge, input_id, validate_edge=False
+                    ):
+                        yield edge

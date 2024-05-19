@@ -14,12 +14,6 @@ def format_response(response_data, config):
         response_data = [response_data]
 
     for item in response_data:
-        # Fetch subject ID based on the provided 'scopes' or fallback to '_id'
-        subject_field = determine_subject_id_field(
-            item, config["bte"]["query_operation"]["request_body"]["body"]["scopes"]
-        )
-        subject_id = item.get(subject_field, item.get("_id"))
-
         # Initialize object info with keys from response_mapping, default to None if not present
         object_info = {
             key: navigate_path(item, value.split("."))
@@ -28,7 +22,7 @@ def format_response(response_data, config):
 
         # Format the complete item
         formatted_item = {
-            "subject": {"type": subject_type, subject_field: subject_id},
+            "subject": {"type": subject_type, "_id": item["query"]},
             "predicate": {"type": predicate_type},
             "object": {"type": object_type, **object_info},
         }
