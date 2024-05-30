@@ -7,7 +7,7 @@ from .helpers import yaml_2_json
 from .metakg.parser import MetaKGParser
 from .parser import format_response
 from .query_validator import QueryValidator
-
+from .query_builder import QueryBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -81,13 +81,11 @@ class SmartAPI:
         if validate_edge:
             self.query_validator.validate_query(query_operation)
 
-        request_method = getattr(httpx, query_operation["method"])
-        url = query_operation["server"] + query_operation["path"]
-        params = query_operation["params"]
-        body = query_operation["request_body"]["body"]
-        body["q"] = input_id
+        query_builder = QueryBuilder(metakg_edge)
+        request_func = query_builder.get_request_func()
+        request_config = query_builder.construct_request_config()
 
-        resp = request_method(url, params=params, data=body)
+        resp = request_func(**request_config)
         resp.raise_for_status()
 
         resp_data = resp.json()
