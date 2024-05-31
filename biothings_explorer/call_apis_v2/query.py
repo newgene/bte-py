@@ -7,7 +7,7 @@ from .helpers import yaml_2_json
 from .metakg.parser import MetaKGParser
 from .parser import format_response
 from .query_validator import QueryValidator
-from .query_builder import QueryBuilder
+from .builder import QueryBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -83,8 +83,10 @@ class SmartAPI:
 
         query_builder = QueryBuilder(metakg_edge)
         request_func = query_builder.get_request_func()
-        request_config = query_builder.construct_request_config()
-
+        request_config = query_builder.construct_request_config(
+            {"queryInputs": input_id}
+        )
+        logger.info(json.dumps(request_config, indent=2))
         resp = request_func(**request_config)
         resp.raise_for_status()
 
