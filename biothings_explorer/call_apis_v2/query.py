@@ -7,7 +7,7 @@ from .helpers import yaml_2_json
 from .metakg.parser import MetaKGParser
 from .parser import format_response
 from .query_validator import QueryValidator
-from .builder import QueryBuilder
+from .builder import builder_factory
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ class SmartAPI:
         if validate_edge:
             self.query_validator.validate_query(query_operation)
 
-        query_builder = QueryBuilder(metakg_edge)
+        query_builder = builder_factory(metakg_edge, self.is_trapi)
         request_func = query_builder.get_request_func()
         request_config = query_builder.construct_request_config(
             {"queryInputs": input_id}

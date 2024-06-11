@@ -5,7 +5,7 @@ import httpx
 from .jinja import jinja_env
 
 
-class QueryBuilder:
+class TemplateQueryBuilder:
     def __init__(self, edge):
         self.edge = edge
 
