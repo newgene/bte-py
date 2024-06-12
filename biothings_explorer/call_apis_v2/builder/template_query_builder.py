@@ -26,7 +26,7 @@ class TemplateQueryBuilder:
             for param in self.query_operation["path_params"]:
                 val = self.query_operation["params"][param]
                 # convert list values to single values
-                for key, value in enumerate(_input):
+                for value in _input:
                     if isinstance(_input, dict) and isinstance(_input[value], list):
                         _input[value] = _input[value][0]
                 if isinstance(_input, dict):
@@ -69,19 +69,31 @@ class TemplateQueryBuilder:
             body = self.query_operation["request_body"]["body"]
 
             if isinstance(body, str):
-                data_template = jinja_env.from_string(body, _input).render()
+                data_template = self._render_request_body(body, _input)
                 data = json.loads(data_template)
             elif isinstance(body, dict):
                 data = {}
                 for field, value in body.items():
                     try:
-                        data[field] = jinja_env.from_string(str(value), _input).render()
+                        data[field] = self._render_request_body(str(value), _input)
                     except ValueError:
-                        data[field] = jinja_env.from_string(str(value)).render()
+                        data[field] = self._render_request_body(str(value))
             else:
                 raise Exception("body is invalid format")
 
             return data
+
+    def _render_request_body(self, template, _input=None):
+        _input = _input or {}
+        query_ids = _input.get("queryInputs") or ""
+        if not isinstance(query_ids, list):
+            query_ids = [query_ids]
+
+        result = [
+            jinja_env.from_string(template, {"queryInputs": str(idx)}).render()
+            for idx in query_ids
+        ]
+        return ",".join(result)
 
     def construct_request_config(self, _input):
         return {

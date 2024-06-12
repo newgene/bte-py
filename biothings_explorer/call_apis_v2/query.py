@@ -107,9 +107,8 @@ class SmartAPI:
             sub_input_ids = input_ids[start_index:end_index]
 
             if query_operation["support_batch"]:
-                combined_ids = ",".join(sub_input_ids)
                 for edge in self.get_edge(
-                    metakg_edge, combined_ids, validate_edge=False
+                    metakg_edge, sub_input_ids, validate_edge=False
                 ):
                     yield edge
             else:

@@ -47,4 +47,9 @@ def joinSafe(input: Union[str, Iterable[str]], delim: Optional[str] = None) -> s
     return delim.join(input)
 
 
-all_filters = [substr, addPrefix, rmPrefix, replPrefix, wrap, joinSafe]
+# NOTE: this filter is override the built-in Jinja2's join filter. We will handle the join on python code
+def join(input: Iterable, delim: str) -> Iterable:
+    return input
+
+
+all_filters = [substr, addPrefix, rmPrefix, replPrefix, wrap, joinSafe, join]
