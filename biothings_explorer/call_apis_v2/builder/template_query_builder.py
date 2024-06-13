@@ -89,10 +89,12 @@ class TemplateQueryBuilder:
         if not isinstance(query_ids, list):
             query_ids = [query_ids]
 
-        result = [
-            jinja_env.from_string(template, {"queryInputs": str(idx)}).render()
-            for idx in query_ids
-        ]
+        result = set(
+            [
+                jinja_env.from_string(template, {"queryInputs": str(idx)}).render()
+                for idx in query_ids
+            ]
+        )
         return ",".join(result)
 
     def construct_request_config(self, _input):
