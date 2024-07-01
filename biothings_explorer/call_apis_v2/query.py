@@ -20,7 +20,7 @@ class SmartAPI:
     @property
     def metadata(self):
         if not hasattr(self, "_metadata"):
-            resp = httpx.get(self.url)
+            resp = httpx.get(self.url, follow_redirects=True)
             resp.raise_for_status()
 
             try:
@@ -55,9 +55,13 @@ class SmartAPI:
     def query_validator(self):
         return QueryValidator(self.metadata)
 
-    def has_tags(self, *tags):
+    def has_tags(self, *tags) -> bool:
         """return True if an SmartAPI contains all given tags"""
-        _tag_set = set([_tag.get("name") for _tag in self.metadata["tags"]])
+        metadata_tags = self.metadata.get("tags")
+        if not metadata_tags:
+            return False
+
+        _tag_set = set([_tag.get("name") for _tag in metadata_tags])
         return len(set(tags) - _tag_set) == 0
 
     @property
