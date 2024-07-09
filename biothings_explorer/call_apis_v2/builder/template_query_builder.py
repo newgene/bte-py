@@ -2,29 +2,27 @@ import json
 
 import httpx
 
+from ..edge import MetaKGEdge, EdgeQueryOperation
 from .jinja import jinja_env
 
 
 class TemplateQueryBuilder:
-    def __init__(self, edge):
+    def __init__(self, edge: MetaKGEdge):
         self.edge = edge
 
     @property
-    def query_operation(self):
-        return self.edge["bte"]["query_operation"]
+    def query_operation(self) -> EdgeQueryOperation:
+        return self.edge.query_operation
 
-    def get_url(self):
-        return self.query_operation["server"] + self.query_operation["path"]
-
-    def _get_url(self, _input):
-        server = self.query_operation["server"]
+    def _get_url(self, _input) -> str:
+        server = self.query_operation.server
         if server.endswith("/"):
             server = server[:-1]
 
-        path = self.query_operation["path"]
-        if isinstance(self.query_operation.get("path_params"), list):
-            for param in self.query_operation["path_params"]:
-                val = self.query_operation["params"][param]
+        path = self.query_operation.path
+        if isinstance(self.query_operation.path_params, list):
+            for param in self.query_operation.path_params:
+                val = self.query_operation.params[param]
                 # convert list values to single values
                 for value in _input:
                     if isinstance(_input, dict) and isinstance(_input[value], list):
@@ -42,31 +40,31 @@ class TemplateQueryBuilder:
 
     def _get_params(self, _input):
         params = {}
-        for param in self.query_operation["params"]:
+        for param in self.query_operation.params:
             if (
-                isinstance(self.query_operation.get("path_params"), list)
-                and param in self.query_operation["path_params"]
+                isinstance(self.query_operation.path_params, list)
+                and param in self.query_operation.path_params
             ):
                 continue
-            if isinstance(self.query_operation["params"].get(param), str):
+            if isinstance(self.query_operation.params.get(param), str):
                 if isinstance(_input, dict):
                     params[param] = jinja_env.from_string(
-                        self.query_operation["params"][param], _input
+                        self.query_operation.params[param], _input
                     ).render()
                 else:
                     params[param] = jinja_env.from_string(
-                        self.query_operation["params"][param]
+                        self.query_operation.params[param]
                     ).render()
             else:
-                params[param] = self.query_operation["params"][param]
+                params[param] = self.query_operation.params[param]
         return params
 
-    def _get_request_body(self, _input):
+    def _get_request_body(self, _input: str) -> dict:
         if (
-            self.query_operation.get("request_body")
-            and "body" in self.query_operation["request_body"]
+            self.query_operation.request_body
+            and "body" in self.query_operation.request_body
         ):
-            body = self.query_operation["request_body"]["body"]
+            body = self.query_operation.request_body["body"]
 
             if isinstance(body, str):
                 data_template = self._render_request_body(body, _input)
@@ -106,4 +104,4 @@ class TemplateQueryBuilder:
         }
 
     def get_request_func(self):
-        return getattr(httpx, self.query_operation["method"])
+        return getattr(httpx, self.query_operation.method)

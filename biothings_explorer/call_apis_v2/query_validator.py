@@ -1,4 +1,5 @@
 from typing import List, Dict, Tuple, Any
+from .edge import EdgeQueryOperation
 
 
 class InvalidQuery(Exception):
@@ -36,7 +37,7 @@ class QueryValidator:
     def get_spec_parameters(
         self, path: str, method: str
     ) -> Tuple[List[Dict], List[str]]:
-        raw_params = self.paths[path][method]["parameters"]
+        raw_params = self.paths[path][method].get("parameters") or []
         params = []
         missing_fields = []
         for param in raw_params:
@@ -52,7 +53,7 @@ class QueryValidator:
                 missing_fields.append(ref)
         return params, missing_fields
 
-    def validate_query(self, query: Dict):
+    def validate_query(self, query: EdgeQueryOperation):
         """
         This method accept a query which extracted from a parsed MetaKG edge,
         then do validate it thourgh multiple steps to ensure the query is valid.
@@ -83,53 +84,46 @@ class QueryValidator:
         self.validate_params(query)
         self.validate_request_body(query)
 
-    def validate_server(self, query):
-        server = query.get("server")
+    def validate_server(self, query: EdgeQueryOperation):
         error = None
-        if not server:
+        if not query.server:
             error = "Missing server"
-        if server not in self.servers:
-            error = f"Unknown server: {server}"
+        if query.server not in self.servers:
+            error = f"Unknown server: {query.server}"
 
         if error:
             raise InvalidQuery(error)
 
-    def validate_path(self, query):
+    def validate_path(self, query: EdgeQueryOperation):
         error = None
-        path = query.get("path")
-        if not path:
+        if not query.path:
             error = "Missing path"
-        if path not in self.paths:
-            error = f"Unknown path: {path}"
+        if query.path not in self.paths:
+            error = f"Unknown path: {query.path}"
 
         if error:
             raise InvalidQuery(error)
 
-    def validate_method(self, query):
-        path = query["path"]
-        method = query["method"]
+    def validate_method(self, query: EdgeQueryOperation):
+        if query.method not in self.paths[query.path]:
+            raise InvalidQuery(f"Invalid method: {query.method} for path: {query.path}")
 
-        if method not in self.paths[path]:
-            raise InvalidQuery(f"Invalid method: {method} for path: {path}")
-
-    def validate_params(self, query):
-        path = query["path"]
-        method = query["method"]
-        query_params = query["params"]
-
-        spec_param_configs, missing_fields = self.get_spec_parameters(path, method)
+    def validate_params(self, query: EdgeQueryOperation):
+        spec_param_configs, missing_fields = self.get_spec_parameters(
+            query.path, query.method
+        )
 
         if missing_fields:
             raise InvalidQuery(
                 f"Missing fields: {', '.join(missing_fields)} "
-                f"for path: {path} with method: {method}"
+                f"for path: {query.path} with method: {query.method}"
             )
 
         try:
-            self.ensure_fields_in_spec_params(spec_param_configs, query_params)
+            self.ensure_fields_in_spec_params(spec_param_configs, query.params)
         except InvalidQuery as ex:
             raise InvalidQuery(
-                f"Invalid field for path: {path} with method: {method}"
+                f"Invalid field for path: {query.path} with method: {query.method}"
             ) from ex
 
         for spec_param_config in spec_param_configs:
@@ -142,7 +136,7 @@ class QueryValidator:
                 if _in != "query":
                     raise InvalidQuery(f"Unsupported param: {param_name} in {_in}")
 
-                query_param_value = query_params.get(param_name)
+                query_param_value = query.params.get(param_name)
                 if not query_param_value:
                     if spec_param_config.get("required"):
                         raise InvalidQuery(f"Missing param: {param_name}")
@@ -152,10 +146,11 @@ class QueryValidator:
                 self.validate_schema(spec_param_config["schema"], query_param_value)
             except InvalidQuery as ex:
                 raise InvalidQuery(
-                    f"Invalid schema for param: {param_name}, path: {path}, method: {method}"
+                    f"Invalid schema for param: {param_name}, path: {query.path}, method: {query.method}"
                 ) from ex
 
     def ensure_fields_in_spec_params(self, spec_param_configs, query_params):
+        query_params = query_params or []
         if isinstance(spec_param_configs, list):
             spec_fields = [field_config["name"] for field_config in spec_param_configs]
         else:
@@ -186,6 +181,9 @@ class QueryValidator:
                     f"receive type {type(value)} instead."
                 )
 
+            if "properties" not in spec_schema:
+                raise InvalidQuery("schem_schema missing properites")
+
             for field, field_config in spec_schema["properties"].items():
                 self.ensure_fields_in_spec_params(field_config, value[field])
                 self.validate_schema(field_config, value[field])
@@ -208,9 +206,12 @@ class QueryValidator:
                 self.validate_schema(spec_schema["items"], item)
 
     def get_spec_body(self, path: str, method: str) -> Dict:
-        request_body = self.paths[path][method]["requestBody"]
-        schema = request_body["content"]["application/json"]["schema"]
-        return schema["properties"]
+        try:
+            request_body = self.paths[path][method]["requestBody"]
+            schema = request_body["content"]["application/json"]["schema"]
+            return schema["properties"]
+        except Exception as ex:
+            raise InvalidQuery("Invalid spec_body") from ex
 
     def ensure_fields_in_spec_body(self, spec_body_config: Dict, query_body: Dict):
         spec_fields = list(spec_body_config.keys())
@@ -219,20 +220,18 @@ class QueryValidator:
         if unknown_fields:
             raise InvalidQuery(f"Unknown fields: {', '.join(unknown_fields)}")
 
-    def validate_request_body(self, query):
-        path = query["path"]
-        method = query["method"]
-        query_body = query["request_body"]["body"]
+    def validate_request_body(self, query: EdgeQueryOperation):
+        spec_body_config = self.get_spec_body(query.path, query.method)
 
-        spec_body_config = self.get_spec_body(path, method)
+        body = query.request_body["body"]
 
-        self.ensure_fields_in_spec_body(spec_body_config, query_body)
+        self.ensure_fields_in_spec_body(spec_body_config, body)
 
         for field, field_config in spec_body_config.items():
             try:
-                query_value = query_body.get(field)
+                query_value = body.get(field)
                 self.validate_schema(field_config, query_value)
             except InvalidQuery as ex:
                 raise InvalidQuery(
-                    f"Invalid request body for path: {path}, method: {method}"
+                    f"Invalid request body for path: {query.path}, method: {query.method}"
                 ) from ex

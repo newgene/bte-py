@@ -1,10 +1,12 @@
 import json
 import logging
+from typing import List, Union
 
 import httpx
 
 from utils.metakg.parser import MetaKGParser
 
+from .edge import MetaKGEdge
 from .helpers import yaml_2_json
 from .parser import format_response
 from .query_validator import QueryValidator
@@ -70,19 +72,16 @@ class SmartAPI:
         """return True if a TRAPI"""
         return self.has_tags("trapi", "translator")
 
-    def list_metakg(self):
-        return [
-            {
-                "subject": record["subject"],
-                "predicate": record["predicate"],
-                "object": record["object"],
-                "bte": record["api"]["bte"],
-            }
-            for record in self.metakg
-        ]
+    def list_metakg(self) -> List[MetaKGEdge]:
+        return [MetaKGEdge(record) for record in self.metakg]
 
-    def get_edge(self, metakg_edge, input_id, validate_edge=True):
-        query_operation = metakg_edge["bte"]["query_operation"]
+    def get_edge(
+        self,
+        metakg_edge: MetaKGEdge,
+        input_id: Union[str, List[str]],
+        validate_edge: bool = True,
+    ):
+        query_operation = metakg_edge.query_operation
         if validate_edge:
             self.query_validator.validate_query(query_operation)
 
@@ -102,16 +101,17 @@ class SmartAPI:
         edges = [edge for edge in resp_data if not edge.get("notfound")]
         return (result for result in format_response(edges, metakg_edge))
 
-    def get_edges(self, metakg_edge, input_ids, batch_size=1000):
-        query_operation = metakg_edge["bte"]["query_operation"]
-        self.query_validator.validate_query(query_operation)
+    def get_edges(
+        self, metakg_edge: MetaKGEdge, input_ids: list, batch_size: int = 1000
+    ):
+        self.query_validator.validate_query(metakg_edge.query_operation)
 
         for i in range(0, len(input_ids), batch_size):
             start_index = i
             end_index = i + batch_size
             sub_input_ids = input_ids[start_index:end_index]
 
-            if query_operation["support_batch"]:
+            if metakg_edge.query_operation.is_query_support_batch:
                 for edge in self.get_edge(
                     metakg_edge, sub_input_ids, validate_edge=False
                 ):

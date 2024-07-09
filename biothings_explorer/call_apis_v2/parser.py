@@ -1,14 +1,16 @@
 import logging
 
+from .edge import MetaKGEdge
+
 logger = logging.getLogger(__name__)
 
 
-def format_response(response_data, config):
+def format_response(response_data, edge: MetaKGEdge):
     output = []
-    subject_type = config["subject"]
-    object_type = config["object"]
-    predicate_type = config["predicate"]
-    response_mapping = config["bte"]["response_mapping"][predicate_type]
+    subject_type = edge.subject
+    object_type = edge.object
+    predicate_type = edge.predicate
+    response_mapping = edge.response_mapping[predicate_type]
 
     if isinstance(response_data, dict):
         response_data = [response_data]
