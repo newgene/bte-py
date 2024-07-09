@@ -3,8 +3,9 @@ import logging
 
 import httpx
 
+from utils.metakg.parser import MetaKGParser
+
 from .helpers import yaml_2_json
-from .metakg.parser import MetaKGParser
 from .parser import format_response
 from .query_validator import QueryValidator
 from .builder import builder_factory
@@ -75,7 +76,7 @@ class SmartAPI:
                 "subject": record["subject"],
                 "predicate": record["predicate"],
                 "object": record["object"],
-                "bte": record["bte"],
+                "bte": record["api"]["bte"],
             }
             for record in self.metakg
         ]

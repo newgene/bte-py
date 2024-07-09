@@ -1,0 +1,31 @@
+# SmartAPI was not built as a python package, you can just clone it some where, and add its src into the sys.path, then you can import it.
+# smartapi  # https://github.com/SmartAPI/smartAPI
+
+biothings[web_extra]==0.12.4
+# git+https://github.com/biothings/biothings.api.git@0.11.x#egg=biothings[web_extra]
+
+# document validation
+jsonschema>=4.4.0
+
+# web handling
+pycurl==7.45.2       # to use curl_httpclient in tornado
+#chardet==3.0.4
+aiocron==1.8
+
+# gitdb version specified because gitdb.utils.compat not available in newest version
+gitdb==4.0.9
+
+# local issuer certificate
+certifi
+
+# pytest
+
+# used in admin.py to lock file
+filelock
+# used in admin.py to upload file to s3
+boto3
+
+# Biolink Model Toolkit, used in /api/metakg endpoint
+bmt-lite-v3.1.0==2.2.2
+
+networkx==3.1.0
