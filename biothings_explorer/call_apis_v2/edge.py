@@ -43,12 +43,20 @@ class MetaKGEdge:
         return self.edge["subject"]
 
     @property
+    def subject_prefix(self) -> str:
+        return self.edge.get("subject_prefix")
+
+    @property
     def predicate(self) -> str:
         return self.edge["predicate"]
 
     @property
     def object(self) -> str:
         return self.edge["object"]
+
+    @property
+    def object_prefix(self) -> str:
+        return self.edge.get("object_prefix")
 
     @property
     def bte(self) -> dict:

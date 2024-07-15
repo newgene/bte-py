@@ -8,7 +8,9 @@ logger = logging.getLogger(__name__)
 def format_response(response_data, edge: MetaKGEdge):
     output = []
     subject_type = edge.subject
+    subject_prefix = edge.subject_prefix
     object_type = edge.object
+    object_prefix = edge.object_prefix
     predicate_type = edge.predicate
     response_mapping = edge.response_mapping[predicate_type]
 
@@ -17,16 +19,23 @@ def format_response(response_data, edge: MetaKGEdge):
 
     for item in response_data:
         # Initialize object info with keys from response_mapping, default to None if not present
+        object_id = item.pop("_id")
+        if object_id and object_prefix:
+            object_id = f"{object_prefix}:{object_id}"
         object_info = {
             key: navigate_path(item, value.split("."))
             for key, value in response_mapping.items()
         }
 
         # Format the complete item
+        subject_id = item["query"]
+        if subject_prefix:
+            subject_id = f"{subject_prefix}:{item['query']}"
+
         formatted_item = {
-            "subject": {"type": subject_type, "_id": item["query"]},
+            "subject": {"type": subject_type, "id": subject_id},
             "predicate": {"type": predicate_type},
-            "object": {"type": object_type, **object_info},
+            "object": {"type": object_type, "id": object_id, **object_info},
         }
         output.append(formatted_item)
 
