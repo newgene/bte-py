@@ -1,5 +1,9 @@
+import logging
 import os
-from jsonpath_ng import jsonpath, parse
+
+from jsonpath_ng import parse
+
+logger = logging.getLogger(__name__)
 
 
 def commonprefix(l, sep=os.sep):
@@ -61,7 +65,7 @@ def get_parsed_json(template, json_doc):
         except IndexError:
             try:
                 return [jsonpath_expr.find(json_doc['data'][0])[0].value]
-            except Exception as e:
+            except Exception:
                 return []
 
 
@@ -113,7 +117,7 @@ def transform_complex_object(json_doc, template):
             trimmed_json_doc = get_parsed_json(common_path, json_doc)[0]
         except IndexError:
             trimmed_json_doc = None
-            print("Index error")
+            logger.debug("Index error: %s %s", common_path, json_doc)
         #trimmed_json_doc = [match.value for match in jsonpath_expr.find(json_doc)] #jsonpath_expr.find(json_doc)[0].value
         trimmed_template = remove_common_path_from_template(template, common_path)
     else:
@@ -133,7 +137,7 @@ def remove_common_path_from_template(template, common_path):
         return template
     common_path = common_path + '.'
     new_template = {}
-    for key,value in template.items():
+    for key, value in template.items():
         if isinstance(value, str):
             new_template[key] = value[len(common_path):] if value.startswith(common_path) else value
         else:

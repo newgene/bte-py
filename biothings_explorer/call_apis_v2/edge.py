@@ -89,3 +89,9 @@ class MetaKGEdge:
     @property
     def association_predicate(self) -> str:
         return self.association.get("predicate")
+
+    def __str__(self) -> str:
+        return f"{self.subject}->{self.predicate}->{self.object}"
+
+    def __repr__(self) -> str:
+        return f'<MetaKGEdge "{self.__str__()}">'

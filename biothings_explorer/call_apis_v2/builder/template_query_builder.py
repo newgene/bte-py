@@ -2,13 +2,14 @@ import json
 
 import httpx
 
-from ..edge import MetaKGEdge, EdgeQueryOperation
+from ..edge import EdgeQueryOperation, MetaKGEdge
 from .jinja import jinja_env
 
 
 class TemplateQueryBuilder:
     def __init__(self, edge: MetaKGEdge):
         self.edge = edge
+        self.timeout = 60
 
     @property
     def query_operation(self) -> EdgeQueryOperation:
@@ -20,12 +21,12 @@ class TemplateQueryBuilder:
             server = server[:-1]
 
         path = self.query_operation.path
-        if isinstance(self.query_operation.path_params, list):
+        if isinstance(self.query_operation.path_params, (list, tuple)):
             for param in self.query_operation.path_params:
                 val = self.query_operation.params[param]
                 # convert list values to single values
                 for value in _input:
-                    if isinstance(_input, dict) and isinstance(_input[value], list):
+                    if isinstance(_input, dict) and isinstance(_input[value], (list, tuple)):
                         _input[value] = _input[value][0]
                 if isinstance(_input, dict):
                     path = jinja_env.from_string(
@@ -84,15 +85,13 @@ class TemplateQueryBuilder:
     def _render_request_body(self, template, _input=None):
         _input = _input or {}
         query_ids = _input.get("queryInputs") or ""
-        if not isinstance(query_ids, list):
+        if not isinstance(query_ids, (list, tuple)):
             query_ids = [query_ids]
 
-        result = set(
-            [
+            result = set([
                 jinja_env.from_string(template, {"queryInputs": str(idx)}).render()
                 for idx in query_ids
-            ]
-        )
+            ])
         return ",".join(result)
 
     def construct_request_config(self, _input):
@@ -101,6 +100,7 @@ class TemplateQueryBuilder:
             "params": self._get_params(_input),
             "json": self._get_request_body(_input),
             "headers": {"Content-Type": "application/json"},
+            "timeout": self.timeout,
         }
 
     def get_request_func(self):

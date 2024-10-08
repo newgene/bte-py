@@ -1,16 +1,15 @@
 import json
 import logging
+from collections.abc import Iterable
 from typing import List, Union
 
-import httpx
+from utils.metakg.api import API
 
-from utils.metakg.parser import MetaKGParser
-
-from .edge import MetaKGEdge
-from .helpers import yaml_2_json
-from .parser import format_response
-from .query_validator import QueryValidator
 from .builder import builder_factory
+from .edge import MetaKGEdge
+from .helpers import iter_n
+from .parser import format_response_v2
+from .query_validator import QueryValidator
 
 logger = logging.getLogger(__name__)
 
@@ -19,76 +18,36 @@ class SmartAPI:
     def __init__(self, url, id=None):
         self.url = url
         self._id = id
-
-    @property
-    def metadata(self):
-        if not hasattr(self, "_metadata"):
-            resp = httpx.get(self.url, follow_redirects=True)
-            resp.raise_for_status()
-
-            try:
-                self._metadata = yaml_2_json(resp.text)
-            except Exception:
-                try:
-                    self._metadata = json.loads(resp.text)
-                except Exception:
-                    raise Exception("Cannot parse the metadata from the URL")
-
-        return self._metadata
+        self._api = API(url=url, id=id)
 
     @property
     def metakg(self):
         if not hasattr(self, "_metakg"):
-            mkg_parser = MetaKGParser()
-            extra_data = {"id": self._id, "url": self.url}
-            self.metakg_errors = None  # reset metakg_errors
-            if self.is_trapi:
-                self._metakg = mkg_parser.get_TRAPI_metadatas(self.metadata, extra_data)
-            else:
-                self._metakg = mkg_parser.get_non_TRAPI_metadatas(
-                    self.metadata, extra_data
-                )
-            if mkg_parser.metakg_errors:
-                # hold metakg_errors for later use
-                self.metakg_errors = mkg_parser.metakg_errors
-
+            self._metakg = self._api.get_metakg()
         return self._metakg
 
     @property
     def query_validator(self):
-        return QueryValidator(self.metadata)
-
-    def has_tags(self, *tags) -> bool:
-        """return True if an SmartAPI contains all given tags"""
-        metadata_tags = self.metadata.get("tags")
-        if not metadata_tags:
-            return False
-
-        _tag_set = set([_tag.get("name") for _tag in metadata_tags])
-        return len(set(tags) - _tag_set) == 0
-
-    @property
-    def is_trapi(self):
-        """return True if a TRAPI"""
-        return self.has_tags("trapi", "translator")
+        return QueryValidator(self._api.smartapi_doc)
 
     def list_metakg(self) -> List[MetaKGEdge]:
         return [MetaKGEdge(record) for record in self.metakg]
 
-    def get_edge(
+    def _get_edge(
         self,
         metakg_edge: MetaKGEdge,
-        input_id: Union[str, List[str]],
+        input_ids: Union[str, List[str], Iterable[str]],
         validate_edge: bool = True,
+        raw: bool = False,
     ):
         query_operation = metakg_edge.query_operation
         if validate_edge:
             self.query_validator.validate_query(query_operation)
 
-        query_builder = builder_factory(metakg_edge, self.is_trapi)
+        query_builder = builder_factory(metakg_edge, self._api.is_trapi)
         request_func = query_builder.get_request_func()
         request_config = query_builder.construct_request_config(
-            {"queryInputs": input_id}
+            {"queryInputs": input_ids}
         )
         logger.info(json.dumps(request_config, indent=2))
         resp = request_func(**request_config)
@@ -97,28 +56,38 @@ class SmartAPI:
         resp_data = resp.json()
         if not isinstance(resp_data, list):
             resp_data = [resp_data]
+        logger.info("API call is completed.")
+        if raw:
+            return resp_data
+        else:
+            # edges = [edge for edge in resp_data if not edge.get("notfound")]
+            # return (result for result in format_response(edges, metakg_edge))
+            return (result for result in format_response_v2(resp_data, metakg_edge))
 
-        edges = [edge for edge in resp_data if not edge.get("notfound")]
-        return (result for result in format_response(edges, metakg_edge))
-
-    def get_edges(
-        self, metakg_edge: MetaKGEdge, input_ids: list, batch_size: int = 1000
+    def get_edge(
+        self, metakg_edge: MetaKGEdge, input_ids: Union[str, list[str], Iterable[str]], batch_size: int = 1000
     ):
         self.query_validator.validate_query(metakg_edge.query_operation)
 
-        for i in range(0, len(input_ids), batch_size):
-            start_index = i
-            end_index = i + batch_size
-            sub_input_ids = input_ids[start_index:end_index]
-
+        for id_batch in iter_n(input_ids, batch_size):
             if metakg_edge.query_operation.is_query_support_batch:
-                for edge in self.get_edge(
-                    metakg_edge, sub_input_ids, validate_edge=False
+                for edge in self._get_edge(
+                    metakg_edge, id_batch, validate_edge=False
                 ):
                     yield edge
             else:
-                for input_id in sub_input_ids:
-                    for edge in self.get_edge(
+                for input_id in id_batch:
+                    for edge in self._get_edge(
                         metakg_edge, input_id, validate_edge=False
                     ):
                         yield edge
+
+    def get_edges(
+        self,
+        metakg_edges: Union[list[MetaKGEdge], tuple[MetaKGEdge], Iterable[MetaKGEdge]],
+        input_ids: Union[str, list[str], Iterable[str]],
+        batch_size: int = 1000,
+    ):
+        for metakg_edge in metakg_edges:
+            logger.info("Processing edge: %s", metakg_edge)
+            yield from self.get_edge(metakg_edge, input_ids, batch_size=batch_size)
