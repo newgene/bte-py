@@ -14,7 +14,7 @@ py==1.10.0
 pyparsing==2.4.7
 pytest==6.2.4
 python-dotenv==0.17.1
-PyYAML==5.4.1
+PyYAML==6.0.1
 redis==3.5.3
 requests==2.25.1
 schedule==1.1.0
@@ -22,3 +22,7 @@ six==1.16.0
 toml==0.10.2
 tornado==6.1
 urllib3==1.26.4
+httpx==0.27.0
+
+# Biolink Model Toolkit, used in /api/metakg endpoint
+bmt-lite-v3.1.0==2.2.2
